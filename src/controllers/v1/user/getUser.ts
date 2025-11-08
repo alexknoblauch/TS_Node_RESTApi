@@ -1,0 +1,44 @@
+/**
+ * Node Modules
+ */
+
+/**
+ * Custom Modules
+ */
+/**
+ * Models
+ */
+
+import User from "@/models/user";
+/**
+ * Middleware
+ */
+import logger from "@/lib/winston";
+import catchAsync from "@/utils/catchAsync";
+
+/**
+ * Types
+ */
+import type { Request, Response } from "express";
+import type { AppError } from "@/middleware/errorHandler";
+
+
+const getUser = catchAsync(async function (req: Request, res: Response) {
+    const userId = req.params.userId
+
+    const user = await User.findById(userId).select('-__v').exec()
+    if(user == null){
+        const error = new Error('User not found') as AppError;
+        error.statusCode = 404;
+        error.code = 'UserNotFound';
+        throw error;
+    }
+
+    res.status(200).json({
+        code: 'Success',
+        message: 'User successfully retreaved.',
+        user
+    })
+})
+
+export default getUser
