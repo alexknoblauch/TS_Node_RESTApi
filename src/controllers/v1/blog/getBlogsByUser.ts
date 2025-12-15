@@ -20,6 +20,7 @@ import User from "@/models/user";
  * Types
  */
 import type { Request, Response } from 'express'
+import getOrSetRedis from "@/utils/getOrSetRedis";
 
 interface QueryType {
   status?: 'published' | 'draft';                   //Interface optional aber empfehelnswert
@@ -36,6 +37,7 @@ const getBlogsByUser = catchAsync(async function(req: Request, res: Response): P
 
     
     const user = await User.findById(currentId).select('role').lean().exec()
+
     if(!user) { 
         const error = new Error('User not found for role settnigs') as AppError
         error.statusCode = 404                                                          //Rolle vergeben
@@ -47,28 +49,37 @@ const getBlogsByUser = catchAsync(async function(req: Request, res: Response): P
         query.status = 'published'
     }
 
-    
     const total = await Blog.countDocuments({author: queryId, ...query})  //spread Opterator nicht vergessen!!
-    const data = await Blog.find({author: queryId, ...query})
-    .select('-banner.publicId -__v')
-    .populate('author', '-createdAt -updatedAt -__v')
-    .limit(limit)
-    .skip(skip)
-    .sort({ createdAt: -1 })
-    .lean()
-    .exec()
+    const cacheKey = `Blog-${queryId}:${user.role}:${limit}:${skip}` 
 
-    if(!data || data.length === 0){
-        const error = new Error('No Blogs found for user') as AppError
-        error.statusCode = 404
-        error.code = 'ApiError'
-        throw error
-    }
+    const blog = await getOrSetRedis(cacheKey, async () => {
+        const data = await Blog.find({author: queryId, ...query})
+        .select('title slug content banner.url author viewsCount likesCount commentsCount status createdAt')
+        .populate('author', 'name email avatar')
+        .limit(limit)
+        .skip(skip)
+        .sort({ createdAt: -1 })
+        .lean()
+        .exec()
+
+        const author = data[0]?.author;
+
+        if(!data || data.length === 0){
+            const error = new Error('No Blogs found for user') as AppError
+            error.statusCode = 404
+            error.code = 'ApiError'
+            throw error
+        }
+        
+        return {data, author}                       // 2 Export (data & author)
+        })
+
 
     res.status(200).json({
         code: 'ApiSuccess',
         message: 'Blogs of user successfully retrieved',
-        blogs: data
+        blogs: blog.data,                          // 2 Exporte = blog.data
+        author: blog.author                        // 2 Exporte = blog.author
     })
     logger.info('Blogs of user successfulls retreived')
 })

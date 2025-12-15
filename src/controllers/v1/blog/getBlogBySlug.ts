@@ -21,6 +21,7 @@ import User from "@/models/user";
  */
 import type { Request, Response } from 'express'
 import blog from "@/models/blog";
+import getOrSetRedis from "@/utils/getOrSetRedis";
 
 
 
@@ -38,32 +39,39 @@ const getBlogsByUser = catchAsync(async function(req: Request, res: Response): P
         error.code = 'ApiError'
         throw error
     } 
-    
-    
-    const data = await Blog.findOne({slug})
-    .select('-banner.publicId -__v')
-    .populate('author', '-createdAt -updatedAt -__v')
-    .lean()
-    .exec()
-    
-    if(user.role === 'user'&& data?.status === 'draft'){
 
-        logger.warn('A User tried to access Draft Blog')
-        throw new Error('User can not access Draft Blog')
-    }
+    const cacheKey = `Blog-${slug}-${user.role}`
+
+    const blog = await getOrSetRedis(cacheKey, async () => {
+        const data = await Blog.findOne({slug})
+        .select('-banner.publicId -__v')
+        .populate('author', '-createdAt -updatedAt -__v')
+        .lean()
+        .exec()
+
+            if(user.role === 'user' && data?.status === 'draft'){
+            logger.warn('A User tried to access Draft Blog')
+            throw new Error('User can not access Draft Blog')
+            }
+
+            if(!data){
+                const error = new Error('No Blogs found for slug') as AppError
+                error.statusCode = 404
+                error.code = 'ApiError'
+                throw error
+            }
+
+            return data
+    })
     
 
-    if(!data){
-        const error = new Error('No Blogs found for slug') as AppError
-        error.statusCode = 404
-        error.code = 'ApiError'
-        throw error
-    }
+    
+
 
     res.status(200).json({
         code: 'ApiSuccess',
         message: 'Blog for slug successfully retrieved',
-        blogs: data
+        blogs: blog
     })
     logger.info('Blogs for slug successfulls retreived')
 })

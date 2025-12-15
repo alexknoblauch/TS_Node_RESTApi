@@ -3,6 +3,7 @@
  *  Node Modules
 */
 import express, {Request, Response, Application, urlencoded} from 'express'
+import { redisClient } from './lib/redis'
 
 /**
  *  Node Modules
@@ -53,24 +54,32 @@ app.use(errorHandler)
 
 // Server
 const startServer = async() => {
-    try{
+    try {
         await connectToDatabase()
+        await redisClient.connect();
+ 
         app.listen(config.PORT, () => {
             logger.info(`server lsitens at port ${config.PORT}`)
         })
-    }catch(err){
+        
+    } catch(err) {
         logger.error('server not connected')
+        
+        if (process.env.NODE_ENV === 'production') {
+            process.exit(1)
+        }
     }
 }
 startServer()
 
 
 const handleShutDown = async function(){
-    try{
+    try {
         await disconnectDatabase()
+
         logger.info('server shut down')
         process.exit(0)
-    } catch(err){
+    } catch(err) {
         logger.error('error during server shutdown')
     }
 }

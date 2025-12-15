@@ -16,6 +16,7 @@ import logger from "@/lib/winston";
 
 import type { Request, Response, NextFunction } from 'express'
 import type { Types } from 'mongoose'
+import { AppError } from "./errorHandler";
 
 
 declare global {
@@ -30,11 +31,11 @@ export default function authenticate(req: Request, res: Response, next: NextFunc
     const authHeader = req.headers.authorization;
 
     if (!authHeader?.startsWith('Bearer ')) {
-        res.status(401).json({
-            code: 'AuthenticationError',
-            message: 'No Authorization header or invalid format'
-        });
-        return;
+        logger.error('No Bearer Token found')
+        const error = new Error('No Bearer Token found') as AppError;
+        error.statusCode = 401;
+        error.code = 'BeararNotFound';
+        throw error;
     }
  
     const [_, token] = authHeader.split(' ');
@@ -43,11 +44,11 @@ export default function authenticate(req: Request, res: Response, next: NextFunc
         const jwtPayload = verifyAccessToken(token) as { userId: Types.ObjectId };
         req.userId = jwtPayload.userId;
         next();
-    } catch (err) {
-        res.status(401).json({
-            code: 'AuthenticationError',
-            message: 'Token verification failed'
-        });
-        return;
+     } catch (err) {
+        logger.error('Token verfication failed')
+        const error = new Error('Token verfication failed') as AppError;
+        error.statusCode = 401;
+        error.code = 'BeararNotFound';
+        throw error;
     }
 }

@@ -26,12 +26,25 @@ import { refreshToken } from '@/controllers/v1/auth/refresh-token'
 import register  from '@/controllers/v1/auth/register'
 import validationErrorMiddelware from '@/middleware/validationError'
 import authenticate from '@/middleware/authenticate'
+//import { setup2FA } from '../controller/auth/login' 
 
 /**
  *  Models
  */
 
 const router = Router()
+
+router.get('/2fa/setup',
+ // authenticate,  User muss eingeloggt sein!
+ // setup2FA
+)
+router.post('/2fa/disable', 
+    //authenticate, 
+    // disable2FA
+);
+
+
+
 router.post('/register', 
     body('email')
     .trim()

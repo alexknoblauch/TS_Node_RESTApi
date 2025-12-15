@@ -11,7 +11,7 @@
     "strict": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
-    "sourceMap": true,
+    "sourceMap": true, 
     "paths": {
       "@/*": ["*"]
     },

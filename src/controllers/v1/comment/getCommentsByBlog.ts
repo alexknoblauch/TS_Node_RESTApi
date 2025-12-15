@@ -18,9 +18,13 @@ import { AppError } from "@/middleware/errorHandler"
  * Types
  */
 import { Request, Response } from "express"
+import getOrSetRedis from "@/utils/getOrSetRedis"
 
 const getCommentsByBlog =  catchAsync(async function (req:Request, res: Response): Promise<void>{
-    const { blogId } = req.params                               
+    const { blogId } = req.params    
+
+
+    const cacheKey = `Comment:${blogId}`
 
     const blog = await Blog.findById(blogId).lean().exec()
 
@@ -32,14 +36,15 @@ const getCommentsByBlog =  catchAsync(async function (req:Request, res: Response
         throw error;
     }
 
-    const allComments = await Comment.find({blogId}).sort({ createdAt: -1}).lean().exec()
-
+    const data = await getOrSetRedis(cacheKey, async () => {
+        const allComments = await Comment.find({blogId}).sort({ createdAt: -1}).lean().exec()
+        return allComments
+    })
  
     logger.info('Comments successfully retreaved')
     res.status(200).json({
-        allComments
+        allComments: data
     })
-
     return
 })
 

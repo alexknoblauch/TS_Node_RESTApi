@@ -10,6 +10,7 @@ import logger from "@/lib/winston";
 
 import User from "@/models/user";
 import catchAsync from "@/utils/catchAsync";
+import getOrSetRedis from "@/utils/getOrSetRedis";
 
 /**
  * Types
@@ -19,10 +20,16 @@ import type {Request, Response} from 'express'
 
 const getCurrentUser = catchAsync(async (req: Request, res: Response): Promise<void> =>{
     const userId = req.userId
-    const user = await User.findById(userId).select('-__v').lean().exec()
+
+    const cacheKey = `User:${userId}`
+
+    const data = await getOrSetRedis(cacheKey, async () => {
+        const user = await User.findById(userId).select('-__v -password -refreshToken').lean().exec()
+        return user
+    })
     
     res.status(200).json({
-        user
+        user: data
     })
 }) 
 

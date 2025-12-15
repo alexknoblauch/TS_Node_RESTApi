@@ -18,7 +18,8 @@ export const generateAccessToken = function(userId: Types.ObjectId): string {
     }
     return jwt.sign({userId}, config.JWT_ACCESS_SECRET, {
         expiresIn: config.ACCESS_TOKEN_EXPIRY,
-        subject: 'accessApi'
+        subject: 'accessApi', 
+        algorithm: 'HS256'
     })
 }
 
@@ -29,7 +30,8 @@ export const generateRefreshToken = function(userId: Types.ObjectId): string {
     }
     return jwt.sign({userId}, config.JWT_REFRESH_SECRET, {
         expiresIn: config.REFRESH_TOKEN_EXPIRY,
-        subject: 'refreshToken'
+        subject: 'refreshToken',
+        algorithm: 'HS256'
     })
 }
 
@@ -38,12 +40,16 @@ export const verifyAccessToken = (token: string) => {
     if(!config.JWT_ACCESS_SECRET){
         throw new Error('JWT secret refresh token not found.')
     }
-    return jwt.verify(token, config.JWT_ACCESS_SECRET); 
+    return jwt.verify(token, config.JWT_ACCESS_SECRET, {
+        algorithms: ['HS256'] 
+    }); 
 };
 
 export const verifyRefreshToken = (token: string) => {
         if(!config.JWT_REFRESH_SECRET){
         throw new Error('JWT secret refresh token not found.')
     }
-    return jwt.verify(token, config.JWT_REFRESH_SECRET!); 
+    return jwt.verify(token, config.JWT_REFRESH_SECRET!, {
+        algorithms: ['HS256'] 
+    }); 
 };
