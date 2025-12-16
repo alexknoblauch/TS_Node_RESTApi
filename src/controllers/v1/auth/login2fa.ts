@@ -13,7 +13,7 @@ import bcrypt from 'bcrypt'
  * Custom Modules
  */
 import logger from '../../../lib/winston'
-import  { AppError }  from "../../../types/express/index";
+import  { AppError }  from "../../../types/express/express";
 
 /**
  * Types

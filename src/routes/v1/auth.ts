@@ -34,13 +34,12 @@ import authenticate from '@/middleware/authenticate'
 
 const router = Router()
 
+// setup2FA
 router.get('/2fa/setup',
- // authenticate,  User muss eingeloggt sein!
- // setup2FA
+ authenticate
 )
-router.post('/2fa/disable', 
-    //authenticate, 
-    // disable2FA
+// disable2FA
+router.post('/2fa/disable', authenticate, 
 );
 
 

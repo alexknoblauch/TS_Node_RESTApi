@@ -74,3 +74,5 @@ const getAllBlogs = catchAsync(async function(req: Request, res: Response): Prom
     })
     logger.info(`Blogs successfully retrieved ${data.length} blogs`)
 })
+
+export default getAllBlogs

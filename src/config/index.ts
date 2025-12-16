@@ -1,6 +1,7 @@
 /**
  *  Node modules
  */
+import getOrSetRedis from "@/utils/getOrSetRedis";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -8,6 +9,7 @@ dotenv.config();
  *  Types
  */
 import type ms from 'ms'
+
 
 const config = {
     PORT: process.env.PORT || 3000,

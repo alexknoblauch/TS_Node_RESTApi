@@ -11,12 +11,20 @@ import config from '../config'
 
 const { combine, timestamp, json, errors, align, printf, colorize } = winston.format;
 
+const correlationIdFormat = winston.format((info) => {
+  if (!info.correlationId) {
+    info.correlationId = 'N/A';
+  }
+  return info;
+});
+
 const transports: winston.transport[] = [];
 
 if (config.NODE_ENV !== "production") {
   transports.push(
     new winston.transports.Console({
       format: combine(
+        correlationIdFormat(),
         colorize({ all: true }),                                    // Farben aktivieren
         timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),               // Zeitformat
         align(),                                                    // schön ausgerichtet
@@ -43,7 +51,7 @@ if (config.NODE_ENV === "production") {
       maxSize: '20m',
       maxFiles: '14d',
       zippedArchive: true,
-      format: combine(timestamp(), json())
+      format: combine(correlationIdFormat(), timestamp(), json())
     })
   );
 
@@ -55,7 +63,7 @@ if (config.NODE_ENV === "production") {
       maxSize: '10m',
       maxFiles: '30d',      
       zippedArchive: true,
-      format: combine(timestamp(), json()) 
+      format: combine(correlationIdFormat(), timestamp(), json())
     })
   )
 
@@ -66,14 +74,14 @@ if (config.NODE_ENV === "production") {
         level: 'warn',        // Nur warn und error
         maxSize: '10m',
         maxFiles: '30d',
-        format: combine(timestamp(), json()) 
+        format: combine(correlationIdFormat(), timestamp(), json())
       })
     )
 }
 
 const logger = winston.createLogger({
   level: config.LOG_LEVEL || 'info',                           //Fallback hier wichtig
-  format: combine(timestamp(),errors({ stack: true }), json()), 
+  format: combine(correlationIdFormat(), timestamp(),errors({ stack: true }), json()), 
   transports,
   silent: config.NODE_ENV === 'test'
 });
