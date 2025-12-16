@@ -13,7 +13,6 @@ import bcrypt from 'bcrypt'
  * Custom Modules
  */
 import logger from '../../../lib/winston'
-import  { AppError }  from "../../../types/express/express";
 
 /**
  * Types
@@ -21,6 +20,7 @@ import  { AppError }  from "../../../types/express/express";
 import { Request, Response } from "express";
 import { IUser } from "../../../models/user";
 import { generateAccessToken, generateRefreshToken } from "../../../lib/jwt";
+import { AppError } from "@/middleware/errorHandler";
 
 type LoginUser = Pick<IUser, 'password' | 'email'> & {
   twoFactorCode?: string;

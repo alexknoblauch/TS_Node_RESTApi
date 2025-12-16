@@ -22,7 +22,10 @@ export interface IUser {
         linkedin?: string,
         x?: string,
         instagram?: string
-    } 
+    },
+    twoFactorSecret: string,
+    twoFactorEnabled: boolean,
+    refreshToken: string
 };
 
 const UserSchema = new Schema<IUser>({
@@ -85,6 +88,15 @@ const UserSchema = new Schema<IUser>({
             type: String,
             maxLength: [100, 'LinkedIn address must be less than 100 characters']
         }
+    },
+    twoFactorSecret: {
+        type: String
+    },
+    twoFactorEnabled: {
+        type: Boolean
+    },
+    refreshToken: {
+        type: string
     }
 }, { timestamps: true })
 
