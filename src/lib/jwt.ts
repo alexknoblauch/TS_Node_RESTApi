@@ -12,6 +12,10 @@ import config from '@/config'
 import { Types } from 'mongoose'
 
 
+interface TokenPayload {
+    userId: Types.ObjectId;
+}
+
 export const generateAccessToken = function(userId: Types.ObjectId): string {
     if(!config.JWT_ACCESS_SECRET){
         throw new Error('JWT secret access token not found.')
@@ -36,20 +40,20 @@ export const generateRefreshToken = function(userId: Types.ObjectId): string {
 }
 
 
-export const verifyAccessToken = (token: string) => {
+export const verifyAccessToken = (token: string): TokenPayload => {
     if(!config.JWT_ACCESS_SECRET){
         throw new Error('JWT secret refresh token not found.')
     }
     return jwt.verify(token, config.JWT_ACCESS_SECRET, {
         algorithms: ['HS256'] 
-    }); 
+    }) as TokenPayload; 
 };
 
-export const verifyRefreshToken = (token: string) => {
+export const verifyRefreshToken = (token: string): TokenPayload => {
         if(!config.JWT_REFRESH_SECRET){
         throw new Error('JWT secret refresh token not found.')
     }
     return jwt.verify(token, config.JWT_REFRESH_SECRET!, {
         algorithms: ['HS256'] 
-    }); 
+    }) as TokenPayload; 
 };
