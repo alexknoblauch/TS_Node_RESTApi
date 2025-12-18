@@ -3,6 +3,7 @@ declare global {
     interface Request {                 
       userId?: string;        // Simple Version
       correlationId?: string;
+      user?: IUser;
     }
   }
 }

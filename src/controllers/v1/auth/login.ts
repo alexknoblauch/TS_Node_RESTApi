@@ -30,7 +30,7 @@ export type UserData = Pick<IUser, 'email' | 'password'>
 
 
 const login = catchAsync(async function(req: Request, res: Response): Promise<void>{
-    const {email} = req.body as UserData
+    const {email, password} = req.body as UserData
     const user = await  User.findOne({email}).select('email username password role').lean().exec()
 
     if(!user) {
@@ -41,6 +41,15 @@ const login = catchAsync(async function(req: Request, res: Response): Promise<vo
         return
     }
 
+    const pwCorrect = await bcrypt.compare(password, user.password)
+
+    if(!pwCorrect){
+        res.status(404).json({
+            message: 'wrong password'
+        })
+        return
+    }
+    
     const accessToken = generateAccessToken(user._id)
     const refreshToken = generateRefreshToken(user._id)
     await Token.create({token: refreshToken, userId: user._id})
@@ -60,7 +69,7 @@ const login = catchAsync(async function(req: Request, res: Response): Promise<vo
 
     logger.info('user successfully created', user)
 
-    res.status(201).json({
+    res.status(200).json({
         user: {
             username: user.userName,
             email: user.email,
@@ -68,6 +77,7 @@ const login = catchAsync(async function(req: Request, res: Response): Promise<vo
         },
         accessToken
     })
+
 })
 
 export default login

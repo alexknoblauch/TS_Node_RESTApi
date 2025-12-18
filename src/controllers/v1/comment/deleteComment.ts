@@ -1,7 +1,7 @@
 /**
  * Node Modules
  */
-import Comment from "@/models/comment"
+import Comment, { IComment } from "@/models/comment"
 import User from "@/models/user"
 import Blog from "@/models/blog"
 
@@ -19,33 +19,25 @@ import { AppError } from "@/middleware/errorHandler"
  */
 import { Request, Response } from "express"
 import { Types } from "mongoose"
+import { validateRequired } from "@/utils/validateRequired"
+import { ensureDocument } from "@/utils/ensureDocument"
 
 
 
 const deleteComment =  catchAsync(async function (req:Request, res: Response): Promise<void>{
-    const userId = req.userId                                       // params = string interference
+    const userId = req.userId                              // params = string interference
     const { commentId } = req.params                               // das auch string interference
 
-    const comment = await Comment.findById(commentId).exec() as any   //wegen toString()
+    validateRequired(userId, 'userId', 401)
+    validateRequired(commentId, 'commentId', 401)
+
+    const comment = await Comment.findById(commentId).exec()   //wegen toString()
     const user = await User.findById(userId).select('role').lean().exec()
 
-    if(!comment){
-        logger.error('Comment not found')
-        const error = new Error('Comment not found') as AppError;
-        error.statusCode = 404;
-        error.code = 'CommentNotFound';
-        throw error;
-    }
+    ensureDocument(comment, 'Comment')
+    ensureDocument(user, 'User')
 
-    if(!user){
-        logger.error('User not found')
-        const error = new Error('User not found') as AppError;
-        error.statusCode = 404;
-        error.code = 'UserNotFound';
-        throw error;
-    }
-
-    if(comment.userId.toString() !== userId && user.role !== 'admin' ) {
+    if(comment.userId.toString() !== userId?.toString() && user.role !== 'admin' ) {       //comment.userId = objectId   das muss fast immer zu string gemacht werden für JS
         logger.error('User tried to delete a comment without permission')
         const error = new Error('User tried to delete a comment without permission') as AppError;
         error.statusCode = 403;

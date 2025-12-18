@@ -10,6 +10,7 @@ import xss from 'xss'
 */
 import catchAsync from "@/utils/catchAsync"
 import logger from "@/lib/winston"
+
 /**
  * Middleware
  */
@@ -19,12 +20,20 @@ import { AppError } from "@/middleware/errorHandler"
  */
 import { Request, Response } from "express"
 import { Types } from "mongoose"
+import { validateRequired } from "@/utils/validateRequired"
+
 type CommentData = Pick <IComment, 'comment'>                   //PICK TYPE
 
 const commentBlog =  catchAsync(async function (req:Request, res: Response): Promise<void>{
     const userId = req.userId                                   // params = string interference
     const { blogId } = req.params                               // das auch string interference
     const { comment } = req.body as CommentData                 // Wichtig Typisieren!
+ 
+
+    validateRequired(userId, 'userId', 404)
+    validateRequired(blogId, 'BlogId', 404)
+    validateRequired(comment, 'Comment', 404)
+
 
     const blog = await Blog.findById(blogId).lean().exec()
 

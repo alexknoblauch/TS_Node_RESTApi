@@ -22,18 +22,17 @@ import User from '@/models/user'
 import type { Request, Response } from 'express'
 import type { IBlog } from '@/models/blog'
 import type { AppError } from '@/middleware/errorHandler'
+import { Types } from 'mongoose'
 /**
  * Purify the blog content
  */
 
 
-type BlogData = Pick<IBlog, 'title' | 'content' | 'banner' | 'status' | 'author' >
 
 const deleteBlog = catchAsync(async function(req: Request, res: Response): Promise<void>{
 
-    const {title, content, banner, status} = req.body as BlogData
-    const userId = req.userId
-    const blogId = req.params.blogId
+    const userId = req.userId as Types.ObjectId
+    const blogId = req.params.blogId as string
 
     const user = await User.findById(userId).select('role').lean().exec()
     const blog = await Blog.findById(blogId).select('author banner.puvlicId').lean().exec()

@@ -28,8 +28,12 @@ interface QueryType {
 
 
 const getAllBlogs = catchAsync(async function(req: Request, res: Response): Promise<void>{
-    const limit = Number(req.query.limit as string) || config.defaultResLimit
-    const skip = Number(req.query.offset as string) || config.defaultOffset
+    let limit = Number(req.query.limit) || config.defaultResLimit;           // req.query hat Type: string | string[] | undefined
+    let skip = Number(req.query.offset) || config.defaultOffset;
+    
+    if (limit < 1) limit = 1;
+    if (skip < 0) skip = 0;
+
     const userId = req.userId
     const query: QueryType = {} 
 

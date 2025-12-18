@@ -29,12 +29,19 @@ import type { AppError } from '@/middleware/errorHandler'
 
 type BlogData = Partial<Pick<IBlog, 'title' | 'content' | 'banner' | 'status' >>
 
-const createBlog = catchAsync(async function(req: Request, res: Response): Promise<void>{
+const updateBlog = catchAsync(async function(req: Request, res: Response): Promise<void>{
 
     const {title, content, banner, status} = req.body as BlogData
-    if(req.body == null) return
+
     const userId = req.userId
+    if (!userId) {
+        return
+    }
+
     const blogId = req.params.blogId
+    if (!blogId) {
+        return  
+    }
 
     const user = await User.findById(userId).select('role').lean().exec()
     const blog = await Blog.findById(blogId)
@@ -71,4 +78,4 @@ const createBlog = catchAsync(async function(req: Request, res: Response): Promi
     res.status(200).json({ blog })
 })
 
-export default createBlog
+export default updateBlog

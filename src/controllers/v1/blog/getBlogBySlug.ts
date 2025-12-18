@@ -30,6 +30,13 @@ const getBlogsByUser = catchAsync(async function(req: Request, res: Response): P
     const userId = req.userId
     const slug = req.params.slug             // /:slug
 
+    if(!slug) {
+        const error = new Error('User not found for role settnigs') as AppError
+        error.statusCode = 404                                                  
+        error.code = 'Slug Not found'
+        throw error
+    }
+
 
     
     const user = await User.findById(userId).select('role').lean().exec()
