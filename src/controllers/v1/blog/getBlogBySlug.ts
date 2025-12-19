@@ -22,6 +22,8 @@ import User from "@/models/user";
 import type { Request, Response } from 'express'
 import blog from "@/models/blog";
 import getOrSetRedis from "@/utils/getOrSetRedis";
+import { validateRequired } from "@/utils/validateRequired";
+import { ensureDocument } from "@/utils/ensureDocument";
 
 
 
@@ -30,22 +32,11 @@ const getBlogsByUser = catchAsync(async function(req: Request, res: Response): P
     const userId = req.userId
     const slug = req.params.slug             // /:slug
 
-    if(!slug) {
-        const error = new Error('User not found for role settnigs') as AppError
-        error.statusCode = 404                                                  
-        error.code = 'Slug Not found'
-        throw error
-    }
-
-
+    validateRequired(userId, 'userID')
+    validateRequired(slug, 'Slug')
     
     const user = await User.findById(userId).select('role').lean().exec()
-    if(!user) { 
-        const error = new Error('User not found for role settnigs') as AppError
-        error.statusCode = 404                                                  //Rolle vergeben
-        error.code = 'ApiError'
-        throw error
-    } 
+    ensureDocument(user, 'User')
 
     const cacheKey = `Blog-${slug}-${user.role}`
 
@@ -61,19 +52,11 @@ const getBlogsByUser = catchAsync(async function(req: Request, res: Response): P
             throw new Error('User can not access Draft Blog')
             }
 
-            if(!data){
-                const error = new Error('No Blogs found for slug') as AppError
-                error.statusCode = 404
-                error.code = 'ApiError'
-                throw error
-            }
+            ensureDocument(data, 'Fetch Data')
 
             return data
     })
     
-
-    
-
 
     res.status(200).json({
         code: 'ApiSuccess',

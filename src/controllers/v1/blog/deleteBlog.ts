@@ -23,6 +23,7 @@ import type { Request, Response } from 'express'
 import type { IBlog } from '@/models/blog'
 import type { AppError } from '@/middleware/errorHandler'
 import { Types } from 'mongoose'
+import { ensureDocument } from '@/utils/ensureDocument'
 /**
  * Purify the blog content
  */
@@ -37,12 +38,7 @@ const deleteBlog = catchAsync(async function(req: Request, res: Response): Promi
     const user = await User.findById(userId).select('role').lean().exec()
     const blog = await Blog.findById(blogId).select('author banner.puvlicId').lean().exec()
 
-    if(!blog){
-        const error = new Error(`No Blog found with id ${blogId}`) as AppError;
-        error.statusCode = 400;
-        error.code = 'BlogNotFound';
-        throw error;
-    }
+    ensureDocument(blog, 'blog')
 
     if(blog?.author !== userId && user?.role !== 'admin'){
         logger.warn('someone tried to delete blog without acceess',{

@@ -22,6 +22,7 @@ import User from '@/models/user'
 import type { Request, Response } from 'express'
 import type { IBlog } from '@/models/blog'
 import type { AppError } from '@/middleware/errorHandler'
+import { ensureDocument } from '@/utils/ensureDocument'
 /**
  * Purify the blog content
  */
@@ -46,14 +47,10 @@ const updateBlog = catchAsync(async function(req: Request, res: Response): Promi
     const user = await User.findById(userId).select('role').lean().exec()
     const blog = await Blog.findById(blogId)
 
-    if(!blog){
-        const error = new Error('No blog found with this ID') as AppError;
-        error.statusCode = 404;
-        error.code = 'BlogNotFound';
-        throw error;
-    }
+    ensureDocument(user, 'User')
+    ensureDocument(blog, 'Blog')
 
-    if(blog.author !== userId && user?.role !== 'admin'){
+    if(blog.author.toString() !== userId.toString() && user?.role !== 'admin'){    //Type.objectId toString()! sosnt werden obejct ref nummern verglichen nicht deren inhalt
         logger.warn('User tried to update a Blog without haveing permission', {
             userId,
             blog
@@ -64,8 +61,9 @@ const updateBlog = catchAsync(async function(req: Request, res: Response): Promi
         error.code = 'AuthorizationError';
         throw error; 
     }
-
+ 
     if(title) blog.title = title
+
     if(content) {
         const cleanContent = xss(content)
         blog.content = cleanContent

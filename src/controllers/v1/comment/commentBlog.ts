@@ -21,6 +21,7 @@ import { AppError } from "@/middleware/errorHandler"
 import { Request, Response } from "express"
 import { Types } from "mongoose"
 import { validateRequired } from "@/utils/validateRequired"
+import { ensureDocument } from "@/utils/ensureDocument"
 
 type CommentData = Pick <IComment, 'comment'>                   //PICK TYPE
 
@@ -37,13 +38,7 @@ const commentBlog =  catchAsync(async function (req:Request, res: Response): Pro
 
     const blog = await Blog.findById(blogId).lean().exec()
 
-    if(!blog){
-        logger.error('Blog not found')
-        const error = new Error('Blog not found') as AppError;
-        error.statusCode = 404;
-        error.code = 'BlogNotFound';
-        throw error;
-    }
+    ensureDocument(blog, 'Blog')
 
     const cleanComment = xss(comment)
 
@@ -51,6 +46,7 @@ const commentBlog =  catchAsync(async function (req:Request, res: Response): Pro
         userId: new Types.ObjectId(userId),                    //string to OObjectId machen!!
         blogId: new Types.ObjectId(blogId),                    //string to OObjectId machen!!
         comment })
+        
     logger.info('Comment successfully created')
     res.status(201).json({
         blogId,                     

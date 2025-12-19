@@ -21,6 +21,9 @@ import User from "@/models/user";
  */
 import type { Request, Response } from 'express'
 import getOrSetRedis from "@/utils/getOrSetRedis";
+import { ensureDocument } from "@/utils/ensureDocument";
+import { ensureArray } from "@/utils/ensureArray";
+import blog from "@/models/blog";
 
 interface QueryType {
   status?: 'published' | 'draft';
@@ -38,12 +41,7 @@ const getAllBlogs = catchAsync(async function(req: Request, res: Response): Prom
     const query: QueryType = {} 
 
     const user = await User.findById(userId).select('role').lean().exec()
-    if(!user) {
-        const error = new Error('User not found for role settings') as AppError
-        error.statusCode = 404
-        error.code = 'ApiError'
-        throw error
-    } 
+    ensureDocument(user, 'user')
     
     if(user.role === 'user'){
         query.status = 'published'
@@ -61,12 +59,7 @@ const getAllBlogs = catchAsync(async function(req: Request, res: Response): Prom
             .lean()
             .exec()
 
-        if(!blogs || blogs.length === 0){
-            const error = new Error('No Blogs found') as AppError
-            error.statusCode = 404
-            error.code = 'ApiError'
-            throw error  
-        }
+        ensureArray(blogs, 'blogs')
 
         return blogs
     })

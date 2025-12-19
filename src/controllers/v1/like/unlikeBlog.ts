@@ -22,6 +22,7 @@ import Like from '@/models/like'
 import type { Request, Response } from 'express'
 import type { IBlog } from '@/models/blog'
 import type { AppError } from '@/middleware/errorHandler'
+import { ensureDocument } from '@/utils/ensureDocument'
 /**
  * Purify the blog content
  */
@@ -33,13 +34,7 @@ const unlikeBlog = catchAsync(async function(req: Request, res: Response): Promi
 
     const blog = await Blog.findById(blogId).select('likeCount').exec()
 
-    if(!blog){
-        logger.error('Blog not found')
-        const error = new Error('BLog not found') as AppError;
-        error.statusCode = 404;
-        error.code = 'BlogNotFound';
-        throw error; 
-    }
+    ensureDocument(blog, 'Blog')
 
     await Blog.findByIdAndUpdate(blog.id, {
         $inc: {likesCount: -1}

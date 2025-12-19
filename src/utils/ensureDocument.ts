@@ -6,7 +6,6 @@ export function ensureDocument<T>(
     entityName: string
 ): asserts document is T  {                         // so ist wert nie undefined   if(!user) check
     if (!document) {
-        // ✅ Verwende den Parameter!
         logger.error(`${entityName} not found`)
         const error = new Error(`${entityName} not found`) as AppError
         error.statusCode = 404
