@@ -48,6 +48,8 @@ const getAllBlogs = catchAsync(async function(req: Request, res: Response): Prom
     }
     
     const cacheKey = `blogs:${user.role}:limit:${limit}:skip:${skip}`
+
+    const cache = `blogs:${limit}:${skip}:${user.role}`
     
     const data = await getOrSetRedis(cacheKey, async () => {
         const blogs = await Blog.find(query)

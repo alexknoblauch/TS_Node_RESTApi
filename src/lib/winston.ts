@@ -8,17 +8,21 @@ import DailyRotateFile from 'winston-daily-rotate-file'
  * Node Modules
  */
 import config from '../config'
+import { asyncLocalStorageInstance, getCorrelationId } from '@/utils/correlationStore';
 
 const { combine, timestamp, json, errors, align, printf, colorize } = winston.format;
 
 const correlationIdFormat = winston.format((info) => {
-  if (!info.correlationId) {
+  const correlationId = getCorrelationId() as string;
+  if (!correlationId) {
     info.correlationId = 'N/A';
+  } else {
+    info.correlationId = correlationId
   }
   return info;
 });
 
-const transports: winston.transport[] = [];
+const transports: winston.transport[] = [];                       //LOKI for centraliezd log files. winstown würde sosnt in jedem server ein logifle abelgen
 
 if (config.NODE_ENV !== "production") {
   transports.push(
@@ -47,11 +51,11 @@ if (config.NODE_ENV === "production") {
     new DailyRotateFile({
       filename: 'logs/app-%DATE%.log',
       datePattern: 'YYYY-MM-DD',
-      level: 'info',
+      level: 'info',                                                        // Log Level
       maxSize: '20m',
       maxFiles: '14d',
       zippedArchive: true,
-      format: combine(correlationIdFormat(), timestamp(), json())
+      format: combine(correlationIdFormat(), timestamp(), json())           //CorrelationID
     })
   );
 
@@ -59,11 +63,11 @@ if (config.NODE_ENV === "production") {
     new DailyRotateFile({
       filename: 'logs/error-%DATE%.log',
       datePattern: 'YYYY-MM-DD',
-      level: 'error',       // error
+      level: 'error',                                                       //Log Level
       maxSize: '10m',
       maxFiles: '30d',      
       zippedArchive: true,
-      format: combine(correlationIdFormat(), timestamp(), json())
+      format: combine(correlationIdFormat(), timestamp(), json())           //CorrelationID
     })
   )
 
@@ -71,17 +75,16 @@ if (config.NODE_ENV === "production") {
       new DailyRotateFile({
         filename: 'logs/warn-%DATE%.log',
         datePattern: 'YYYY-MM-DD',
-        level: 'warn',        // Nur warn und error
+        level: 'warn',                                                    //Log Level
         maxSize: '10m',
         maxFiles: '30d',
-        format: combine(correlationIdFormat(), timestamp(), json())
+        format: combine(correlationIdFormat(), timestamp(), json())       //CorrelationID
       })
     )
 }
 
 const logger = winston.createLogger({
-  level: config.LOG_LEVEL || 'info',                           //Fallback hier wichtig
-  format: combine(correlationIdFormat(), timestamp(),errors({ stack: true }), json()), 
+  level: config.LOG_LEVEL || 'info',                                      //Fallback hier wichtig
   transports,
   silent: config.NODE_ENV === 'test'
 });

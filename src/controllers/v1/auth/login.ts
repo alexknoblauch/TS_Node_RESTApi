@@ -25,6 +25,7 @@ import bcrypt from 'bcrypt'
 import type { Request, Response, NextFunction } from 'express'
 import type { IUser } from "@/models/user";
 import catchAsync from "@/utils/catchAsync";
+import { ensureDocument } from "@/utils/ensureDocument";
 
 export type UserData = Pick<IUser, 'email' | 'password'>
 
@@ -33,13 +34,7 @@ const login = catchAsync(async function(req: Request, res: Response): Promise<vo
     const {email, password} = req.body as UserData
     const user = await  User.findOne({email}).select('email username password role').lean().exec()
 
-    if(!user) {
-        res.status(404).json({
-            code: 'AuthError',
-            message: 'User not found'
-        })
-        return
-    }
+    ensureDocument(user, 'User')
 
     const pwCorrect = await bcrypt.compare(password, user.password)
 
@@ -53,11 +48,6 @@ const login = catchAsync(async function(req: Request, res: Response): Promise<vo
     const accessToken = generateAccessToken(user._id)
     const refreshToken = generateRefreshToken(user._id)
     await Token.create({token: refreshToken, userId: user._id})
-
-    logger.info('Refresh Token created for', {
-        userId: user._id,
-        token: refreshToken
-    })
     
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
@@ -67,7 +57,7 @@ const login = catchAsync(async function(req: Request, res: Response): Promise<vo
     })
     
 
-    logger.info('user successfully created', user)
+    logger.info('user successfully logged in', user)
 
     res.status(200).json({
         user: {

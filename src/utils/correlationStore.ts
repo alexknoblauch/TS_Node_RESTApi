@@ -9,12 +9,4 @@ declare module 'express' {
   }
 }
 
-const asyncLocalStorage = new AsyncLocalStorage<Map<string, string>>();         //spezieller REQ ASYNC speicher
-
-export const getCorrelationId = (): string | undefined => {
-  const store = asyncLocalStorage.getStore();
-  return store?.get('correlationId');
-};
-
-// Export für Middleware
-export const asyncLocalStorageInstance = asyncLocalStorage;
+export const asyncLocalStorageInstance = new AsyncLocalStorage<string>();  

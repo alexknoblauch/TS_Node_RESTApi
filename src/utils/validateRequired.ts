@@ -7,7 +7,7 @@ export function validateRequired(
     name: string, 
     statusCode: number = 400,
     customMessage?: string
-): asserts value is NonNullable<typeof value> {                 // so ist wert nie undefined   if(!user) check
+): asserts value is NonNullable <typeof value> {                 // so ist wert nie undefined   if(!user) check
     if (!value) {
         const message = customMessage || `${name} is required`
         logger.error(message)

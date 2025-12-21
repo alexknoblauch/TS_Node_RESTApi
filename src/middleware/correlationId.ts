@@ -17,18 +17,13 @@ declare module 'express' {
   }
 }
 
-
 export const correlationIdMiddleware = ( req: Request, res: Response, next: NextFunction ) => {
   const correlationId = req.headers['x-correlation-id'] as string || uuidv4();
   
   req.correlationId = correlationId;
   res.setHeader('X-Correlation-ID', correlationId);
 
-  // WICHTIG: AsyncLocalStorage Context erstellen spezieller speicher für REQ und ASYNC kontext
-  const store = new Map();
-  store.set('correlationId', correlationId);
-
-  asyncLocalStorageInstance.run(store, () => {
+  asyncLocalStorageInstance.run(correlationId, () => {
     next(); 
   });
 };
