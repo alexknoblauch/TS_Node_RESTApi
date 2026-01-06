@@ -96,7 +96,7 @@ const UserSchema = new Schema<IUser>({
         type: Boolean
     },
     refreshToken: {
-        type: string
+        type: String
     }
 }, { timestamps: true })
 

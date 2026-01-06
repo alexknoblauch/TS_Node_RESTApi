@@ -32,7 +32,7 @@ import { ensureDocument } from '@/utils/ensureDocument'
 
 const deleteBlog = catchAsync(async function(req: Request, res: Response): Promise<void>{
 
-    const userId = req.userId as Types.ObjectId
+    const userId = req.userId
     const blogId = req.params.blogId as string
 
     const user = await User.findById(userId).select('role').lean().exec()

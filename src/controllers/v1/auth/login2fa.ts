@@ -71,9 +71,8 @@ const login = async function (req: Request, res: Response): Promise<void> {
     // 2FA Code verifizieren
     const verified = speakeasy.totp.verify({
       secret: user.twoFactorSecret,
-      encoding: 'base32',
       token: twoFactorCode,
-      window: 1 // 30s Toleranz
+      encoding: 'base32',
     });
 
     if (!verified) {
@@ -85,8 +84,8 @@ const login = async function (req: Request, res: Response): Promise<void> {
   }
 
   // 👇 DEIN ORIGINALER CODE (unverändert)
-  const accessToken = await generateAccessToken(user.id);
-  const refreshToken = await generateRefreshToken(user.id);
+  const accessToken =  generateAccessToken(user.id);
+  const refreshToken =  generateRefreshToken(user.id);
 
   user.refreshToken = refreshToken;
   await user.save();

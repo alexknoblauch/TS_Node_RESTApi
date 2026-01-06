@@ -67,7 +67,6 @@ const login = catchAsync(async function(req: Request, res: Response): Promise<vo
         },
         accessToken
     })
-
 })
 
 export default login

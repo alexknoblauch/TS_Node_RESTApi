@@ -31,6 +31,7 @@ export const connectToDatabase = async function():Promise<void>{
     try{
         if(!process.env.MONGOOSE_URI) return
         await mongoose.connect(process.env.MONGOOSE_URI, clientOptiones)
+        
         logger.info('connections successful', {
             uri: process.env.MONGOOSE_URI,
             options: clientOptiones

@@ -39,9 +39,9 @@ const register = catchAsync(async (req: Request, res: Response): Promise<void> =
 
     const userName = genUsername()
     const newUser = await User.create({userName, email, password, role})
+    
     const accessToken = generateAccessToken(newUser._id)
     const refreshToken = generateRefreshToken(newUser._id)
-
     await Token.create({token: refreshToken, userId: newUser._id })
 
     res.cookie('refreshToken', refreshToken, {
@@ -64,7 +64,6 @@ const register = catchAsync(async (req: Request, res: Response): Promise<void> =
             email: email,
             role: role
     })
-
 })
 
 export default register

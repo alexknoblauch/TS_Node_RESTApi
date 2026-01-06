@@ -1,7 +1,8 @@
 /**
  * Node Modules
  */
-import { Schema, model, Types } from "mongoose"
+import mongoose, { Schema, model, Types } from "mongoose"
+import { z } from 'zod'
 
 
 /**
@@ -14,12 +15,16 @@ import { Schema, model, Types } from "mongoose"
  * Models
  */
 
-export interface IComment {
-    _id: Types.ObjectId,  
-    blogId: Types.ObjectId,
-    userId: Types.ObjectId,
-    comment: string,
-}
+const ICommentSchema = z.object({
+    _id: z.instanceof(mongoose.Types.ObjectId).optional(),
+    blogId: z.instanceof(mongoose.Types.ObjectId),
+    userId: z.instanceof(mongoose.Types.ObjectId),
+    comment: z.string()
+        .min(1, "Kommentar darf nicht leer sein")
+        .max(500, "Kommentar darf maximal 500 Zeichen lang sein")
+});
+
+export type IComment = z.infer<typeof ICommentSchema>;      //export type:  z.infer() macht type kein JS Value muss 
 
 const commentSchema = new Schema<IComment>({
     blogId: {

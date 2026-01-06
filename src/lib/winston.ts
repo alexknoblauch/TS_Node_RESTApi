@@ -8,12 +8,13 @@ import DailyRotateFile from 'winston-daily-rotate-file'
  * Node Modules
  */
 import config from '../config'
-import { asyncLocalStorageInstance, getCorrelationId } from '@/utils/correlationStore';
+import { asyncLocalStorageInstance } from '@/utils/correlationStore';
 
 const { combine, timestamp, json, errors, align, printf, colorize } = winston.format;
 
 const correlationIdFormat = winston.format((info) => {
-  const correlationId = getCorrelationId() as string;
+  const correlationId = asyncLocalStorageInstance.getStore() as string;
+  
   if (!correlationId) {
     info.correlationId = 'N/A';
   } else {
@@ -71,16 +72,16 @@ if (config.NODE_ENV === "production") {
     })
   )
 
-    transports.push(
-      new DailyRotateFile({
-        filename: 'logs/warn-%DATE%.log',
-        datePattern: 'YYYY-MM-DD',
-        level: 'warn',                                                    //Log Level
-        maxSize: '10m',
-        maxFiles: '30d',
-        format: combine(correlationIdFormat(), timestamp(), json())       //CorrelationID
-      })
-    )
+  transports.push(
+    new DailyRotateFile({
+      filename: 'logs/warn-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      level: 'warn',                                                    //Log Level
+      maxSize: '10m',
+      maxFiles: '30d',
+      format: combine(correlationIdFormat(), timestamp(), json())       //CorrelationID
+    })
+  )
 }
 
 const logger = winston.createLogger({

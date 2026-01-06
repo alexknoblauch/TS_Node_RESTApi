@@ -24,6 +24,7 @@ const logout = catchAsync(async function(req: Request, res: Response): Promise<v
     if (refreshToken){
         Token.deleteOne({token: refreshToken})
     }
+    
     logger.info('User refresh Token deleted successfully', {
         userId: req.userId,
         token: refreshToken

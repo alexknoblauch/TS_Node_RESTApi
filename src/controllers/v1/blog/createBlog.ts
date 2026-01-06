@@ -8,6 +8,7 @@ import xss from 'xss'
 */
 import catchAsync from "@/utils/catchAsync"
 import logger from '@/lib/winston'
+import { ensureDocument } from '@/utils/ensureDocument'
 /**
  * Models
  */
@@ -34,12 +35,8 @@ const createBlog = catchAsync(async function(req: Request, res: Response): Promi
     const newEntry = await Blog.create({ title, content: cleanContent, banner, status, author: userId })
 
     
-    if(newEntry == null){
-        const error = new Error('create new Blog not worked') as AppError;
-        error.statusCode = 400;
-        error.code = 'BlogNotCreateds';
-        throw error;
-    }
+    ensureDocument(newEntry, 'New Blog')
+
     logger.info('New Blog entry creted')
     
 

@@ -22,6 +22,7 @@ import catchAsync from "@/utils/catchAsync";
 
 import type { Request, Response } from 'express'
 import { Types } from 'mongoose'
+import { ensureDocument } from "@/utils/ensureDocument";
 
 
 export const refreshToken = catchAsync( async (req: Request, res: Response) => {
@@ -29,12 +30,7 @@ export const refreshToken = catchAsync( async (req: Request, res: Response) => {
 
     const tokenExists = await Token.exists({ token: refreshToken })
 
-    if(!tokenExists){
-        return res.status(401).json({
-            code: 'AuthenticationError',
-            messag: 'Invalid refresh token'
-        })
-    }
+    ensureDocument(tokenExists, 'Token exists')
 
     const jwtPayload = verifyRefreshToken(refreshToken) as { userId: Types.ObjectId }
     const accessToken = generateAccessToken(jwtPayload.userId)
