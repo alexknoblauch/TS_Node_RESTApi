@@ -1,6 +1,7 @@
 /**
  * Custom Modules
  */
+import { redisClient } from '@/lib/redis'
 import User from '@/models/user'
 
 /**
@@ -32,22 +33,27 @@ export type UpdateUserInput = Partial<Omit<IUser,               //Update immer P
 
 
 export const createUserRepository = () => {             //leer lassen für DB (Hihger Order fn)
-  return {
-    create: async (userData: CreateUserInput): Promise<UserResponse | null> => {          // mongoose method git Promise<.....> zurück
-        const doc = await User.create(userData)
+    return {
+        create: async (userData: CreateUserInput): Promise<UserResponse | null> => {          // mongoose method git Promise<.....> zurück
+            const doc = await User.create(userData)
+            const cacheKey = `User:${doc._id.toString()}`;
 
-        if(!doc) return null                            // return null wegen oben UserResponse | null
+            if(!doc) return null                            // return null wegen oben UserResponse | null
 
-        return {
-          id: doc._id.toString(),
-          userName: doc.userName,
-          email: doc.email,
-          role: doc.role,
-          firstName: doc.firstName,
-          lastName: doc.lastName,
-          socialLinks: doc.socialLinks
-        }
-    },
+            const userResponse = {
+                id: doc._id.toString(),
+                userName: doc.userName,
+                email: doc.email,
+                role: doc.role,
+                firstName: doc.firstName,
+                lastName: doc.lastName,
+                socialLinks: doc.socialLinks
+            }
+            
+            await redisClient.set(cacheKey, JSON.stringify(userResponse), { EX: 3600 });
+
+            return userResponse
+        },
 
     
     // READ
@@ -65,13 +71,14 @@ export const createUserRepository = () => {             //leer lassen für DB (H
             lastName: doc.lastName,
             socialLinks: doc.socialLinks
         }))
+
     },
 
     
     findById: async (id: string): Promise<UserResponse | null> => {
       const cacheKey = `User:${id}`
 
-      return await getOrSetRedis<UserResponse | null>(cacheKey, async () => {
+      return await getOrSetRedis<UserResponse | null>(cacheKey, async () => {           //Generic auch hier! kei Promise<> weil getorsetredis die promise schon auflöst
            const doc = await User.findById(id).select('-__v -password -refreshToken').lean().exec()
             if(!doc) return null
 
@@ -114,24 +121,25 @@ export const createUserRepository = () => {             //leer lassen für DB (H
 
         return await getOrSetRedis<UserResponse | null>(cacheKey, async () => {
 
-        const doc = await User.findOne({ userName })
+            const doc = await User.findOne({ userName })
 
-        if(!doc) return null
+            if(!doc) return null
 
-        return {
-            id: doc._id.toString(),
-            userName: doc.userName,
-            email: doc.email,
-            role: doc.role,
-            firstName: doc.firstName,
-            lastName: doc.lastName,
-            socialLinks: doc.socialLinks
-        } 
-    })
+            return {
+                id: doc._id.toString(),
+                userName: doc.userName,
+                email: doc.email,
+                role: doc.role,
+                firstName: doc.firstName,
+                lastName: doc.lastName,
+                socialLinks: doc.socialLinks
+            } 
+        })
     },
 
     
     updateOne: async (id: string, updateData: UpdateUserInput): Promise<UserResponse | null> => {
+        const cacheKey = `User:${id}`
         const doc = await User.findByIdAndUpdate(
             id, 
             updateData, 
@@ -140,7 +148,7 @@ export const createUserRepository = () => {             //leer lassen für DB (H
 
         if(!doc) return null
 
-        return {
+        const updatedUser =  {
           id: doc._id.toString(),
           userName: doc.userName,
           email: doc.email,
@@ -149,13 +157,38 @@ export const createUserRepository = () => {             //leer lassen für DB (H
           lastName: doc.lastName,
           socialLinks: doc.socialLinks
         }
+
+        redisClient.set(cacheKey, JSON.stringify(updatedUser), { EX: 3600 })
+
+        return updatedUser
     },
 
 
     deleteOne: async (id: string): Promise<boolean> => {
         const doc = await User.findByIdAndDelete(id)
 
-        return doc !== null                             // true wenn gelöscht, false wenn nicht existiert
+        if(!doc) throw new Error('no User found')
+
+        //REDIS
+        let keysToDelete = []
+
+        if(doc.email){
+            keysToDelete.push(`User:${doc.email.toLowerCase().trim()}`)      
+        }
+        if(doc.userName){
+            keysToDelete.push(`User:${doc.userName.toLowerCase().trim()}`)
+        }
+        if(doc._id){
+            keysToDelete.push(`User:${doc._id.toString()}`)       // immer zu string wen JS !!
+        }
+
+        const deleted =  doc !== null                             // true wenn gelöscht, false wenn nicht existiert
+        
+        if(deleted){
+            await Promise.all(keysToDelete.map(key => redisClient.del(key)))        //ohne awiat Promise wird redis nicht komplett ausgeführt
+        }
+
+        return deleted
     },
     
   }
