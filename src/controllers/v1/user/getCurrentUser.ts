@@ -2,35 +2,35 @@
  * Custom Modules
  */
 
-import logger from "@/lib/winston";
 
 /**
  * Models
  */
 
-import User from "@/models/user";
-import catchAsync from "@/utils/catchAsync";
+import { createUserRepository, UserResponse } from "@/Repositories/userRepository";
 import getOrSetRedis from "@/utils/getOrSetRedis";
 
 /**
  * Types
  */
 
-import type {Request, Response} from 'express'
+const userRepository = createUserRepository()
 
-const getCurrentUser = catchAsync(async (req: Request, res: Response): Promise<void> =>{
-    const userId = req.userId
 
+const getCurrentUser = (async (userId: string): Promise<UserResponse | null> =>{
     const cacheKey = `User:${userId}`
 
-    const data = await getOrSetRedis(cacheKey, async () => {
-        const user = await User.findById(userId).select('-__v -password -refreshToken').lean().exec()
-        return user
-    })
+        const user = await getOrSetRedis<UserResponse | null> (cacheKey, async () => {      //Generic auch hier! kei Promise<> weil getorsetredis die promise schon auflöst
+            const user = await userRepository.findById(userId)
+
+            if(!user) throw new Error(`User nor found, ${userId}`)
+            return user
+        })
+        if (!user) {
+            throw new Error(`Cache returned null for user: ${userId}`);
+        }
     
-    res.status(200).json({
-        user: data
-    })
+        return user;
 }) 
 
 export default getCurrentUser

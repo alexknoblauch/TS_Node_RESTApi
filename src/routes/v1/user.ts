@@ -2,7 +2,7 @@
  * Node Modules
  */
 
-import { Router } from 'express'
+import { Request, Response, Router } from 'express'
 import { param, query, body } from 'express-validator'
 
 /**
@@ -28,14 +28,24 @@ import deleteUser from '@/controllers/v1/user/deleteUser'
 import getAllUsers from '@/controllers/v1/user/getAllUsers'
 import getUser from '@/controllers/v1/user/getUser'
 import deleteUserById from '@/controllers/v1/user/deleteUserById'
+import { validateRequired } from '@/utils/validateRequired'
 
 
+
+// wenn Express abstraheirt wird läuft catchAsync nicht mehr im Controller weil es next() Express braucht!!
 
 const router = Router()
 
 router.get('/', authenticate, authorize(['admin']), getAllUsers)
 
-router.get('/current', authenticate, authorize(['admin', 'user']), getCurrentUser)
+router.get('/current', authenticate, authorize(['admin', 'user']), 
+    async (req: Request, res: Response) => {
+        const userId = req.userId
+        if(!userId) return res.status(401).json({ message: 'Unauthenticated' })
+        const user = await getCurrentUser(userId.toString())
+        res.status(200).json(user)
+    }
+);
 
 router.put('/current', authenticate, authorize(['admin', 'user']),
 body('username')
