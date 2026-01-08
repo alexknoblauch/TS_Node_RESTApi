@@ -6,36 +6,34 @@ import logger from "@/lib/winston";
 import bcrypt from 'bcrypt'
 
 /**
- * Models
- */
-
-import User from "@/models/user";
-import catchAsync from "@/utils/catchAsync";
-
-/**
  * Types
  */
 
-import type { Request, Response } from 'express'
 import type { AppError } from '@/middleware/errorHandler'
 
-const updateCurrentUser = catchAsync(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.userId
+/**
+ * REpos
+ */
 
-    const {
-        username,
-        password,
-        email,
-        firstName,
-        lastName,
-        website,
-        youtube,
-        facebook,
-        instagram,
-        linkedin,
-        x
-    } = req.body
-    const user = await User.findById(userId).select('-__v')
+import { createUserRepository, UserResponse } from "@/Repositories/userRepository";
+
+const userRepository = createUserRepository()
+
+const updateCurrentUser = (async (
+    userId: string,
+    username?: string,
+    password?: string,
+    email?: string,
+    firstName?: string,
+    lastName?: string,
+    website?: string,
+    youtube?: string,
+    facebook?: string,
+    instagram?: string,
+    linkedin?: string,
+    x?: string): Promise<UserResponse | null> => {
+
+    const user = await userRepository.findById(userId)
 
     if(!user){
         const error = new Error('User not found') as AppError;
@@ -47,7 +45,7 @@ const updateCurrentUser = catchAsync(async (req: Request, res: Response): Promis
     if (username) {user.userName = username}
     if (email) {user.email = email;}
     if (password) {
-        user.password = await bcrypt.hash(password, 12);
+        (user as any).password = await bcrypt.hash(password, 12);
     }
     if (firstName) {user.firstName = firstName;}
     if (lastName) {user.lastName = lastName;}
@@ -59,13 +57,11 @@ const updateCurrentUser = catchAsync(async (req: Request, res: Response): Promis
     if (x) {user.socialLinks.x = x;}
     if (youtube) {user.socialLinks.youtube = youtube;}
 
-    await user.save()
+    const savedUser = await userRepository.save<UserResponse>(user)         //save<TYPE> nicht vergessen!
+    if(!savedUser) throw Error(`saving user went wrong)`)
     logger.info('User successfully updated')
 
-    res.status(200).json({
-        user
-    })
-
+    return savedUser
 })
 
 export default updateCurrentUser

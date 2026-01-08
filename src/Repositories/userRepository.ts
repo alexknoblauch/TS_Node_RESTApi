@@ -137,6 +137,11 @@ export const createUserRepository = () => {             //leer lassen für DB (H
         })
     },
 
+    save: async <T>(userData: any) => {                 //generic für type definition in code
+        const user = new User(userData);
+        return await user.save() as T
+    },
+
     
     updateOne: async (id: string, updateData: UpdateUserInput): Promise<UserResponse | null> => {
         const cacheKey = `User:${id}`
@@ -190,6 +195,16 @@ export const createUserRepository = () => {             //leer lassen für DB (H
 
         return deleted
     },
+    
+    existsByEmail: async(email: string):Promise<boolean> => {
+            const doc = await User.exists({ email: email })
+            return doc !== null;
+    },
+
+    existUsername: async(username: string): Promise<boolean> => {
+        const doc = await User.exists({ username: username})
+        return doc !== null
+    }
     
   }
 }
