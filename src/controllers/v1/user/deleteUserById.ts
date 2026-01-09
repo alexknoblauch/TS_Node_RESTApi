@@ -18,18 +18,19 @@ import Blog from "@/models/blog";
 import catchAsync from "@/utils/catchAsync";
 import logger from "@/lib/winston";
 /**
- * Types
+ * Repos
  */
 
-import type { Request, Response } from "express";
+import { createUserRepository  } from "@/Repositories/userRepository";
+
+const userRepository = createUserRepository()
 
 
 
 
 
-const deleteUserById = catchAsync(async function (req: Request, res: Response) {
-    const userId = req.params.userId
-    const result = await User.deleteOne({ _id: userId })
+const deleteUserById = (async function (userId: string): Promise<{deletedCount: number}> {
+    const result = await userRepository.deleteOne(userId)
 
     const blogs = await Blog.find({author: userId}).select('banner.publicId').lean().exec()
 
@@ -48,7 +49,7 @@ const deleteUserById = catchAsync(async function (req: Request, res: Response) {
         throw error;
     }
 
-    res.status(204).send()
+    return result
 })
 
 export default deleteUserById

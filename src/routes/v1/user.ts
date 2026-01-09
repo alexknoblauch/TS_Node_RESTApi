@@ -12,7 +12,6 @@ import { param, query, body } from 'express-validator'
 import authenticate from '@/middleware/authenticate'
 import validationErrorMiddelware from '@/middleware/validationError'
 import authorize from '@/middleware/authorize'
-import updateUserValidator from '@/middleware/validators/updateUserValidator'
 
 /**
  * Models
@@ -43,9 +42,16 @@ router.get('/', authenticate, authorize(['admin']), getAllUsers)
 router.get('/current', authenticate, authorize(['admin', 'user']), 
     async (req: Request, res: Response) => {
         const userId = req.userId
+
         if(!userId) return res.status(401).json({ message: 'Unauthenticated' })
+
         const user = await getCurrentUser(userId.toString())
-        res.status(200).json(user)
+
+        res.status(200).json({
+            success: true,
+            data: user,
+            message: 'User updated successfully'
+        });    
     }
 );
 
@@ -53,6 +59,7 @@ router.put('/current', authenticate, authorize(['admin', 'user']), updateUserVal
 validationErrorMiddelware , 
     async(req: Request, res: Response) => {
         const userId = req.userId
+
         if(!userId) throw Error(`${userId} not found`)
 
         const {
@@ -68,7 +75,7 @@ validationErrorMiddelware ,
             linkedin,
             x
         } = req.body
-        
+    
         const updatedUser = await updateCurrentUser(userId.toString(), username, password, email, firstName, lastName, website, youtube, facebook, instagram, linkedin, x )
         
         res.status(200).json({
@@ -80,15 +87,46 @@ validationErrorMiddelware ,
         });
     })
 
-router.delete('/current', authenticate, authorize(['admin', 'user']), deleteUser)
+
+router.delete('/current', authenticate, authorize(['admin', 'user']),
+    async (req: Request, res: Response) => {
+        const id  = req.userId?.toString()
+        
+        if(!id) throw Error(`Id is wrong ${id}`)
+
+        await deleteUser(id)
+
+        res.status(204)
+    })
 
 
-router.get('/:userId', authenticate, authorize(['admin', 'user']), 
-param('userId')
-.notEmpty().isMongoId().withMessage('ID mus be a Mongo UserId'), validationErrorMiddelware , getUser)
+
+router.get('/:userId', authenticate, authorize(['admin', 'user']), param('userId')
+    .notEmpty().isMongoId().withMessage('ID mus be a Mongo UserId'), 
+    validationErrorMiddelware,
+    async(req: Request, res: Response) => {
+        const userId = req.params.userId
+
+        const user = await getUser(userId)
+
+        res.status(200).json({
+            code: 'Success',
+            message: 'User successfully retreaved.',
+            user
+        })
+    } )
 
 router.delete('/:userId', authenticate, authorize(['admin', 'user']), 
-param('userId')
-.notEmpty().isMongoId().withMessage('ID mus be a Mongo UserId'), validationErrorMiddelware , deleteUserById)
+param('userId').notEmpty().isMongoId().withMessage('ID mus be a Mongo UserId'), 
+validationErrorMiddelware, 
+    async(req: Request, res: Response) => {
+        const userId = req.params.userId
+        
+        await deleteUserById(userId)
+
+        
+        res.status(204)
+    }
+)
 
 export default router

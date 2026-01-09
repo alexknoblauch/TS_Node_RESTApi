@@ -18,16 +18,16 @@ import logger from "@/lib/winston";
 
 
 /**
- * Custom Types
+ * Repos
  */
 
-import type {Request, Response } from 'express'
-import catchAsync from "@/utils/catchAsync";
- 
-const deleteUser = catchAsync(async (req: Request, res: Response) => {
-    const  id  = req.userId 
+import { createUserRepository, UserResponse } from "@/Repositories/userRepository";
 
-    const userToDelete = await User.findById(id)
+const userRepository = createUserRepository()
+
+ 
+const deleteUser = (async (id: string):Promise<boolean> => {
+    const userToDelete = await userRepository.findById(id)
 
     if (!userToDelete) {
         const error = new Error('User not found') as AppError;
@@ -36,7 +36,7 @@ const deleteUser = catchAsync(async (req: Request, res: Response) => {
         throw error;
     }
 
-    const result = await User.deleteOne({_id: id})
+    const result = await userRepository.deleteOne(id)
     logger.info('A user Account has been deleted.', {
         id
     })
@@ -54,7 +54,8 @@ const deleteUser = catchAsync(async (req: Request, res: Response) => {
         username: userToDelete.userName
     });
 
-    res.status(204)
+    return result
+
 })
 
 export default deleteUser

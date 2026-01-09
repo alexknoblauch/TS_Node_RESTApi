@@ -169,7 +169,7 @@ export const createUserRepository = () => {             //leer lassen für DB (H
     },
 
 
-    deleteOne: async (id: string): Promise<boolean> => {
+    deleteOne: async (id: string): Promise<{deletedCount: number}> => {         // SPEZEIALTYP für spezeille fälle
         const doc = await User.findByIdAndDelete(id)
 
         if(!doc) throw new Error('no User found')
@@ -187,13 +187,7 @@ export const createUserRepository = () => {             //leer lassen für DB (H
             keysToDelete.push(`User:${doc._id.toString()}`)       // immer zu string wen JS !!
         }
 
-        const deleted =  doc !== null                             // true wenn gelöscht, false wenn nicht existiert
-        
-        if(deleted){
-            await Promise.all(keysToDelete.map(key => redisClient.del(key)))        //ohne awiat Promise wird redis nicht komplett ausgeführt
-        }
-
-        return deleted
+        return { deletedCount: 1 };
     },
     
     existsByEmail: async(email: string):Promise<boolean> => {

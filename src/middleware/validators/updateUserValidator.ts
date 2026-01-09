@@ -4,7 +4,7 @@ import { body } from "express-validator"
 
 const userRepository = createUserRepository()
 
-export const updateUserValidator = function(){
+const updateUserValidator = function(){
     return [
         body('username')
         .optional()
@@ -50,3 +50,5 @@ export const updateUserValidator = function(){
         .withMessage('Characters not allowed succeed 100 chars') 
     ]
 }
+
+export default updateUserValidator

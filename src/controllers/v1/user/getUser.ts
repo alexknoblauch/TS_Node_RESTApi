@@ -23,14 +23,13 @@ import type { Request, Response } from "express";
 import type { AppError } from "@/middleware/errorHandler";
 import getOrSetRedis from "@/utils/getOrSetRedis";
 
+import { createUserRepository } from "@/Repositories/userRepository";
 
-const getUser = catchAsync(async function (req: Request, res: Response) {
-    const userId = req.params.userId
+const userRepository = createUserRepository()
 
-    const cacheKey = `User:${userId}`
 
-    const data = await getOrSetRedis(cacheKey, async () => {
-        const user = await User.findById(userId).select('-__v -password -refreshToken').lean().exec()
+const getUser = (async function (userId: string) {
+        const user = await userRepository.findById(userId)
 
         if(user == null){
             const error = new Error('User not found') as AppError;
@@ -39,14 +38,6 @@ const getUser = catchAsync(async function (req: Request, res: Response) {
             throw error;
         }
         return user 
-    })
-
-
-    res.status(200).json({
-        code: 'Success',
-        message: 'User successfully retreaved.',
-        user: data
-    })
 })
 
 export default getUser
