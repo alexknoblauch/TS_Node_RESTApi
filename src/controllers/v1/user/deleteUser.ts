@@ -26,7 +26,7 @@ import { createUserRepository, UserResponse } from "@/Repositories/userRepositor
 const userRepository = createUserRepository()
 
  
-const deleteUser = (async (id: string):Promise<boolean> => {
+const deleteUser = (async (id: string):Promise<{ deletedCount: number }>  => {
     const userToDelete = await userRepository.findById(id)
 
     if (!userToDelete) {
