@@ -12,6 +12,7 @@ import { param, query, body } from 'express-validator'
 import authenticate from '@/middleware/authenticate'
 import validationErrorMiddelware from '@/middleware/validationError'
 import authorize from '@/middleware/authorize'
+import updateUserValidator from '@/middleware/validators/updateUserValidator'
 
 /**
  * Models

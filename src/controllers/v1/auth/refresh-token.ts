@@ -27,7 +27,6 @@ import { ensureDocument } from "@/utils/ensureDocument";
 
 export const refreshToken = catchAsync( async (req: Request, res: Response) => {
     const refreshToken = req.cookies.refreshToken as string
-
     const tokenExists = await Token.exists({ token: refreshToken })
 
     ensureDocument(tokenExists, 'Token exists')

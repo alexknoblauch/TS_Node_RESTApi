@@ -21,6 +21,8 @@ export interface IBlog {
     likesCount: number
     commentsCount: number,
     status: 'draft' | 'publicated'
+    createdAt: Date;                    // timestamps: true
+    updatedAt: Date;                    // timestamps: true
 }
 
 /**
