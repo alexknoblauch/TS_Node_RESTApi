@@ -27,7 +27,7 @@ import { ensureDocument } from "@/utils/ensureDocument";
 
 
 
-const getBlogsByUser = catchAsync(async function(req: Request, res: Response): Promise<void>{
+const getBlogsBySlug = catchAsync(async function(req: Request, res: Response): Promise<void>{
 
     const userId = req.userId
     const slug = req.params.slug             // /:slug
@@ -66,4 +66,4 @@ const getBlogsByUser = catchAsync(async function(req: Request, res: Response): P
     logger.info('Blogs for slug successfulls retreived')
 })
 
-export default getBlogsByUser
+export default getBlogsBySlug

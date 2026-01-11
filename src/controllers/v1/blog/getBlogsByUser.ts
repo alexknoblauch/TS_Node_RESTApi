@@ -7,6 +7,7 @@
  */
 import logger from "@/lib/winston";
 import { AppError } from "@/middleware/errorHandler";
+import { createUserRepository } from "@/Repositories/userRepository";
 
 /**
  * Models
@@ -24,24 +25,17 @@ import getOrSetRedis from "@/utils/getOrSetRedis";
 import { validateRequired } from "@/utils/validateRequired";
 import { ensureDocument } from "@/utils/ensureDocument";
 import { ensureArray } from "@/utils/ensureArray";
+import { BlogResponse } from "@/Repositories/blogRepository";
 
 interface QueryType {
   status?: 'published' | 'draft';                   //Interface optional aber empfehelnswert
 }
 
+const userRepository = createUserRepository()
 
-const getBlogsByUser = catchAsync(async function(req: Request, res: Response): Promise<void>{
-    let limit = Number(req.query.limit) || config.defaultResLimit;
-    let skip = Number(req.query.offset) || config.defaultOffset;
-    
-    if (limit < 1) limit = 1;
-    if (skip < 0) skip = 0;
 
-    const currentId = req.userId
-    const queryId = req.params.id             // user/:userId
-    const query: QueryType = {} 
-    
-    const user = await User.findById(currentId).select('role').lean().exec()
+const getBlogsByUser = (async function(currentId: string, queryId: string, query: QueryType, limit: string, skip: string): Promise<BlogResponse[]>{
+    const user = await userRepository.findById(currentId)
 
     ensureDocument(user, 'user')
 

@@ -57,8 +57,29 @@ export const createUserRepository = () => {             //leer lassen für DB (H
 
     
     // READ
-    find: async (): Promise<UserResponse[] | null> => {           // mongoose method git Promise<.....> zurück
-        const doc = await User.find().select('-__v -password -refreshToken').lean().exec()
+    find: async (options?: {
+        query?: any;                    // Filter z.B. { role: 'admin' }
+        limit?: number;                 // Paginierung: 10
+        skip?: number;                  // Paginierung: 0
+        sort?: Record<string, 1 | -1>;  // Sortierung: { createdAt: -1 }
+        select?: string;                // Felder: '-password -__v'
+        }): Promise<UserResponse[] | null> => {           // mongoose method git Promise<.....> zurück
+
+        const {
+            query = {},
+            limit = 50,      // Default limit
+            skip = 0,
+            sort = { createdAt: -1 },
+            select = '-__v -password -refreshToken'
+        } = options || {};
+
+        const doc = await User.find(query)    
+            .select(select)
+            .limit(limit)
+            .skip(skip)
+            .sort(sort)
+            .lean()
+            .exec();
 
         if(!doc) return null                        
 
@@ -71,7 +92,6 @@ export const createUserRepository = () => {             //leer lassen für DB (H
             lastName: doc.lastName,
             socialLinks: doc.socialLinks
         }))
-
     },
 
     

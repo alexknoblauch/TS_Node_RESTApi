@@ -1,15 +1,15 @@
 /**
  * Types
  */
-import Blog, { IBlog } from "@/models/blog"
-import { PopulatedDoc } from 'mongoose';
+import Blog, { IBlog, QueryType } from "@/models/blog"
 import { UserResponse } from "./userRepository";
-import User, { IUser } from "@/models/user";
 import getOrSetRedis from "@/utils/getOrSetRedis";
 import { redisClient } from "@/lib/redis";
-import logger from "@/lib/winston";
 
-type BlogResponse = {
+export type SortOptions = Record<string, 1 | -1>;
+
+
+export type BlogResponse = {
     id: string;                    
     title: string;
     content: string;
@@ -107,15 +107,30 @@ export const createBlogRepository = () => {
             })
         },
 
-        getAllBlogs: async(id: string):Promise<BlogResponse[]> => {
-            const cacheKey = `Blogs:all`
+
+
+        getAllBlogs: async(userId: string, query: QueryType, limit: number, skip: number, select: string = '-__v -banner.publicId', sort?: string):Promise<BlogResponse[]> => {
+            const cacheKey = `blogs:${userId}:${JSON.stringify(query)}:${limit}:${skip}:${select}:${sort}`
 
             return await getOrSetRedis<BlogResponse[]>(cacheKey, async() => {
-                const blogs = await Blog.find().populate('author').lean().exec()
 
-                if(!blogs) {
-                    throw new Error(`No Blogs found`)
-                }
+                //sort() bruacht OBJ ! {desc: -1}. Hier string zu OBJ umwandeln:
+                const sortOptions: Record<string, 1 | -1> = sort === 'popular' 
+                ? { viewsCount: -1 as -1 } 
+                : { createdAt: -1 as -1 };
+
+
+                const blogs = await Blog.find(query).populate('author')            
+                    .select(select)
+                    .limit(limit)
+                    .skip(skip)
+                    .sort(sortOptions)
+                    .lean()
+                    .exec()
+
+            
+                if(!blogs || blogs.length === 0) return [];
+
 
                 return blogs.map(blog => {
                     //author Type checken (muss Obj sein mongoose) / Danach author erstellen
@@ -144,7 +159,7 @@ export const createBlogRepository = () => {
                         likesCount: blog.likesCount,
                         commentsCount: blog.commentsCount
                     } 
-                    })
+                })
             })
         },
 

@@ -5,22 +5,29 @@
 import { genSlug } from '@/utils'
 import mongoose, { Schema, Types, model } from 'mongoose'
 
+export interface BannerType {
+  publicId: string;
+  url: string;
+  width: number;
+  height: number;
+}
+
+
+export interface QueryType {
+  status?: 'published' | 'draft';
+}
+
 
 export interface IBlog {
     title: string,
     slug: string
     content: string,
-    banner: {
-        publicId: string,
-        url: string
-        width: number,
-        height: number
-    }
+    banner: BannerType
     author: Types.ObjectId,
     viewsCount: number,
     likesCount: number
     commentsCount: number,
-    status: 'draft' | 'publicated'
+    status: 'draft' | 'published'
     createdAt: Date;                    // timestamps: true
     updatedAt: Date;                    // timestamps: true
 }

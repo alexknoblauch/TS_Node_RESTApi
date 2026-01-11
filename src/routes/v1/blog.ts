@@ -1,11 +1,12 @@
 /**
  *  Node Modules
  */
-
-import { Router } from 'express'
-import { body, cookie, param } from 'express-validator'
-import bcrypt from 'bcrypt'
+import { Request, Response, Router } from 'express'
+import { param } from 'express-validator'
 import multer from 'multer'
+import xss from 'xss'
+import config from "@/config";
+
 
 /**
  *  Custom Modules
@@ -13,6 +14,15 @@ import multer from 'multer'
 import  User, { IUser }  from '@/models/user'
 import  login from '@/controllers/v1/auth/login'
 import  logout from '@/controllers/v1/auth/logout'
+import type { IBlog, QueryType } from '@/models/blog'
+import type { AppError } from '@/middleware/errorHandler'
+
+/**
+ * Types
+ */
+
+
+type BlogData = Pick<IBlog, 'title' | 'content' | 'banner' | 'status' >
 
 /**
  * Middleware
@@ -28,9 +38,13 @@ import authorize from '@/middleware/authorize'
 import createBlog from '@/controllers/v1/blog/createBlog'
 import uploadBlogBanner from '@/middleware/uploadBlogBanner'
 import getAllBlogs from '@/controllers/v1/blog/getAllBlogs'
-import getBlogByUser from '@/controllers/v1/blog/getBlogsByUser'
+import getBlogsByUser from '@/controllers/v1/blog/getBlogsByUser'
 import updateBlog from '@/controllers/v1/blog/updateBlog'
 import deleteBlog from '@/controllers/v1/blog/deleteBlog'
+import createBlogValidation from '@/middleware/validators/blog/createBlogValidation'
+import updateBlogValidation from '@/middleware/validators/blog/updateBlogValidator'
+import { validateRequired } from '@/utils/validateRequired'
+import getBlogsBySlug from '@/controllers/v1/blog/getBlogBySlug';
 
 /**
  *  Models
@@ -40,35 +54,68 @@ const router = Router()
 const upload = multer()
 
 
+import 'express-async-errors';          //Automatisches try catch für express router!! 
+
+
 router.post('/', 
     authenticate, 
     authorize(['user', 'admin']), 
     //upload.single('banner_images'),                       //param in body (key) req.params postman
     //uploadBlogBanner('post'),
     //body('banner_image').notEmpty().withMessage('Banner Image is required'),
-    body('title')
-    .trim()
-    .notEmpty()
-    .withMessage('Title must have a value')
-    .isLength({max: 100})
-    .withMessage('Title must be less then 100'),
-    body('content')
-    .trim()
-    .notEmpty()
-    .withMessage('Body must have a value'),
-    body('status')
-    .optional()
-    .isIn(['draf', 'published'])
-    .withMessage('Status must be of the value draft or published'), 
+    createBlogValidation(), 
     validationErrorMiddelware,
-    createBlog)
+        async(req: Request, res: Response) => {
+            const { title, content, banner, status } = req.body as BlogData
+            const userId = req.userId?.toString()
+
+            if(!userId) throw new Error(`No UserId`)
+            validateRequired(title, 'Title')
+            validateRequired(content, 'Content')
+            validateRequired(banner, 'Banner')
+            validateRequired(status, 'Status')
+
+            const cleanContent = xss(content)
+            const newEntry = await createBlog(title, cleanContent, banner, status, userId)
+
+            res.status(201).json({
+                code: 'BlogCreated',
+                message: 'Successfully new Blog created',
+                newEntry
+            })
+        }
+    )
 
 
 router.get('/', 
     authenticate, 
     authorize(['admin', 'user']), 
     validationErrorMiddelware,
-    getAllBlogs)                            //COPY
+        async(req: Request, res:Response) => {
+            let limit = Number(req.query.limit) || config.defaultResLimit;           // req.query hat Type: string | string[] | undefined
+            let skip = Number(req.query.offset) || config.defaultOffset;
+
+            const sort   = req.query.sort as string
+            const select = req.query.select as string
+            
+            if(!sort) throw new Error()
+            
+            if (limit < 1) limit = 1;
+            if (skip < 0) skip = 0;
+        
+            const userId = req.userId?.toString()
+            if(!userId) throw new Error('Id not valid')
+            const query: QueryType = {}
+
+            const data = getAllBlogs(userId, query, limit, skip, select, sort)
+
+            res.status(200).json({
+                code: 'ApiSuccess',
+                message: 'Blogs successfully retrieved',
+                blogs: data
+            })
+        }
+    )                            
 
 
 router.get('/user/:userId',                     
@@ -76,7 +123,7 @@ router.get('/user/:userId',
     authorize(['admin', 'user']),
     param('userId').isMongoId().withMessage('invalid id format'), 
     validationErrorMiddelware,
-    getBlogByUser)                          // PASTE getAllBlogs & Edit, es ist fast alles gleich 
+    getBlogsByUser)                          // PASTE getAllBlogs & Edit, es ist fast alles gleich 
 
 
 router.get('/:slug',                     
@@ -84,20 +131,13 @@ router.get('/:slug',
     authorize(['admin', 'user']),
     param('slug').notEmpty().withMessage('Slug parameter needs value'), 
     validationErrorMiddelware,
-    getBlogByUser)                          // PASTE getBlogByUser & Edit, es ist fast alles gleich 
+    getBlogsBySlug)                          // PASTE getBlogByUser & Edit, es ist fast alles gleich 
 
 
 router.patch('/:blogId',
     authenticate,
     authorize(['admin']),
-    body('userId')
-    .isMongoId()
-    .withMessage('ID is in the wrong format.'),
-    body('content'),
-    body('status')
-    .optional()
-    .isIn(['draft', 'published'])
-    .withMessage('Status must be one of the value, draft/published'),
+    updateBlogValidation(),
     validationErrorMiddelware,
     uploadBlogBanner('put'),
     updateBlog                                  //COPY PAST createBlog
