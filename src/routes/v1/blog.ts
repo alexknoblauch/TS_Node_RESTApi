@@ -38,7 +38,6 @@ import authorize from '@/middleware/authorize'
 import createBlog from '@/controllers/v1/blog/createBlog'
 import uploadBlogBanner from '@/middleware/uploadBlogBanner'
 import getAllBlogs from '@/controllers/v1/blog/getAllBlogs'
-import getBlogsByUser from '@/controllers/v1/blog/getBlogsByUser'
 import updateBlog from '@/controllers/v1/blog/updateBlog'
 import deleteBlog from '@/controllers/v1/blog/deleteBlog'
 import createBlogValidation from '@/middleware/validators/blog/createBlogValidation'
@@ -55,6 +54,7 @@ const upload = multer()
 
 
 import 'express-async-errors';          //Automatisches try catch für express router!! 
+import getBlogsByUser from '@/controllers/v1/blog/getBlogsByUser';
 
 
 router.post('/', 
@@ -107,7 +107,7 @@ router.get('/',
             if(!userId) throw new Error('Id not valid')
             const query: QueryType = {}
 
-            const data = getAllBlogs(userId, query, limit, skip, select, sort)
+            const data = await getAllBlogs(userId, query, limit, skip, select, sort)
 
             res.status(200).json({
                 code: 'ApiSuccess',
@@ -123,7 +123,32 @@ router.get('/user/:userId',
     authorize(['admin', 'user']),
     param('userId').isMongoId().withMessage('invalid id format'), 
     validationErrorMiddelware,
-    getBlogsByUser)                          // PASTE getAllBlogs & Edit, es ist fast alles gleich 
+        async(req: Request, res: Response) => {
+            let limit = Number(req.query.limit) || config.defaultResLimit;
+            let skip = Number(req.query.offset) || config.defaultOffset;
+
+            const sort   = req.query.sort as string
+            const select = req.query.select as string
+            
+            if (limit < 1) limit = 1;
+            if (skip < 0) skip = 0;
+        
+            const userId = req.userId?.toString()
+            if(!userId) throw new Error('No userId')
+            const queryId = req.params.id             // user/:userId
+            const query: QueryType = {} 
+                
+
+            const blog = await getBlogsByUser(userId, queryId, query, limit, skip, select, sort)
+
+            res.status(200).json({
+                code: 'ApiSuccess',
+                message: 'Blogs of user successfully retrieved',
+                blogs: blog.data,                          // 2 Exporte = blog.data
+                author: blog.author                        // 2 Exporte = blog.author
+            })
+        }
+    )                          // PASTE getAllBlogs & Edit, es ist fast alles gleich 
 
 
 router.get('/:slug',                     

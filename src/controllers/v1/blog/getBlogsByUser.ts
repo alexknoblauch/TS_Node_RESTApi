@@ -15,7 +15,7 @@ import { createUserRepository } from "@/Repositories/userRepository";
 import Blog from "@/models/blog";
 import catchAsync from "@/utils/catchAsync";
 import config  from '@/config/index'
-import User from "@/models/user";
+import User, { IUser } from "@/models/user";
 
 /**
  * Types
@@ -25,17 +25,23 @@ import getOrSetRedis from "@/utils/getOrSetRedis";
 import { validateRequired } from "@/utils/validateRequired";
 import { ensureDocument } from "@/utils/ensureDocument";
 import { ensureArray } from "@/utils/ensureArray";
-import { BlogResponse } from "@/Repositories/blogRepository";
+import { BlogResponse, createBlogRepository } from "@/Repositories/blogRepository";
 
 interface QueryType {
   status?: 'published' | 'draft';                   //Interface optional aber empfehelnswert
 }
 
+type BlogsByUserResponse = {                        //spezieller rückgabe type für getBlogsByUser     
+  data: BlogResponse[];
+  author: BlogResponse['author'] | null;
+};
+
 const userRepository = createUserRepository()
+const blogRepository = createBlogRepository()
 
 
-const getBlogsByUser = (async function(currentId: string, queryId: string, query: QueryType, limit: string, skip: string): Promise<BlogResponse[]>{
-    const user = await userRepository.findById(currentId)
+const getBlogsByUser = (async function(id: string, targetUserId: string, query: QueryType, limit: number, skip: number, select: string = '-__v -banner.publicId', sort?: string): Promise<BlogsByUserResponse>{
+    const user = await userRepository.findById(id)
 
     ensureDocument(user, 'user')
 
@@ -43,34 +49,15 @@ const getBlogsByUser = (async function(currentId: string, queryId: string, query
         query.status = 'published'
     }
 
-    const total = await Blog.countDocuments({author: queryId, ...query})  //spread Opterator nicht vergessen!!
-    const cacheKey = `Blog-${queryId}:${user.role}:${limit}:${skip}` 
 
-    const blog = await getOrSetRedis(cacheKey, async () => {
-        const data = await Blog.find({author: queryId, ...query})
-        .select('title slug content banner.url author viewsCount likesCount commentsCount status createdAt')
-        .populate('author', 'name email avatar')
-        .limit(limit)
-        .skip(skip)
-        .sort({ createdAt: -1 })
-        .lean()
-        .exec()
+    const data = await blogRepository.getBlogsByUser(id, targetUserId, query, limit, skip, select, sort);    
+    const author = data[0]?.author;
 
-        const author = data[0]?.author;
-
-        ensureArray(data, 'Blog')
+    ensureArray(data, 'Blog')
         
-        return {data, author}                       // 2 Export (data & author)
-        })
-
-
-    res.status(200).json({
-        code: 'ApiSuccess',
-        message: 'Blogs of user successfully retrieved',
-        blogs: blog.data,                          // 2 Exporte = blog.data
-        author: blog.author                        // 2 Exporte = blog.author
-    })
     logger.info('Blogs of user successfulls retreived')
+
+    return {data, author}
 })
 
 export default getBlogsByUser

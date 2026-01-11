@@ -6,6 +6,11 @@ import { UserResponse } from "./userRepository";
 import getOrSetRedis from "@/utils/getOrSetRedis";
 import { redisClient } from "@/lib/redis";
 
+/**
+ * Models
+ */
+import User from "@/models/user";
+
 export type SortOptions = Record<string, 1 | -1>;
 
 
@@ -163,6 +168,65 @@ export const createBlogRepository = () => {
             })
         },
 
+
+
+        //Gleiche Funktion wie getAllUsers aber mit  targetUserId
+        getBlogsByUser: async(id: string, targetUserId: string, query: QueryType, limit: number, skip: number, select: string = '-__v -banner.publicId', sort?: string):Promise<BlogResponse[]> => {                //array
+            const cacheKey = `blogs:user:${targetUserId}:${JSON.stringify(query)}:${limit}:${skip}:${select}:${sort}`;
+
+            return await getOrSetRedis<BlogResponse[]>(cacheKey, async() => {           //array
+
+                const sortOptions: Record<string, 1 | -1> = sort === 'popular' 
+                            ? { viewsCount: -1 as -1 } 
+                            : { createdAt: -1 as -1 };
+
+                const finalQuery = {                             // zusätzliche Line
+                    author: targetUserId,
+                    ...query 
+                };
+
+                const blogs = await Blog.find(finalQuery)                           //author: id !!!!!!!!!!
+                .populate('author')            
+                .select(select)
+                .limit(limit)
+                .skip(skip)
+                .sort(sortOptions)
+                .lean()
+                .exec();    
+
+                if(!blogs) {
+                    throw new Error(`No Blogs found, user:${id}`)
+                }
+
+                return blogs.map(blog => {                                              // return !!
+                    if (!blog.author || typeof blog.author === 'string') {
+                        throw new Error('Author not populated');
+                    }
+                    const author = blog.author as any;
+
+                    return {
+                        id: blog._id.toString(),            
+                        title: blog.title,
+                        content: blog.content,
+                        banner: blog.banner,
+                        author: {                                   // ganzes Obj !!
+                            id: author._id.toString(),
+                            userName: author.userName,
+                            email: author.email,
+                            role: author.role,
+                            firstName: author.firstName,
+                            lastName: author.lastName
+                        },
+                        createdAt: blog.createdAt,
+                        updatedAt: blog.updatedAt,
+                        viewsCount: blog.viewsCount,
+                        likesCount: blog.likesCount,
+                        commentsCount: blog.commentsCount
+                    }
+                })
+            })
+        },   
+
         getBlogBySlug: async (slug: string):Promise<BlogResponse> => {
             const cacheKey =  `Blog:slug:${slug}`;
 
@@ -203,44 +267,7 @@ export const createBlogRepository = () => {
             })
         },
 
-        getBlogsByUser: async(user: string):Promise<BlogResponse[]> => {                //array
-            const cacheKey = `Blogs:user:${user.toString()}`
-
-            return await getOrSetRedis<BlogResponse[]>(cacheKey, async() => {           //array
-                const blogs = await Blog.find({ author: user }).populate('author').lean().exec()
-
-                if(!blogs) {
-                    throw new Error(`No Blogs found, user:${user}`)
-                }
-
-                return blogs.map(blog => {                                              // return !!
-                    if (!blog.author || typeof blog.author === 'string') {
-                        throw new Error('Author not populated');
-                    }
-                    const author = blog.author as any;
-
-                    return {
-                        id: blog._id.toString(),            
-                        title: blog.title,
-                        content: blog.content,
-                        banner: blog.banner,
-                        author: {                                   // ganzes Obj !!
-                            id: author._id.toString(),
-                            userName: author.userName,
-                            email: author.email,
-                            role: author.role,
-                            firstName: author.firstName,
-                            lastName: author.lastName
-                        },
-                        createdAt: blog.createdAt,
-                        updatedAt: blog.updatedAt,
-                        viewsCount: blog.viewsCount,
-                        likesCount: blog.likesCount,
-                        commentsCount: blog.commentsCount
-                    }
-                })
-            })
-        },   
+        
 
         deleteBlog: async(id: string):Promise<void> => {                
             const blog = await Blog.findById(id).populate('author').lean().exec()
@@ -310,5 +337,7 @@ export const createBlogRepository = () => {
 
             return blogResponse;
         }
+
+        
     }
 }
