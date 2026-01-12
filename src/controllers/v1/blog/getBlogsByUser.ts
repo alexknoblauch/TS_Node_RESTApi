@@ -11,31 +11,22 @@ import { AppError } from "@/middleware/errorHandler";
 /**
  * Models
  */
-import Blog from "@/models/blog";
+import Blog, { IBlog } from "@/models/blog";
 import catchAsync from "@/utils/catchAsync";
 import config  from '@/config/index'
-import User from "@/models/user";
+import User, { IUser } from "@/models/user";
 
 /**
  * Types
  */
 import type { Request, Response } from 'express'
-
-interface QueryType {
-  status?: 'published' | 'draft';                   //Interface optional aber empfehelnswert
-}
-
-
-const getBlogsByUser = catchAsync(async function(req: Request, res: Response): Promise<void>{
-    const limit = Number(req.query.limit as string) || config.defaultResLimit           // limit sort ect ist IMMER req.query
-    const skip = Number(req.query.offset as string) || config.defaultOffset
-    const currentId = req.userId
-    const queryId = req.params.id             // user/:userId
-    const query: QueryType = {} 
+import { FilterQuery } from "mongoose";
+import { userRepository } from "@/repository/userRepository";
+import { blogRepository } from "@/repository/blogreposiroty";
 
 
-    
-    const user = await User.findById(currentId).select('role').lean().exec()
+const getBlogsByUser = (async function(userId: string, query: FilterQuery<IBlog> , queryId: string, skip: number, limit: number): Promise<IBlog[]>{
+    const user = await userRepository.findById(userId)
     if(!user) { 
         const error = new Error('User not found for role settnigs') as AppError
         error.statusCode = 404                                                          //Rolle vergeben
@@ -46,17 +37,8 @@ const getBlogsByUser = catchAsync(async function(req: Request, res: Response): P
     if(user.role === 'user'){
         query.status = 'published'
     }
-
     
-    const total = await Blog.countDocuments({author: queryId, ...query})  //spread Opterator nicht vergessen!!
-    const data = await Blog.find({author: queryId, ...query})
-    .select('-banner.publicId -__v')
-    .populate('author', '-createdAt -updatedAt -__v')
-    .limit(limit)
-    .skip(skip)
-    .sort({ createdAt: -1 })
-    .lean()
-    .exec()
+    const data = await blogRepository.find({author: queryId, ...query}, {skip, limit})
 
     if(!data || data.length === 0){
         const error = new Error('No Blogs found for user') as AppError
@@ -65,12 +47,8 @@ const getBlogsByUser = catchAsync(async function(req: Request, res: Response): P
         throw error
     }
 
-    res.status(200).json({
-        code: 'ApiSuccess',
-        message: 'Blogs of user successfully retrieved',
-        blogs: data
-    })
-    logger.info('Blogs of user successfulls retreived')
+    return data
+
 })
 
 export default getBlogsByUser

@@ -2,7 +2,7 @@
  * Node Modules
  */
 
-import { Router } from 'express'
+import { Response, Router } from 'express'
 import { param, query, body } from 'express-validator'
 
 /**
@@ -29,11 +29,32 @@ import getAllUsers from '@/controllers/v1/user/getAllUsers'
 import getUser from '@/controllers/v1/user/getUser'
 import deleteUserById from '@/controllers/v1/user/deleteUserById'
 
+/**
+ * Types
+ */
+import { Response, Request } from 'express'
+import { config } from 'dotenv'
 
 
 const router = Router()
 
-router.get('/', authenticate, authorize(['admin']), getAllUsers)
+router.get('/', authenticate, authorize(['admin']), async (req: Request, res: Response) => {
+    const limitRaw = Number(req.query.limit);
+    const offsetRaw = Number(req.query.offset);
+
+    const limit = Number.isInteger(limitRaw) && limitRaw > 0 ? limitRaw : 10;
+    const offset = Number.isInteger(offsetRaw) && offsetRaw >= 0 ? offsetRaw : 0;
+
+    const users = await getAllUsers(limit, offset)
+
+    res.status(200).json({
+        code: 'Success',
+        message: 'Users retreived successfully',
+        users,
+        limit,
+        offset,
+    })
+})
 
 router.get('/current', authenticate, authorize(['admin', 'user']), getCurrentUser)
 

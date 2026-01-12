@@ -22,6 +22,8 @@ import User from '@/models/user'
 import type { Request, Response } from 'express'
 import type { IBlog } from '@/models/blog'
 import type { AppError } from '@/middleware/errorHandler'
+import { userRepository } from '@/repository/userRepository'
+import { blogRepository } from '@/repository/blogreposiroty'
 /**
  * Purify the blog content
  */
@@ -29,14 +31,10 @@ import type { AppError } from '@/middleware/errorHandler'
 
 type BlogData = Pick<IBlog, 'title' | 'content' | 'banner' | 'status' | 'author' >
 
-const deleteBlog = catchAsync(async function(req: Request, res: Response): Promise<void>{
+const deleteBlog = (async function(userId: string, blogId: string): Promise<void>{
 
-    const {title, content, banner, status} = req.body as BlogData
-    const userId = req.userId
-    const blogId = req.params.blogId
-
-    const user = await User.findById(userId).select('role').lean().exec()
-    const blog = await Blog.findById(blogId).select('author banner.puvlicId').lean().exec()
+    const user = await userRepository.findById(userId)
+    const blog = await blogRepository.findById(blogId)
 
     if(!blog){
         const error = new Error(`No Blog found with id ${blogId}`) as AppError;
@@ -58,11 +56,10 @@ const deleteBlog = catchAsync(async function(req: Request, res: Response): Promi
     }
 
     //await cloudenary.delet(......)        //IMG nicht vergessen zu deleten
-    await Blog.deleteOne(userId)
+    await blogRepository.delete(userId)
     logger.info('blog has been successfully deleted', {
         blog
     })
-    res.sendStatus(204)
 })
 
 export default deleteBlog

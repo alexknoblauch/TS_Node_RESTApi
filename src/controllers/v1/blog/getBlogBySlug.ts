@@ -11,7 +11,7 @@ import { AppError } from "@/middleware/errorHandler";
 /**
  * Models
  */
-import Blog from "@/models/blog";
+import Blog, { IBlog } from "@/models/blog";
 import catchAsync from "@/utils/catchAsync";
 import config  from '@/config/index'
 import User from "@/models/user";
@@ -21,17 +21,14 @@ import User from "@/models/user";
  */
 import type { Request, Response } from 'express'
 import blog from "@/models/blog";
+import { userRepository } from "@/repository/userRepository";
+import { blogRepository } from "@/repository/blogreposiroty";
 
 
 
-const getBlogsByUser = catchAsync(async function(req: Request, res: Response): Promise<void>{
+const getBlogBySlug = (async function(userId: string, slug: string): Promise<IBlog[] | null>{
 
-    const userId = req.userId
-    const slug = req.params.slug             // /:slug
-
-
-    
-    const user = await User.findById(userId).select('role').lean().exec()
+    const user = await userRepository.findById(userId)
     if(!user) { 
         const error = new Error('User not found for role settnigs') as AppError
         error.statusCode = 404                                                  //Rolle vergeben
@@ -39,33 +36,25 @@ const getBlogsByUser = catchAsync(async function(req: Request, res: Response): P
         throw error
     } 
     
+    const data = await blogRepository.findBySlug(slug)
     
-    const data = await Blog.findOne({slug})
-    .select('-banner.publicId -__v')
-    .populate('author', '-createdAt -updatedAt -__v')
-    .lean()
-    .exec()
-    
-    if(user.role === 'user'&& data?.status === 'draft'){
+    data?.map(data => {
+        if(user.role === 'user'&& data?.status === 'draft'){
 
-        logger.warn('A User tried to access Draft Blog')
-        throw new Error('User can not access Draft Blog')
-    }
-    
+            logger.warn('A User tried to access Draft Blog')
+            throw new Error('User can not access Draft Blog')
+        }
+        
 
-    if(!data){
-        const error = new Error('No Blogs found for slug') as AppError
-        error.statusCode = 404
-        error.code = 'ApiError'
-        throw error
-    }
-
-    res.status(200).json({
-        code: 'ApiSuccess',
-        message: 'Blog for slug successfully retrieved',
-        blogs: data
+        if(!data){
+            const error = new Error('No Blogs found for slug') as AppError
+            error.statusCode = 404
+            error.code = 'ApiError'
+            throw error
+        }
     })
-    logger.info('Blogs for slug successfulls retreived')
+
+    return data
 })
 
-export default getBlogsByUser
+export default getBlogBySlug

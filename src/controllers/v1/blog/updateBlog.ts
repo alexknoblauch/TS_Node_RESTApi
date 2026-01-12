@@ -20,8 +20,10 @@ import User from '@/models/user'
  * Types
  */
 import type { Request, Response } from 'express'
-import type { IBlog } from '@/models/blog'
+import type { IBanner, IBlog } from '@/models/blog'
 import type { AppError } from '@/middleware/errorHandler'
+import { userRepository } from '@/repository/userRepository'
+import { blogRepository } from '@/repository/blogreposiroty'
 /**
  * Purify the blog content
  */
@@ -29,15 +31,10 @@ import type { AppError } from '@/middleware/errorHandler'
 
 type BlogData = Partial<Pick<IBlog, 'title' | 'content' | 'banner' | 'status' >>
 
-const createBlog = catchAsync(async function(req: Request, res: Response): Promise<void>{
+const createBlog = (async function(userId: string, blogId: string, title: string, content: string, banner: IBanner, status: 'draft' | 'publicated'): Promise<IBlog>{
 
-    const {title, content, banner, status} = req.body as BlogData
-    if(req.body == null) return
-    const userId = req.userId
-    const blogId = req.params.blogId
-
-    const user = await User.findById(userId).select('role').lean().exec()
-    const blog = await Blog.findById(blogId)
+    const user = await userRepository.findById(userId)
+    const blog = await blogRepository.findById(blogId)
 
     if(!blog){
         const error = new Error('No blog found with this ID') as AppError;
@@ -67,8 +64,7 @@ const createBlog = catchAsync(async function(req: Request, res: Response): Promi
     if(banner) blog.banner = banner
     if(status) blog.status = status
 
-    logger.info('Blog successfully updated')
-    res.status(200).json({ blog })
+    return blog
 })
 
 export default createBlog

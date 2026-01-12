@@ -1,73 +1,25 @@
 /**
- * Node Modules
- */
-
-/**
- * Custom Models
- */
-import logger from "@/lib/winston";
-import { AppError } from "@/middleware/errorHandler";
-
-/**
  * Models
  */
-import Blog from "@/models/blog";
-import catchAsync from "@/utils/catchAsync";
-import config  from '@/config/index'
-import User from "@/models/user";
+import  { IBlog } from "@/models/blog";
+
+/**
+ * Repos
+ */
+import { blogRepository } from "@/repository/blogreposiroty";
 
 /**
  * Types
  */
-import type { Request, Response } from 'express'
-
-interface QueryType {
-  status?: 'published' | 'draft';
-}
+import { FilterQuery } from "mongoose";
 
 
-const getAllBlogs = catchAsync(async function(req: Request, res: Response): Promise<void>{
-    const limit = Number(req.query.limit as string) || config.defaultResLimit
-    const skip = Number(req.query.offset as string) || config.defaultOffset
-    const userId = req.userId
-    const query: QueryType = {} 
+const getAllBlogs = (async function(query: FilterQuery<IBlog>, skip: number, limit: number): Promise<IBlog[]>{
+        const blogs = await blogRepository.find(query, {skip, limit})
 
-    
-    const user = await User.findById(userId).select('role').lean().exec()
-    if(!user) {
-        const error = new Error('User not found for role settnigs') as AppError
-        error.statusCode = 404
-        error.code = 'ApiError'
-        throw error
-    } 
-    if(user.role === 'user'){
-        query.status = 'published'
-    }
+        if(!blogs || blogs.length === 0) console.log('No Blogs found')
 
-    
-    const total = await Blog.countDocuments(query) 
-    const data = await Blog.find(query)
-    .select('-banner.publicId -__v')
-    .populate('author', '-createdAt -updatedAt -__v')
-    .limit(limit)
-    .skip(skip)
-    .sort({ createdAt: -1 })
-    .lean()
-    .exec()
-
-    if(!data || data.length === 0){
-        const error = new Error('No Blogs found') as AppError
-        error.statusCode = 404
-        error.code = 'ApiError'
-        throw error
-    }
-
-    res.status(200).json({
-        code: 'ApiSuccess',
-        message: 'Blogs successfully retrieved',
-        blogs: data
-    })
-    logger.info('Blogs successfulls retreived')
+        return blogs
 })
 
 export default getAllBlogs
