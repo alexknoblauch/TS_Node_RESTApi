@@ -18,11 +18,8 @@ import catchAsync from "@/utils/catchAsync";
 import type {Request, Response} from 'express'
 
 const getCurrentUser = (async (userId: string): Promise<void> =>{
-    const user = await User.findById(userId).select('-__v').lean().exec()
-    
-    res.status(200).json({
-        user
-    })
+    const user = await User.findById(userId)
+
 }) 
 
 export default getCurrentUser

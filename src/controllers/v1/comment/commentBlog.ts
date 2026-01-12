@@ -19,14 +19,12 @@ import { AppError } from "@/middleware/errorHandler"
  */
 import { Request, Response } from "express"
 import { Types } from "mongoose"
-type CommentData = Pick <IComment, 'comment'>                   //PICK TYPE
+import { blogRepository } from "@/repository/blogreposiroty"
+import { commentRepository } from "@/repository/commentRepository"
 
-const commentBlog =  catchAsync(async function (req:Request, res: Response): Promise<void>{
-    const userId = req.userId                                   // params = string interference
-    const { blogId } = req.params                               // das auch string interference
-    const { comment } = req.body as CommentData                 // Wichtig Typisieren!
+const commentBlog =  (async function (userId: string, blogId: string, comment: string): Promise<IComment>{
 
-    const blog = await Blog.findById(blogId).lean().exec()
+    const blog = await blogRepository.findById(blogId)
 
     if(!blog){
         logger.error('Blog not found')
@@ -38,17 +36,15 @@ const commentBlog =  catchAsync(async function (req:Request, res: Response): Pro
 
     const cleanComment = xss(comment)
 
-    await Comment.create({ 
+    const createdComment = await commentRepository.create({ 
         userId: new Types.ObjectId(userId),                    //string to OObjectId machen!!
         blogId: new Types.ObjectId(blogId),                    //string to OObjectId machen!!
-        comment })
-    logger.info('Comment successfully created')
-    res.status(201).json({
-        blogId,                     
-        userId,                     
-        cleanComment
+        comment: cleanComment 
     })
-    return
+    
+    logger.info('Comment successfully created')
+
+    return createdComment
 })
 
 export default commentBlog

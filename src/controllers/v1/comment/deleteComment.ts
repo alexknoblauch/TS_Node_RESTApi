@@ -19,14 +19,14 @@ import { AppError } from "@/middleware/errorHandler"
  */
 import { Request, Response } from "express"
 import { Types } from "mongoose"
+import { commentRepository } from "@/repository/commentRepository"
+import { blogRepository } from "@/repository/blogreposiroty"
 
 
 
-const deleteComment =  catchAsync(async function (req:Request, res: Response): Promise<void>{
-    const userId = req.userId                                       // params = string interference
-    const { commentId } = req.params                               // das auch string interference
+const deleteComment =  (async function (userId: string, commentId: string): Promise<void>{
 
-    const comment = await Comment.findById(commentId).exec() as any   //wegen toString()
+    const comment = await commentRepository.find({_id: commentId}) as any        //wegen toString()
     const user = await User.findById(userId).select('role').lean().exec()
 
     if(!comment){
@@ -53,16 +53,12 @@ const deleteComment =  catchAsync(async function (req:Request, res: Response): P
         throw error;
     }       
 
-    await Comment.deleteOne({ _id: commentId })
-    await Blog.findByIdAndUpdate(comment.blogId, {                      // comment.blogId = Realtion!!
+    await commentRepository.delete(commentId)
+    await blogRepository.update(comment.blogId, {                      // comment.blogId = Realtion!!
         $inc: {likesCount: -1}
     })
 
     logger.info('Comment successfully deleted')
-    res.status(201).json({
-        commentId
-    })
-    return
 })
 
 export default deleteComment

@@ -33,11 +33,6 @@ const getUser = (async function (userId:string) {
         throw error;
     }
 
-    res.status(200).json({
-        code: 'Success',
-        message: 'User successfully retreaved.',
-        user
-    })
 })
 
 export default getUser

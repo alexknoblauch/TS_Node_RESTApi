@@ -18,11 +18,12 @@ import { AppError } from "@/middleware/errorHandler"
  * Types
  */
 import { Request, Response } from "express"
+import { blogRepository } from "@/repository/blogreposiroty"
+import { commentRepository } from "@/repository/commentRepository"
 
-const getCommentsByBlog =  catchAsync(async function (req:Request, res: Response): Promise<void>{
-    const { blogId } = req.params                               
+const getCommentsByBlog =  (async function (blogId: string): Promise<IComment[]>{
 
-    const blog = await Blog.findById(blogId).lean().exec()
+    const blog = await blogRepository.findById(blogId)
 
     if(!blog ){
         logger.error('Blog not found')
@@ -32,15 +33,13 @@ const getCommentsByBlog =  catchAsync(async function (req:Request, res: Response
         throw error;
     }
 
-    const allComments = await Comment.find({blogId}).sort({ createdAt: -1}).lean().exec()
+    const allComments = await commentRepository.find({_id: blogId})
 
  
     logger.info('Comments successfully retreaved')
-    res.status(200).json({
-        allComments
-    })
 
-    return
+
+    return allComments
 })
 
 export default getCommentsByBlog

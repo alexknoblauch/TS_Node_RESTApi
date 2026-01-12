@@ -21,6 +21,15 @@ export interface IComment {
     comment: string,
 }
 
+export interface ICommentCreate {
+    blogId: Types.ObjectId,
+    userId: Types.ObjectId,
+    comment: string,
+}
+
+export type CommentData = Pick <IComment, 'comment'>                   //PICK TYPE
+
+
 const commentSchema = new Schema<IComment>({
     blogId: {
         type:  Schema.Types.ObjectId,
