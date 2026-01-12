@@ -15,6 +15,7 @@ export type IBanner = {
 }
 
 export interface IBlog {
+    _id: Types.ObjectId | string;  
     title: string,
     slug: string,
     content: string,

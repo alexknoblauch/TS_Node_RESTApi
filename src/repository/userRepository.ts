@@ -4,7 +4,7 @@ import User, { IUser } from '@/models/user';
 export const userRepository = {
 
     findByEmail: async (email: string): Promise<IUser | null> => {
-        return User.findOne({ email }).lean().exec();
+        return await User.findOne({ email }).lean().exec();
     },
 
     find: async (filter: any, options?: {
@@ -34,12 +34,12 @@ export const userRepository = {
         return user.toObject();
     },
 
-    updateById: async (id: string, updateData: any): Promise<IUser | null> => {
+    updateById: async (id: string, updateData: Partial<IUser>): Promise<IUser | null> => {
         return User.findByIdAndUpdate(id, updateData, { new: true, lean: true }).exec();
     },
 
     deleteById: async (id: string): Promise<boolean> => {
         const result = await User.deleteOne({ _id: id }).exec();
         return result.deletedCount > 0;
-    }
+    },
 };

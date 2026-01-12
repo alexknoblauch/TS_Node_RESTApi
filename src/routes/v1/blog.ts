@@ -65,8 +65,13 @@ router.post('/',
         async(req: Request, res: Response) => {
             const { title, content, banner, status } = req.body as BlogData
             const userId = req.userId
-            if(!userId) return
-            const cleanContent = xss(content)
+            
+            if(!userId) {
+                return res.status(401).json({
+                    code: 'Unauthorized',
+                    message: 'User not authenticated'
+                })
+            }            const cleanContent = xss(content)
 
             const newEntry = await createBlog(userId, cleanContent, title, banner, status)    
 

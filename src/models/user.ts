@@ -7,8 +7,10 @@ import mongoose, {Schema, model} from 'mongoose'
  *  Custom Modules
  */
 import bcrypt from 'bcrypt'
+import { Types } from 'mongoose';
 
 export interface IUser {
+    _id: Types.ObjectId | string;  
     userName: string
     email: string,
     password: string,

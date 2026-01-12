@@ -57,9 +57,7 @@ const deleteBlog = (async function(userId: string, blogId: string): Promise<void
 
     //await cloudenary.delet(......)        //IMG nicht vergessen zu deleten
     await blogRepository.delete(userId)
-    logger.info('blog has been successfully deleted', {
-        blog
-    })
+
 })
 
 export default deleteBlog

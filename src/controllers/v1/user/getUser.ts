@@ -23,8 +23,7 @@ import type { Request, Response } from "express";
 import type { AppError } from "@/middleware/errorHandler";
 
 
-const getUser = catchAsync(async function (req: Request, res: Response) {
-    const userId = req.params.userId
+const getUser = (async function (userId:string) {
 
     const user = await User.findById(userId).select('-__v').exec()
     if(user == null){

@@ -2,7 +2,6 @@
  * Node Modules
  */
 
-import { Response, Router } from 'express'
 import { param, query, body } from 'express-validator'
 
 /**
@@ -32,8 +31,11 @@ import deleteUserById from '@/controllers/v1/user/deleteUserById'
 /**
  * Types
  */
-import { Response, Request } from 'express'
+import { Response, Request, Router } from 'express'
 import { config } from 'dotenv'
+import validateCurrentUser from '@/middleware/validate/user/validateCurrentUser'
+import validateGetUser from '@/middleware/validate/user/validateGetUser'
+import validateDeleteUserById from '@/middleware/validate/user/validateDeleteUserById'
 
 
 const router = Router()
@@ -56,58 +58,93 @@ router.get('/', authenticate, authorize(['admin']), async (req: Request, res: Re
     })
 })
 
-router.get('/current', authenticate, authorize(['admin', 'user']), getCurrentUser)
+router.get('/current', authenticate, authorize(['admin', 'user']), 
+    async(req: Request, res: Response) => {
+        const userId = req.userId
+
+        if(!userId) {
+            return res.status(401).json({
+                code: 'Unauthorized',
+                message: 'User not authenticated'
+            })
+        }
+        
+        const user =await getCurrentUser(userId)
+
+        res.status(200).json({
+            message: 'User successfully retreived',
+            status: 200,
+            user
+        })
+    }
+)
 
 router.put('/current', authenticate, authorize(['admin', 'user']),
-body('username')
-.optional()
-.trim()
-.isLength({max: 20})
-.withMessage('Username must be less than 20 chars')
-.custom(async (value) => {
-    const userExists = await User.exists({username: value})
+validateCurrentUser(),
+    async(req: Request, res: Response) => {
 
-    if(userExists){
-        throw new Error('User already exists!')
+        const userId = req.userId
+
+        
+        if(!userId) {
+            return res.status(401).json({
+                code: 'Unauthorized',
+                message: 'User not authenticated'
+            })
+        }
+        
+        const updatedData = req.body
+
+        const user = await updateCurrentUser(userId, updatedData)
+
+        res.status(200).json({
+            message: 'User successfully created',
+            status: 200,
+            user
+        })
     }
-}),
-body('email')
-.optional()
-.isLength({max: 50})
-.withMessage('Email must be shorter than 50 Characters')
-.isEmail()
-.withMessage('Must be valid Email Adress')
-.custom(async(value) => {
-    const emailExists = await User.exists({email: value})
+)
 
-    if(emailExists){
-        throw new Error('Email is already in use')
+router.delete('/current', authenticate, authorize(['admin', 'user']),
+    async(req: Request, res: Response) => {
+        const userId = req.userId
+
+        if(!userId) {
+            return res.status(401).json({
+                code: 'Unauthorized',
+                message: 'User not authenticated'
+            })
+        }
+        
+        await deleteUser(userId)
+
+        res.status(204)
     }
-}),
-body('password')
-.optional()
-.isLength({min: 8})
-.withMessage('Password min 8 Characters')
-,body('firstName')
-.optional()
-.isLength({max: 30})
-.withMessage('Firstname max 30 Characters'),
-body(['website', 'facebook', 'instagram', 'x', 'linkedin'])
-.optional()
-.isURL()
-.withMessage('Formate must be an URL')
-.isLength({max: 100})
-.withMessage('Characters not allowed succeed 100 chars') ,updateCurrentUser)
-
-router.delete('/current', authenticate, authorize(['admin', 'user']), deleteUser)
+)
 
 
 router.get('/:userId', authenticate, authorize(['admin', 'user']), 
-param('userId')
-.notEmpty().isMongoId().withMessage('ID mus be a Mongo UserId'), validationErrorMiddelware , getUser)
+validateGetUser(),
+validationErrorMiddelware , 
+    async(req: Request, res: Response) => {
+        const userId = req.params.userId
 
-router.delete('/:userId', authenticate, authorize(['admin', 'user']), 
-param('userId')
-.notEmpty().isMongoId().withMessage('ID mus be a Mongo UserId'), validationErrorMiddelware , deleteUserById)
+        if(!userId) {
+            return res.status(401).json({
+                code: 'Unauthorized',
+                message: 'User not authenticated'
+            })
+        }
+
+        const user = await getUser(userId)
+
+        
+        res.status(200).json({
+            code: 'Success',
+            message: 'User successfully retreaved.',
+            user
+        })
+    }
+)
 
 export default router
