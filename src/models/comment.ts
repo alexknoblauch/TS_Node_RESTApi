@@ -15,9 +15,9 @@ import { Schema, model, Types } from "mongoose"
  */
 
 export interface IComment {
-    _id: Types.ObjectId,  
-    blogId: Types.ObjectId,
-    userId: Types.ObjectId,
+    _id: Types.ObjectId | string,  
+    blogId: Types.ObjectId | string,
+    userId: Types.ObjectId | string,
     comment: string,
 }
 

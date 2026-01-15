@@ -1,4 +1,4 @@
-import { userRepository } from "@/repository/userRepository"
+import { userRepository } from "@/repository/userRepository/userRepository"
 import { body, ValidationChain } from "express-validator"
 
 const validateCurrentUser = function():ValidationChain[] {

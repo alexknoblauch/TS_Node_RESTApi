@@ -23,8 +23,8 @@ import logger from "@/lib/winston";
 
 import type {Request, Response } from 'express'
 import catchAsync from "@/utils/catchAsync";
-import { userRepository } from "@/repository/userRepository";
-import { blogRepository } from "@/repository/blogreposiroty";
+import { userRepository } from "@/repository/userRepository/userRepository";
+import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
  
 const deleteUser = (async (userId: string):Promise<void> => {
 

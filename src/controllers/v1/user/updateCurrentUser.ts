@@ -18,7 +18,7 @@ import catchAsync from "@/utils/catchAsync";
 
 import type { Request, Response } from 'express'
 import type { AppError } from '@/middleware/errorHandler'
-import { userRepository } from "@/repository/userRepository";
+import { userRepository } from "@/repository/userRepository/userRepository";
 
 type  IUpdatedData = Partial<{
         username: string, password: string, email: string, firstName: string,lastName: string, website: string, youtube: string, facebook: string, instagram: string, linkedin: string, x: string

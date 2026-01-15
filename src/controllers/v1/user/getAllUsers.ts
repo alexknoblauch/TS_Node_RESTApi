@@ -15,7 +15,7 @@ import catchAsync from "@/utils/catchAsync";
 /**
  * Repos
  */
-import { userRepository } from "@/repository/userRepository";
+import { userRepository } from "@/repository/userRepository/userRepository";
 /**
  * Types
  */

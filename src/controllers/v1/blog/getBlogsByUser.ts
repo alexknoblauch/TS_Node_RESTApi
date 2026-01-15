@@ -21,11 +21,12 @@ import User, { IUser } from "@/models/user";
  */
 import type { Request, Response } from 'express'
 import { FilterQuery } from "mongoose";
-import { userRepository } from "@/repository/userRepository";
-import { blogRepository } from "@/repository/blogreposiroty";
+import { userRepository } from "@/repository/userRepository/userRepository";
+import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
 
 
 const getBlogsByUser = (async function(userId: string, query: FilterQuery<IBlog> , queryId: string, skip: number, limit: number): Promise<IBlog[]>{
+    
     const user = await userRepository.findById(userId)
     if(!user) { 
         const error = new Error('User not found for role settnigs') as AppError

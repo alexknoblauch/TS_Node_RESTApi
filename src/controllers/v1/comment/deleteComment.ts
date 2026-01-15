@@ -19,12 +19,12 @@ import { AppError } from "@/middleware/errorHandler"
  */
 import { Request, Response } from "express"
 import { Types } from "mongoose"
-import { commentRepository } from "@/repository/commentRepository"
-import { blogRepository } from "@/repository/blogreposiroty"
+import { commentRepository } from "@/repository/commentRepository/commentRepository"
+import { blogRepository } from "@/repository/blogRepository/blogreposiroty"
 
 
 
-const deleteComment =  (async function (userId: string, commentId: string): Promise<void>{
+const deleteComment = (async function (userId: string, commentId: string): Promise<void>{
 
     const comment = await commentRepository.find({_id: commentId}) as any        //wegen toString()
     const user = await User.findById(userId).select('role').lean().exec()
@@ -53,7 +53,7 @@ const deleteComment =  (async function (userId: string, commentId: string): Prom
         throw error;
     }       
 
-    await commentRepository.delete(commentId)
+    await commentRepository.deleteById(commentId)
     await blogRepository.update(comment.blogId, {                      // comment.blogId = Realtion!!
         $inc: {likesCount: -1}
     })

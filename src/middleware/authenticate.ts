@@ -16,7 +16,7 @@ import logger from "@/lib/winston";
 
 import type { Request, Response, NextFunction } from 'express'
 import type { Types } from 'mongoose'
-import { userRepository } from "@/repository/userRepository";
+import { userRepository } from "@/repository/userRepository/userRepository";
 
 
 export default async function authenticate(req: Request, res: Response, next: NextFunction): Promise<void> {

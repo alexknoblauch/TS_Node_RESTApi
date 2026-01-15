@@ -20,7 +20,7 @@ import Blog from '@/models/blog'
  */
 import type { IBanner, IBlog } from '@/models/blog'
 import type { AppError } from '@/middleware/errorHandler'
-import { blogRepository } from '@/repository/blogreposiroty'
+import { blogRepository } from '@/repository/blogRepository/blogreposiroty'
 
 
 const createBlog = (async function(userId: string, cleanContent:string, title: string, banner: IBanner, status: 'draft' | 'publicated'): Promise<IBlog>{

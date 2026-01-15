@@ -6,7 +6,7 @@ import  { IBlog } from "@/models/blog";
 /**
  * Repos
  */
-import { blogRepository } from "@/repository/blogreposiroty";
+import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
 
 /**
  * Types

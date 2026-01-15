@@ -19,8 +19,8 @@ import { AppError } from "@/middleware/errorHandler"
  */
 import { Request, Response } from "express"
 import { Types } from "mongoose"
-import { blogRepository } from "@/repository/blogreposiroty"
-import { commentRepository } from "@/repository/commentRepository"
+import { blogRepository } from "@/repository/blogRepository/blogreposiroty"
+import { commentRepository } from "@/repository/commentRepository/commentRepository"
 
 const commentBlog =  (async function (userId: string, blogId: string, comment: string): Promise<IComment>{
 

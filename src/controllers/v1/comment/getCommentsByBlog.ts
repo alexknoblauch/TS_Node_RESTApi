@@ -18,8 +18,8 @@ import { AppError } from "@/middleware/errorHandler"
  * Types
  */
 import { Request, Response } from "express"
-import { blogRepository } from "@/repository/blogreposiroty"
-import { commentRepository } from "@/repository/commentRepository"
+import { blogRepository } from "@/repository/blogRepository/blogreposiroty"
+import { commentRepository } from "@/repository/commentRepository/commentRepository"
 
 const getCommentsByBlog =  (async function (blogId: string): Promise<IComment[]>{
 

@@ -16,7 +16,8 @@ export const commentRepository = {
         return await query
     },
 
-    delete: async function(id: string):Promise<boolean> {
-        return await Comment.deleteOne({_id: id})
+    deleteById: async function(id: string):Promise<boolean> {
+        const result = await Comment.deleteOne({ _id: id })
+        return result.deletedCount > 0    
     }
 }

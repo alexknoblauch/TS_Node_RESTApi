@@ -22,8 +22,8 @@ import User from '@/models/user'
 import type { Request, Response } from 'express'
 import type { IBanner, IBlog } from '@/models/blog'
 import type { AppError } from '@/middleware/errorHandler'
-import { userRepository } from '@/repository/userRepository'
-import { blogRepository } from '@/repository/blogreposiroty'
+import { userRepository } from '@/repository/userRepository/userRepository'
+import { blogRepository } from '@/repository/blogRepository/blogreposiroty'
 /**
  * Purify the blog content
  */
