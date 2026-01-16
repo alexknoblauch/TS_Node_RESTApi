@@ -27,6 +27,23 @@ export interface IUser {
     } 
 };
 
+export interface SafeUser {
+    _id: Types.ObjectId | string;
+    userName: string;
+    email: string;
+    role: 'admin' | 'user';
+    firstName?: string;
+    lastName?: string;
+    socialLinks?: {
+        website?: string;
+        youtube?: string;
+        facebook?: string;
+        linkedin?: string;
+        x?: string;
+        instagram?: string;
+    };
+}
+
 const UserSchema = new Schema<IUser>({
     userName: {
         type: String,

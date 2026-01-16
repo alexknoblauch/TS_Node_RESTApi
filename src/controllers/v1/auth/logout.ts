@@ -16,18 +16,15 @@ import Token from '@/models/token'
  */
 
 import type { Request, Response } from 'express'
+import authService from "@/services/auth.service";
+import { AppError } from "@/middleware/errorHandler";
 
 
-const logout = catchAsync(async function(req: Request, res: Response): Promise<void>{
-    const refreshToken = req.cookies.refreshToken as String
+const logout = (async function(req: Request, res: Response): Promise<void>{
+    const refreshToken = req.cookies.refreshToken
+    const userId = req.userId as string
 
-    if (refreshToken){
-        Token.deleteOne({token: refreshToken})
-    }
-    logger.info('User refresh Token deleted successfully', {
-        userId: req.userId,
-        token: refreshToken
-    })
+    await authService.logout(refreshToken, userId)
 
     res.clearCookie('refreshToken', {
         httpOnly: true,
@@ -35,11 +32,7 @@ const logout = catchAsync(async function(req: Request, res: Response): Promise<v
         sameSite: 'strict'
     })
     
-    res.status(204)
-
-    logger.info('User logged out successfully', {
-        userId: req.userId
-    })
+    res.status(204).send()
 })
 
 export default logout

@@ -2,13 +2,14 @@
  * Custom Modules
  */
 import authService from "@/services/auth.service";
+import catchAsync from "@/utils/catchAsync";
 /**
  *  Types
  */
 
 import type { Request, Response, NextFunction } from 'express'
 
-const login = (async(req: Request, res: Response) => {
+const login = catchAsync(async(req: Request, res: Response) => {
             const credentials = req.body                           // Achtung: kein destructoring
             const {accessToken, refreshToken} = await authService.login(credentials) 
 

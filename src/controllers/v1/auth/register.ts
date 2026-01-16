@@ -25,12 +25,10 @@ import authService from '@/services/auth.service'
 
 type UserData = Pick<IUser, 'email' | 'password' | 'role'>
 
-const register = (async (req: Request, res: Response): Promise<void> => {
+const register = catchAsync(async (req: Request, res: Response): Promise<void> => {
     const credentials = req.body as UserData
 
-
-    const {user, refreshToken} = await authService.register(credentials)
-
+    const {user, accessToken, refreshToken} = await authService.register(credentials)
                 
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,

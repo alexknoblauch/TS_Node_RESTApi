@@ -25,7 +25,7 @@ import { Types } from 'mongoose'
 import authService from "@/services/auth.service";
 
 
-export const refreshToken = ( async (req: Request, res: Response) => {
+export const refreshToken = catchAsync(async (req: Request, res: Response) => {
     const { refreshToken } = req.cookies
 
     if (!refreshToken) {
