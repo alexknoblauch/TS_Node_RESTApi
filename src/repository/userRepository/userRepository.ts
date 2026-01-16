@@ -7,6 +7,10 @@ export const userRepository = {
         return await User.findOne({ email }).lean().exec();
     },
 
+    findByEmailForLogin: async (email: string): Promise<IUser | null> => {
+        return await User.findOne({ email }).select('+password').lean().exec();        // Alle Felder + email
+    },
+
     find: async (filter: any, options?: {
             limit?: number;
             skip?: number;
