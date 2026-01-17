@@ -8,7 +8,6 @@ import catchAsync from "@/utils/catchAsync"
 import type { Request, Response } from 'express'
 import blogService from '@/services/blog.service'
 
-
 const deleteBlog = catchAsync(async(req: Request, res: Response) => {
     const userId = req.userId as string
     const blogId = req.params.blogId 

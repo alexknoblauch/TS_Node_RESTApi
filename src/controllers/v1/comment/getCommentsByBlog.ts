@@ -1,45 +1,21 @@
 /**
- * Node Modules
- */
-import Blog from "@/models/blog"
-import Comment, { IComment } from "@/models/comment"
-import xss from 'xss'
-
-/**
- * Custom Modules
-*/
-import catchAsync from "@/utils/catchAsync"
-import logger from "@/lib/winston"
-/**
- * Middleware
- */
-import { AppError } from "@/middleware/errorHandler"
-/**
  * Types
  */
 import { Request, Response } from "express"
-import { blogRepository } from "@/repository/blogRepository/blogreposiroty"
-import { commentRepository } from "@/repository/commentRepository/commentRepository"
-
-const getCommentsByBlog =  (async function (blogId: string): Promise<IComment[]>{
-
-    const blog = await blogRepository.findById(blogId)
-
-    if(!blog ){
-        logger.error('Blog not found')
-        const error = new Error('Blog not found') as AppError;
-        error.statusCode = 404;
-        error.code = 'BlogNotFound';
-        throw error;
-    }
-
-    const allComments = await commentRepository.find({_id: blogId})
-
- 
-    logger.info('Comments successfully retreaved')
+/**
+ * Service
+ */
+import commentService from "@/services/comment.service"
 
 
-    return allComments
-})
+const getCommentsByBlog =  async(req: Request, res: Response) => {
+    const { blogId } = req.params                               
+
+    const allComments = await commentService.getCommentsByBlog(blogId)
+
+    res.status(200).json({
+        allComments
+    })
+} 
 
 export default getCommentsByBlog

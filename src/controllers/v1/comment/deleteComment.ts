@@ -21,44 +21,24 @@ import { Request, Response } from "express"
 import { Types } from "mongoose"
 import { commentRepository } from "@/repository/commentRepository/commentRepository"
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty"
+import commentService from "@/services/comment.service"
 
 
 
-const deleteComment = (async function (userId: string, commentId: string): Promise<void>{
+const deleteComment = async(req: Request, res: Response) => {
+        const userId = req.userId 
+                    
+        if(!userId) {
+            return res.status(401).json({
+                code: 'Unauthorized',
+                message: 'User not authenticated'
+            })
+        }    
+                                         
+        const { commentId } = req.params                               
+        await commentService.deleteComment(userId, commentId)
 
-    const comment = await commentRepository.find({_id: commentId}) as any        //wegen toString()
-    const user = await User.findById(userId).select('role').lean().exec()
-
-    if(!comment){
-        logger.error('Comment not found')
-        const error = new Error('Comment not found') as AppError;
-        error.statusCode = 404;
-        error.code = 'CommentNotFound';
-        throw error;
+        res.status(201)
     }
-
-    if(!user){
-        logger.error('User not found')
-        const error = new Error('User not found') as AppError;
-        error.statusCode = 404;
-        error.code = 'UserNotFound';
-        throw error;
-    }
-
-    if(comment.userId.toString() !== userId && user.role !== 'admin' ) {
-        logger.error('User tried to delete a comment without permission')
-        const error = new Error('User tried to delete a comment without permission') as AppError;
-        error.statusCode = 403;
-        error.code = 'UserNotFound';
-        throw error;
-    }       
-
-    await commentRepository.deleteById(commentId)
-    await blogRepository.update(comment.blogId, {                      // comment.blogId = Realtion!!
-        $inc: {likesCount: -1}
-    })
-
-    logger.info('Comment successfully deleted')
-})
 
 export default deleteComment

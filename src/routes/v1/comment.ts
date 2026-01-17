@@ -33,26 +33,7 @@ router.post('/blogId/:blogId',
     authorize(['user', 'admin']),
     validateCreateComment(),
     validationErrorMiddelware,
-        async(req: Request, res: Response) => {
-            const userId = req.userId                                   // params = string interference
-            const { blogId } = req.params                               // das auch string interference
-            
-            if(!userId) {
-                return res.status(401).json({
-                    code: 'Unauthorized',
-                    message: 'User not authenticated'
-                })
-            }                             
-            const { comment } = req.body as CommentData                 // Wichtig Typisieren!
-            const createdComment = await commentBlog(userId, blogId, comment)
-
-            res.status(201).json({
-                blogId,                     
-                userId,                     
-                createdComment
-            })
-        }
-    
+    commentBlog
 )
 
 router.get('/blogId/:blogId',
@@ -60,16 +41,7 @@ router.get('/blogId/:blogId',
     authorize(['user', 'admin']),
     calidateCreateComment(),
     validationErrorMiddelware,
-        async(req: Request, res: Response) => {
-
-            const { blogId } = req.params                               
-
-            const allComments = await getCommentsByBlog(blogId)
-
-            res.status(200).json({
-                allComments
-            })
-        } 
+    getCommentsByBlog
     
 )
 
