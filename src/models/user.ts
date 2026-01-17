@@ -107,6 +107,21 @@ const UserSchema = new Schema<IUser>({
     }
 }, { timestamps: true })
 
+UserSchema.methods.toJSON = function() {
+    const user = this.toObject();
+    
+    // Entferne sensitive Felder für JSON Responses
+    delete user.password;
+    delete user.__v; // Mongoose interne Version
+    delete user.updatedAt; // Optional, wenn nicht benötigt
+    
+    // Optional: _id → id umbenennen
+    user.id = user._id;
+    delete user._id;
+    
+    return user;
+};
+
 
 UserSchema.pre('save', async function(next){
     if (!this.isModified('password')) return next();       //MONGOOSE: return zuerst! sonst wird await ausgeführt

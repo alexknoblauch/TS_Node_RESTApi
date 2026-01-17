@@ -88,31 +88,31 @@ const authService = {
 
 
     async refreshToken (refreshToken: string): Promise<RefreshTokenResult> {
-        const tokenExists = await tokenRepository.findOne(refreshToken)
+        const tokenExists = await tokenRepository.findOneWithToken(refreshToken)
 
         if(!tokenExists){
-            const error = new Error(`No Token found with token ${refreshToken}`) as AppError;
+            const error = new Error(`'Invalid or expired authentication token`) as AppError;
             error.statusCode = 404;
             error.code = 'TokenNotFound';
             throw error;
         }
 
         if (tokenExists.revoked) {
-            const error = new Error('Refresh token revoked') as AppError;
+            const error = new Error('Invalid or expired authentication token') as AppError;
             error.statusCode = 401;
             error.code = 'TokenRevoked';
             throw error;
         }
 
         if(!tokenExists.expiresAt){
-            const error = new Error(`No Token found with token ${refreshToken}`) as AppError;
+            const error = new Error('Invalid or expired authentication token') as AppError;
             error.statusCode = 404;
             error.code = 'TokenNotFound';
             throw error;
         }
         
         if (tokenExists.expiresAt < new Date()) {
-            const error = new Error('Refresh token expired') as AppError;
+            const error = new Error('Invalid or expired authentication token') as AppError;
             error.statusCode = 401;
             error.code = 'TokenExpired';
             throw error;
@@ -141,6 +141,22 @@ const authService = {
         await tokenRepository.create(refreshToken, user._id.toString())
 
         return {user, accessToken, refreshToken}
+    },
+
+    async logout (refreshToken: string, userId: string):Promise<void> {
+        if (refreshToken){
+            tokenRepository.delete(refreshToken)
+        }
+        
+        logger.info('User refresh Token deleted successfully', {
+            token: refreshToken,
+            userId
+
+        })
+
+        logger.info('User logged out successfully', {
+            userId        
+        })
     }
 }
 

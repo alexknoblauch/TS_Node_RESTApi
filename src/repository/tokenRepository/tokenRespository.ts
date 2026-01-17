@@ -10,7 +10,8 @@ const tokenRepository =   {
     },
 
     delete: async (refreshToken: string):Promise<boolean> => {
-        return await Token.deleteOne({token: refreshToken}) 
+        const result = await Token.deleteOne({token: refreshToken}) 
+        return result.deletedCount > 0
     }
 }
 

@@ -1,5 +1,5 @@
 // repositories/userRepository.ts
-import Blog, { IBlog } from '@/models/blog';
+import Blog, { BlogResponse, IBlog } from '@/models/blog';
 
 /**
  * Types
@@ -10,6 +10,17 @@ import { FilterQuery } from 'mongoose';                     //excluded kritische
 export const blogRepository = {
     findById: async(id: string):Promise<IBlog | null> => {
         return await Blog.findById(id).lean().exec()
+    },
+
+    find: async(queryObj: FilterQuery<BlogResponse>, options: {populate?: string, sort?: string, skip?: number, limit?: number}):Promise<IBlog[] | null> => {
+        let query = Blog.find({_id: queryObj.id})
+
+        if(options.populate){query = query.populate(options.populate)}
+        if(options.sort){ query = query.sort(options.sort)}
+        if(options.skip){ query = query.skip(options.skip)}
+        if(options.limit){ query = query.limit(options.limit)}
+
+        return query.lean().exec()
     },
 
     findBySlug: async(slug: string, populate?: string):Promise<IBlog[] | null> => {

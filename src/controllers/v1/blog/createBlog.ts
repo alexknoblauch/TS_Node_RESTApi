@@ -18,22 +18,27 @@ import Blog from '@/models/blog'
 /**
  * Types
  */
-import type { IBanner, IBlog } from '@/models/blog'
+import type { BlogData, IBanner, IBlog } from '@/models/blog'
 import type { AppError } from '@/middleware/errorHandler'
 import { blogRepository } from '@/repository/blogRepository/blogreposiroty'
+import { Request, Response } from 'express'
+import blogService from '@/services/blog.service'
 
 
-const createBlog = (async function(userId: string, cleanContent:string, title: string, banner: IBanner, status: 'draft' | 'publicated'): Promise<IBlog>{
-    const newEntry = await blogRepository.create({ title, content: cleanContent, banner, status, author: userId })
+const createBlog = catchAsync(async(req: Request, res: Response) => {
+    const { title, content, banner, status } = req.body as BlogData
+    const userId = req.userId as string
 
-    if(newEntry == null){
-        const error = new Error('create new Blog not worked') as AppError;
-        error.statusCode = 400;
-        error.code = 'BlogNotCreateds';
-        throw error;
-    }
-    return newEntry
+    const credentials = {author: userId, title, content, banner, status}
 
-})
+    const user = await blogService.createBlog(credentials) 
+    
+    res.status(200).json({
+        message: 'user successfully created',
+        success: true,
+        user
+    })
+
+})  
 
 export default createBlog

@@ -20,7 +20,7 @@ import authService from "@/services/auth.service";
 import { AppError } from "@/middleware/errorHandler";
 
 
-const logout = (async function(req: Request, res: Response): Promise<void>{
+const logout = catchAsync(async function(req: Request, res: Response): Promise<void>{
     const refreshToken = req.cookies.refreshToken
     const userId = req.userId as string
 

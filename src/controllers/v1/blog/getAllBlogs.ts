@@ -1,12 +1,15 @@
 /**
  * Models
  */
-import  { IBlog } from "@/models/blog";
+import  { BlogResponse, IBlog } from "@/models/blog";
 
 /**
  * Repos
  */
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
+import blogService from "@/services/blog.service";
+import catchAsync from "@/utils/catchAsync";
+import { Request, Response } from "express";
 
 /**
  * Types
@@ -14,12 +17,28 @@ import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
 import { FilterQuery } from "mongoose";
 
 
-const getAllBlogs = (async function(query: FilterQuery<IBlog>, skip: number, limit: number): Promise<IBlog[]>{
-        const blogs = await blogRepository.find(query, {skip, limit})
+const getAllBlogs = catchAsync (async(req: Request, res: Response):Promise<void> => {
+            const limit = Number(req.query) || 10
+            const skip = Number(req.query) || 0
+            const query: FilterQuery<IBlog> = {}
+            
+            const options = {
+                query,
+                skip,
+                limit
+            }
 
-        if(!blogs || blogs.length === 0) console.log('No Blogs found')
+            if (req.userRole === 'user') {
+                query.status = 'published'
+            }
+            
+            const data = await blogService.getAllBlogs(query, options)
 
-        return blogs
-})
+            res.status(200).json({
+                code: 'ApiSuccess',
+                message: 'Blogs successfully retrieved',
+                blogs: data
+            })
+        })
 
 export default getAllBlogs

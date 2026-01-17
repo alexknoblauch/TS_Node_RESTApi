@@ -24,6 +24,7 @@ import type { IBlog } from '@/models/blog'
 import type { AppError } from '@/middleware/errorHandler'
 import { userRepository } from '@/repository/userRepository/userRepository'
 import { blogRepository } from '@/repository/blogRepository/blogreposiroty'
+import blogService from '@/services/blog.service'
 /**
  * Purify the blog content
  */
@@ -31,42 +32,13 @@ import { blogRepository } from '@/repository/blogRepository/blogreposiroty'
 
 type BlogData = Pick<IBlog, 'title' | 'content' | 'banner' | 'status' | 'author' >
 
-const deleteBlog = (async function(userId: string, blogId: string): Promise<void>{
+const deleteBlog = catchAsync(async(req: Request, res: Response) => {
+            const userId = req.userId as string
+            const blogId = req.params.blogId
 
-    const user = await userRepository.findById(userId)
+            await blogService.deleteBlog(userId, blogId)
 
-    if(!user){
-        const error = new Error(`No User found with id ${userId}`) as AppError;
-        error.statusCode = 400;
-        error.code = 'UserNotFound';
-        throw error;
-    }
-
-    const blog = await blogRepository.findById(blogId)
-
-    if(!blog){
-        const error = new Error(`No Blog found with id ${blogId}`) as AppError;
-        error.statusCode = 400;
-        error.code = 'BlogNotFound';
-        throw error;
-    }
-
-    if(blog?.author !== userId && user?.role !== 'admin'){
-        logger.warn('someone tried to delete blog without acceess',{
-            blog,
-            userId
+            res.sendStatus(204)
         })
-
-        const error = new Error(`Pessmissions for delte blog denies`) as AppError;
-        error.statusCode = 400;
-        error.code = 'AccessError';
-        throw error;
-    }
-
-    //await cloudenary.delet(......)        //IMG nicht vergessen zu deleten
-    
-    await blogRepository.deleteById(userId)
-
-})
 
 export default deleteBlog

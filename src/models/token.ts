@@ -16,7 +16,8 @@ export interface IToken {
 const tokenSchema = new Schema({
     token: {
         type: String,
-        required: true
+        required: true,
+        select: false
     },
     userId: {
         type: Types.ObjectId,

@@ -15,7 +15,7 @@ export type IBanner = {
 }
 
 export interface IBlog {
-    _id: Types.ObjectId | string;  
+    _id: Types.ObjectId;  
     title: string,
     slug: string,
     content: string,
@@ -26,6 +26,24 @@ export interface IBlog {
         height: number
     }
     author: Types.ObjectId | string,                    // | string hinzufügen für clean architecture
+    viewsCount: number,
+    likesCount: number
+    commentsCount: number,
+    status: 'draft' | 'publicated'
+}
+
+export interface BlogResponse {
+    _id: string;  
+    title: string,
+    slug: string,
+    content: string,
+    banner: {
+        publicId: string,
+        url: string
+        width: number,
+        height: number
+    }
+    author: string,                    // | string hinzufügen für clean architecture
     viewsCount: number,
     likesCount: number
     commentsCount: number,

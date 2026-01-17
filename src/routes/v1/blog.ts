@@ -62,49 +62,15 @@ router.post('/',
     //body('banner_image').notEmpty().withMessage('Banner Image is required'),
     validateCreateBlog(), 
     validationErrorMiddelware,
-        async(req: Request, res: Response) => {
-            const { title, content, banner, status } = req.body as BlogData
-            const userId = req.userId
-            
-            if(!userId) {
-                return res.status(401).json({
-                    code: 'Unauthorized',
-                    message: 'User not authenticated'
-                })
-            }            const cleanContent = xss(content)
-
-            const newEntry = await createBlog(userId, cleanContent, title, banner, status)    
-
-            res.status(201).json({
-                code: 'BlogCreated',
-                message: 'Successfully new Blog created',
-                newEntry
-            })
-        }
-    )
+    createBlog
+)
 
 
 router.get('/', 
     authenticate, 
     authorize(['admin', 'user']), 
     validationErrorMiddelware,
-        async(req: Request, res: Response):Promise<void> => {
-            const limit = Number(req.query.limit as string) || 10
-            const skip = Number(req.query.offset as string) || 0
-            const query: FilterQuery<IBlog> = {}
-
-            if (req.userRole === 'user') {
-                query.status = 'published'
-            }
-            
-            const data = await getAllBlogs(query, skip, limit)
-
-            res.status(200).json({
-                code: 'ApiSuccess',
-                message: 'Blogs successfully retrieved',
-                blogs: data
-            })
-        }
+        getAllBlogs
     )                           //COPY
 
 
@@ -193,21 +159,7 @@ router.delete('/:blogId',
     authenticate,
     authorize(['admin']),                       //kein body, kein validator nur ID params
     validationErrorMiddelware,
-        async(req: Request, res: Response) => {
-            const userId = req.userId
-            const blogId = req.params.blogId
-
-            if(!userId) {
-                return res.status(401).json({
-                    code: 'Unauthorized',
-                    message: 'User not authenticated'
-                })
-            }
-
-            await deleteBlog(userId, blogId)
-
-            res.sendStatus(204)
-        }
+        
     
 )
 

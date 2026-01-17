@@ -37,40 +37,20 @@ const router = Router()
 router.post('/register', 
     validateAuthRegister(),
     validationErrorMiddelware,
-        async(req: Request, res: Response) => {
-            const {email} = req.body as UserData
-
-        const {} = await register(email)
-
-                    
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // ← In Development = false
-            sameSite: 'lax', // ← 'strict' kann auch Probleme machen
-            maxAge: 7 * 24 * 60 * 60 * 1000 // ← Wichtig: Expiry setzen!
-        })
-        
-        res.status(201).json({
-            user: {
-                username: user.userName,
-                email: user.email,
-                role: user.role
-            },
-            accessToken
-        })
-        }
+    register
     )
 
 router.post('/login',
     validateAuthLogin(),
     validationErrorMiddelware,
     login
-    ) 
+) 
 
 router.post('/refresh-token',
     validateAuthRefreshToken(),
     validationErrorMiddelware, 
-refreshToken)
+    refreshToken
+)
 
 router.post('/logout',authenticate,  logout)
 
