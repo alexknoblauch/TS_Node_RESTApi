@@ -1,55 +1,46 @@
 /**
- * Node Modules
- */
-
-/**
  * Custom Models
  */
-import logger from "@/lib/winston";
-import { AppError } from "@/middleware/errorHandler";
+
+import blogService from "@/services/blog.service";
+import catchAsync from "@/utils/catchAsync";
 
 /**
- * Models
+ * Node Modules
  */
-import Blog, { IBlog } from "@/models/blog";
-import catchAsync from "@/utils/catchAsync";
-import config  from '@/config/index'
-import User, { IUser } from "@/models/user";
-
+import type { Request, Response } from 'express'
 /**
  * Types
  */
-import type { Request, Response } from 'express'
-import { FilterQuery } from "mongoose";
-import { userRepository } from "@/repository/userRepository/userRepository";
-import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
+
+interface QueryType {
+  status?: 'published' | 'draft';
+}
 
 
-const getBlogsByUser = (async function(userId: string, query: FilterQuery<IBlog> , queryId: string, skip: number, limit: number): Promise<IBlog[]>{
-    
-    const user = await userRepository.findById(userId)
-    if(!user) { 
-        const error = new Error('User not found for role settnigs') as AppError
-        error.statusCode = 404                                                          //Rolle vergeben
-        error.code = 'ApiError'
-        throw error
-    }
+const getBlogsByUser = catchAsync(async(req: Request, res: Response) => {
+        const limit = Number(req.query.limit as string) || 10           // limit sort ect ist IMMER req.query
+        const skip = Number(req.query.offset as string) || 0
+        const userId = req.userId
+        
+        if(!userId) {
+            return res.status(401).json({
+                code: 'Unauthorized',
+                message: 'User not authenticated'
+            })
+        }
 
-    if(user.role === 'user'){
-        query.status = 'published'
-    }
-    
-    const data = await blogRepository.find({author: queryId, ...query}, {skip, limit})
+        const queryId = req.params.id             // user/:userId
+        const query: QueryType = {} 
 
-    if(!data || data.length === 0){
-        const error = new Error('No Blogs found for user') as AppError
-        error.statusCode = 404
-        error.code = 'ApiError'
-        throw error
-    }
+        const data = await blogService.getBlogsByUser(userId, query, queryId, skip, limit)
 
-    return data
-
-})
+        res.status(200).json({
+            code: 'ApiSuccess',
+            message: 'Blogs of user successfully retrieved',
+            blogs: data
+        })
+        }
+    )
 
 export default getBlogsByUser

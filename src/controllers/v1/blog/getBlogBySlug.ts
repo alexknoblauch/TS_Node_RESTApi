@@ -1,60 +1,33 @@
 /**
- * Node Modules
- */
-
-/**
- * Custom Models
- */
-import logger from "@/lib/winston";
-import { AppError } from "@/middleware/errorHandler";
-
-/**
- * Models
- */
-import Blog, { IBlog } from "@/models/blog";
-import catchAsync from "@/utils/catchAsync";
-import config  from '@/config/index'
-import User from "@/models/user";
-
-/**
  * Types
  */
 import type { Request, Response } from 'express'
-import blog from "@/models/blog";
-import { userRepository } from "@/repository/userRepository/userRepository";
-import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
+/**
+ * Services
+ */
+
+import blogService from "@/services/blog.service";
 
 
 
-const getBlogBySlug = (async function(userId: string, slug: string): Promise<IBlog[] | null>{
+const getBlogBySlug = (async(req: Request, res: Response) => {
+            const userId = req.userId 
 
-    const user = await userRepository.findById(userId)
-    if(!user) { 
-        const error = new Error('User not found for role settnigs') as AppError
-        error.statusCode = 404                                                  //Rolle vergeben
-        error.code = 'ApiError'
-        throw error
-    } 
-    
-    const data = await blogRepository.findBySlug(slug)
-    
-    data?.map(data => {
-        if(user.role === 'user'&& data?.status === 'draft'){
+            if(!userId) {
+                return res.status(401).json({
+                    code: 'Unauthorized',
+                    message: 'User not authenticated'
+                })
+            }
+            const slug = req.params.slug             // /:slug
+            const data = await blogService.getBlogBySlug(userId, slug)
 
-            logger.warn('A User tried to access Draft Blog')
-            throw new Error('User can not access Draft Blog')
+            res.status(200).json({
+                code: 'ApiSuccess',
+                message: 'Blog for slug successfully retrieved',
+                blogs: data
+            })
         }
-        
-
-        if(!data){
-            const error = new Error('No Blogs found for slug') as AppError
-            error.statusCode = 404
-            error.code = 'ApiError'
-            throw error
-        }
-    })
-
-    return data
-})
+    )
 
 export default getBlogBySlug

@@ -25,6 +25,7 @@ import { Types } from "mongoose";
 import { IUser, SafeUser } from "@/models/user";
 import { config } from "dotenv";
 import { genUsername } from "@/utils";
+import createTokenError from "@/utils/tokenError";
 
 
 interface LoginCredentials {
@@ -90,39 +91,15 @@ const authService = {
     async refreshToken (refreshToken: string): Promise<RefreshTokenResult> {
         const tokenExists = await tokenRepository.findOneWithToken(refreshToken)
 
-        if(!tokenExists){
-            const error = new Error(`'Invalid or expired authentication token`) as AppError;
-            error.statusCode = 404;
-            error.code = 'TokenNotFound';
-            throw error;
-        }
-
-        if (tokenExists.revoked) {
-            const error = new Error('Invalid or expired authentication token') as AppError;
-            error.statusCode = 401;
-            error.code = 'TokenRevoked';
-            throw error;
-        }
-
-        if(!tokenExists.expiresAt){
-            const error = new Error('Invalid or expired authentication token') as AppError;
-            error.statusCode = 404;
-            error.code = 'TokenNotFound';
-            throw error;
-        }
-        
-        if (tokenExists.expiresAt < new Date()) {
-            const error = new Error('Invalid or expired authentication token') as AppError;
-            error.statusCode = 401;
-            error.code = 'TokenExpired';
-            throw error;
-        }
+        if (!tokenExists) throw createTokenError('TokenNotFound', 401); 
+        if (tokenExists.revoked) throw createTokenError('TokenRevoked');
+        if (!tokenExists.expiresAt) throw createTokenError('TokenInvalid');
+        if (tokenExists.expiresAt < new Date()) throw createTokenError('TokenExpired');
 
         const jwtPayload = verifyRefreshToken(refreshToken) as { userId: Types.ObjectId }
         const accessToken = generateAccessToken(jwtPayload.userId.toString())
 
         return {accessToken}
-
     },
 
     async register (credentials: RegisterCredentials): Promise<RegisterResult> {
