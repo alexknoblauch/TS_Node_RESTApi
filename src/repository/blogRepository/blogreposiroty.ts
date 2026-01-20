@@ -1,5 +1,5 @@
 // repositories/userRepository.ts
-import Blog, { BlogResponse, IBlog } from '@/models/blog';
+import Blog, { BlogBasic, BlogLean, IBlog } from '@/models/blog';
 
 /**
  * Types
@@ -12,7 +12,7 @@ export const blogRepository = {
         return await Blog.findById(id).lean().exec()
     },
 
-    find: async(queryObj: FilterQuery<BlogResponse>, options: {populate?: string, sort?: string, skip?: number, limit?: number}):Promise<IBlog[] | null> => {
+    find: async(queryObj: FilterQuery<BlogLean>, options: {populate?: string, sort?: string, skip?: number, limit?: number}):Promise<IBlog[]> => {
         let query = Blog.find({_id: queryObj.id})
 
         if(options.populate){query = query.populate(options.populate)}
@@ -23,7 +23,7 @@ export const blogRepository = {
         return query.lean().exec()
     },
 
-    findBySlug: async(slug: string, populate?: string):Promise<IBlog[] | null> => {
+    findBySlug: async(slug: string, populate?: string):Promise<BlogBasic[] | null> => {
         let query = Blog.find({slug: slug})
 
         if(populate){

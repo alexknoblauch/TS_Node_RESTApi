@@ -4,17 +4,8 @@
 import authenticate from "@/middleware/authenticate";
 import authorize from "@/middleware/authorize";
 import validationErrorMiddelware from "@/middleware/validationError";
-import { Request, Response, Router } from "express";
-import { param, body } from "express-validator"
-/**
- * Custom Modules
- */
-/**
- * Middleware
- */
-/**
- * Types
- */
+import { Router } from "express";
+
 /**
  * Controllers
  */
@@ -50,21 +41,7 @@ router.get('/:commentId',
     authorize(['user', 'admin']),
     validateDeleteComment(),
     validationErrorMiddelware,
-        async(req: Request, res: Response) => {
-        const userId = req.userId 
-                    
-        if(!userId) {
-            return res.status(401).json({
-                code: 'Unauthorized',
-                message: 'User not authenticated'
-            })
-        }    
-                                         
-        const { commentId } = req.params                               
-        await deleteComment(userId, commentId)
-
-        res.status(201)
-    }
+    deleteComment
 )
 
 export default router

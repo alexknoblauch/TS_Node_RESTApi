@@ -31,12 +31,12 @@ const createBlog = catchAsync(async(req: Request, res: Response) => {
 
     const credentials = {author: userId, title, content, banner, status}
 
-    const user = await blogService.createBlog(credentials) 
+    const blog = await blogService.createBlog(credentials) 
     
     res.status(200).json({
         message: 'user successfully created',
         success: true,
-        user
+        blog
     })
 
 })  

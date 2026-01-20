@@ -25,7 +25,7 @@ import commentService from "@/services/comment.service"
 
 
 
-const deleteComment = async(req: Request, res: Response) => {
+const deleteComment = catchAsync(async(req: Request, res: Response) => {
         const userId = req.userId 
                     
         if(!userId) {
@@ -39,6 +39,6 @@ const deleteComment = async(req: Request, res: Response) => {
         await commentService.deleteComment(userId, commentId)
 
         res.status(201)
-    }
+    })
 
 export default deleteComment

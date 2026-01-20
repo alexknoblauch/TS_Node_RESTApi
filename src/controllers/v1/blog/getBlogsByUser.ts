@@ -31,9 +31,10 @@ const getBlogsByUser = catchAsync(async(req: Request, res: Response) => {
         }
 
         const queryId = req.params.id             // user/:userId
+        const options = { limit, skip, queryId }
         const query: QueryType = {} 
 
-        const data = await blogService.getBlogsByUser(userId, query, queryId, skip, limit)
+        const data = await blogService.getBlogsByUser(userId, query, options)
 
         res.status(200).json({
             code: 'ApiSuccess',

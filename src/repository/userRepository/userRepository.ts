@@ -29,7 +29,7 @@ export const userRepository = {
             return query.lean().exec();
         },
 
-    findById: async(id: string):Promise<IUser | null> => {
+    findById: async(id: string):Promise<Partial<IUser> | null> => {
         return await User.findById(id)
     },
 

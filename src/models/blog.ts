@@ -32,8 +32,8 @@ export interface IBlog {
     status: 'draft' | 'publicated'
 }
 
-export interface BlogResponse {
-    _id: string;  
+export interface BlogLean {
+    _id: Types.ObjectId | string;  
     title: string,
     slug: string,
     content: string,
@@ -43,10 +43,19 @@ export interface BlogResponse {
         width: number,
         height: number
     }
-    author: string,                    // | string hinzufügen für clean architecture
+    author: string | Types.ObjectId,                    // | string hinzufügen für clean architecture
     viewsCount: number,
     likesCount: number
     commentsCount: number,
+    status: 'draft' | 'publicated'
+}
+
+export interface BlogBasic {
+    _id: Types.ObjectId | string;  
+    title: string,
+    slug: string,
+    content: string,
+    author: string | Types.ObjectId,                    // | string hinzufügen für clean architecture
     status: 'draft' | 'publicated'
 }
 

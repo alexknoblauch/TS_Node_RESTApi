@@ -4,6 +4,7 @@ jest.mock('@/repository/blogRepository')
 import { userRepository } from '@/repository/userRepository/userRepository'
 import { blogRepository } from '@/repository/blogRepository/blogreposiroty'
 import deleteBlog from '../deleteBlog'
+import blogService from '@/services/blog.service'
 
 describe('deleteBlog', () => {
   it('löscht Blog, wenn User der Autor ist', async () => {
@@ -16,12 +17,13 @@ describe('deleteBlog', () => {
       _id: 'blog123',
       author: 'user123'
     })
+    
 
     (blogRepository.deleteById as jest.Mock).mockResolvedValue(true)
 
-    const result = await deleteBlog('user123', 'blog123')
+    const result = await blogService.deleteBlog('user123', 'blog123')
 
-    // Assert
+    // REPO calls Assert
     expect(userRepository.findById).toHaveBeenCalledWith('user123')
     expect(blogRepository.findById).toHaveBeenCalledWith('blog123')
     expect(blogRepository.deleteById).toHaveBeenCalledWith('blog123')
@@ -33,7 +35,7 @@ describe('deleteBlog', () => {
   it('should throw error when user not found', async() => {
       (userRepository.findById as jest.Mock).mockResolvedValue(null)
 
-      await expect(deleteBlog('user123', 'blog123')).rejects.toThrow('User not found')
+      await expect(blogService.deleteBlog('user123', 'blog123')).rejects.toThrow('User not found')
     }),
     
 
@@ -53,7 +55,7 @@ describe('deleteBlog', () => {
       //DB + Error Case
       (blogRepository.deleteById as jest.Mock).mockRejectedValue(new Error('DB error'))
 
-      await expect(deleteBlog('user123', 'blog123')).rejects.toThrow('DB error')
+      await expect(blogService.deleteBlog('user123', 'blog123')).rejects.toThrow('DB error')
     })
   })
 

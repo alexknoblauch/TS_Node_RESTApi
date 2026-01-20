@@ -116,8 +116,10 @@ const blogService = {
         return data
     },
 
-    getBlogsByUser: async function(userId: string, query: FilterQuery<IBlog> , queryId: string, skip: number, limit: number): Promise<IBlog[]> {
+    getBlogsByUser: async function(userId: string, query: FilterQuery<IBlog> , options: {queryId: string, skip: number, limit: number}): Promise<IBlog[]> {
         const user = await userRepository.findById(userId)
+
+        const {queryId, skip, limit} = options
         
         if(!user) { 
             const error = new Error('User not found for role settnigs') as AppError
@@ -143,7 +145,6 @@ const blogService = {
     },
 
     updateBlog: async function(userId: string, blogId: string, data: { title?: string, content?: string, banner?: IBanner, status?: 'draft' | 'publicated' }): Promise<IBlog>{
-
         const user = await userRepository.findById(userId)
         const blog = await blogRepository.findById(blogId)
         const { title, content, banner, status } = data
@@ -176,7 +177,7 @@ const blogService = {
         if(banner) blog.banner = banner
         if(status) blog.status = status
 
-        return blog
+        return blog as IBlog
     }
 }
 
