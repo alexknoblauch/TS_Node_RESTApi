@@ -4,6 +4,7 @@ declare global {
       userId?: string;        // Simple Version
       correlationId?: string;
       user?: IUser;
+      userRole?: string
     }
   }
 }
