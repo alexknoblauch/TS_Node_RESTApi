@@ -5,10 +5,19 @@
 import { genSlug } from '@/utils'
 import mongoose, { Schema, Types, model } from 'mongoose'
 
+export type BlogData = Pick<IBlog, 'title' | 'content' | 'banner' | 'status' >
+
+export type IBanner = {
+    publicId: string; 
+    url: string; 
+    width: number; 
+    height: number;
+}
 
 export interface IBlog {
+    _id: Types.ObjectId;  
     title: string,
-    slug: string
+    slug: string,
     content: string,
     banner: {
         publicId: string,
@@ -16,12 +25,40 @@ export interface IBlog {
         width: number,
         height: number
     }
-    author: Types.ObjectId,
+    author: Types.ObjectId | string,                    // | string hinzufügen für clean architecture
     viewsCount: number,
     likesCount: number
     commentsCount: number,
     status: 'draft' | 'publicated'
 }
+
+export interface BlogLean {
+    _id: Types.ObjectId | string;  
+    title: string,
+    slug: string,
+    content: string,
+    banner: {
+        publicId: string,
+        url: string
+        width: number,
+        height: number
+    }
+    author: string | Types.ObjectId,                    // | string hinzufügen für clean architecture
+    viewsCount: number,
+    likesCount: number
+    commentsCount: number,
+    status: 'draft' | 'publicated'
+}
+
+export interface BlogBasic {
+    _id: Types.ObjectId | string;  
+    title: string,
+    slug: string,
+    content: string,
+    author: string | Types.ObjectId,                    // | string hinzufügen für clean architecture
+    status: 'draft' | 'publicated'
+}
+
 
 /**
  * Schema

@@ -15,16 +15,21 @@ import { z } from 'zod'
  * Models
  */
 
-const ICommentSchema = z.object({
-    _id: z.instanceof(mongoose.Types.ObjectId).optional(),
-    blogId: z.instanceof(mongoose.Types.ObjectId),
-    userId: z.instanceof(mongoose.Types.ObjectId),
-    comment: z.string()
-        .min(1, "Kommentar darf nicht leer sein")
-        .max(500, "Kommentar darf maximal 500 Zeichen lang sein")
-});
+export interface IComment {
+    _id: Types.ObjectId | string,  
+    blogId: Types.ObjectId | string,
+    userId: Types.ObjectId | string,
+    comment: string,
+}
 
-export type IComment = z.infer<typeof ICommentSchema>;      //export type:  z.infer() macht type kein JS Value muss 
+export interface ICommentCreate {
+    blogId: Types.ObjectId,
+    userId: Types.ObjectId,
+    comment: string,
+}
+
+export type CommentData = Pick <IComment, 'comment'>                   //PICK TYPE
+
 
 const commentSchema = new Schema<IComment>({
     blogId: {

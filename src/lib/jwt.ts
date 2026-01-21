@@ -13,10 +13,10 @@ import { Types } from 'mongoose'
 
 
 interface TokenPayload {
-    userId: Types.ObjectId;
+    userId: string;
 }
 
-export const generateAccessToken = function(userId: Types.ObjectId): string {
+export const generateAccessToken = function(userId: string): string {
     if(!config.JWT_ACCESS_SECRET){
         throw new Error('JWT secret access token not found.')
     }
@@ -29,7 +29,7 @@ export const generateAccessToken = function(userId: Types.ObjectId): string {
 }
 
 
-export const generateRefreshToken = function(userId: Types.ObjectId): string {
+export const generateRefreshToken = function(userId: string): string {
     if(!config.JWT_REFRESH_SECRET){
         throw new Error('JWT secret refresh token not found.')
     }

@@ -2,7 +2,7 @@
  *  Node Modules
  */
 
-import { Router } from 'express'
+import { Request, Response, Router } from 'express'
 import { body, cookie, param } from 'express-validator'
 import bcrypt from 'bcrypt'
 import multer from 'multer'
@@ -31,6 +31,13 @@ import getAllBlogs from '@/controllers/v1/blog/getAllBlogs'
 import getBlogByUser from '@/controllers/v1/blog/getBlogsByUser'
 import updateBlog from '@/controllers/v1/blog/updateBlog'
 import deleteBlog from '@/controllers/v1/blog/deleteBlog'
+import { FilterQuery } from 'mongoose'
+import { BlogData, IBlog } from '@/models/blog'
+import validateCreateBlog from '@/middleware/validate/blog/validateCreateBlog'
+import validateUpdateBlog from '@/middleware/validate/blog/validateUpdateBlog'
+import xss from 'xss'
+import getBlogsByUser from '@/controllers/v1/blog/getBlogsByUser'
+import getBlogBySlug from '@/controllers/v1/blog/getBlogBySlug'
 
 /**
  *  Models
@@ -40,35 +47,26 @@ const router = Router()
 const upload = multer()
 
 
+
+
 router.post('/', 
     authenticate, 
     authorize(['user', 'admin']), 
     //upload.single('banner_images'),                       //param in body (key) req.params postman
     //uploadBlogBanner('post'),
     //body('banner_image').notEmpty().withMessage('Banner Image is required'),
-    body('title')
-    .trim()
-    .notEmpty()
-    .withMessage('Title must have a value')
-    .isLength({max: 100})
-    .withMessage('Title must be less then 100'),
-    body('content')
-    .trim()
-    .notEmpty()
-    .withMessage('Body must have a value'),
-    body('status')
-    .optional()
-    .isIn(['draf', 'published'])
-    .withMessage('Status must be of the value draft or published'), 
+    validateCreateBlog(), 
     validationErrorMiddelware,
-    createBlog)
+    createBlog
+)
 
 
 router.get('/', 
     authenticate, 
     authorize(['admin', 'user']), 
     validationErrorMiddelware,
-    getAllBlogs)                            //COPY
+    getAllBlogs
+    )                           //COPY
 
 
 router.get('/user/:userId',                     
@@ -76,7 +74,8 @@ router.get('/user/:userId',
     authorize(['admin', 'user']),
     param('userId').isMongoId().withMessage('invalid id format'), 
     validationErrorMiddelware,
-    getBlogByUser)                          // PASTE getAllBlogs & Edit, es ist fast alles gleich 
+    getBlogsByUser
+    )                          // PASTE getAllBlogs & Edit, es ist fast alles gleich 
 
 
 router.get('/:slug',                     
@@ -84,24 +83,18 @@ router.get('/:slug',
     authorize(['admin', 'user']),
     param('slug').notEmpty().withMessage('Slug parameter needs value'), 
     validationErrorMiddelware,
-    getBlogByUser)                          // PASTE getBlogByUser & Edit, es ist fast alles gleich 
+    getBlogBySlug
+    )                          // PASTE getBlogByUser & Edit, es ist fast alles gleich 
 
 
 router.patch('/:blogId',
     authenticate,
     authorize(['admin']),
-    body('userId')
-    .isMongoId()
-    .withMessage('ID is in the wrong format.'),
-    body('content'),
-    body('status')
-    .optional()
-    .isIn(['draft', 'published'])
-    .withMessage('Status must be one of the value, draft/published'),
+    validateUpdateBlog(),
     validationErrorMiddelware,
     uploadBlogBanner('put'),
-    updateBlog                                  //COPY PAST createBlog
-)
+    updateBlog
+)                              //COPY PAST createBlog
 
 router.delete('/:blogId', 
     authenticate,

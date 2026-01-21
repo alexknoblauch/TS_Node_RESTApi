@@ -1,37 +1,35 @@
 /**
- * Node Modules
- */
-
-/**
- * Custom Models
- */
-import logger from "@/lib/winston";
-import { AppError } from "@/middleware/errorHandler";
-
-/**
- * Models
- */
-import Blog from "@/models/blog";
-import catchAsync from "@/utils/catchAsync";
-import config  from '@/config/index'
-import User from "@/models/user";
-
-/**
  * Types
  */
 import type { Request, Response } from 'express'
+<<<<<<< HEAD
 import blog from "@/models/blog";
 import getOrSetRedis from "@/utils/getOrSetRedis";
 import { validateRequired } from "@/utils/validateRequired";
 import { ensureDocument } from "@/utils/ensureDocument";
+=======
+/**
+ * Services
+ */
+
+import blogService from "@/services/blog.service";
+>>>>>>> tests
 
 
 
-const getBlogsByUser = catchAsync(async function(req: Request, res: Response): Promise<void>{
+const getBlogBySlug = (async(req: Request, res: Response) => {
+            const userId = req.userId 
 
-    const userId = req.userId
-    const slug = req.params.slug             // /:slug
+            if(!userId) {
+                return res.status(401).json({
+                    code: 'Unauthorized',
+                    message: 'User not authenticated'
+                })
+            }
+            const slug = req.params.slug             // /:slug
+            const data = await blogService.getBlogBySlug(userId, slug)
 
+<<<<<<< HEAD
     validateRequired(userId, 'userID')
     validateRequired(slug, 'Slug')
     
@@ -67,3 +65,14 @@ const getBlogsByUser = catchAsync(async function(req: Request, res: Response): P
 })
 
 export default getBlogsByUser
+=======
+            res.status(200).json({
+                code: 'ApiSuccess',
+                message: 'Blog for slug successfully retrieved',
+                blogs: data
+            })
+        }
+    )
+
+export default getBlogBySlug
+>>>>>>> tests

@@ -1,24 +1,20 @@
 /**
- * Node Modules
- */
-
-/**
- * Custom Models
- */
-import logger from "@/lib/winston";
-import { AppError } from "@/middleware/errorHandler";
-
-/**
  * Models
  */
-import Blog from "@/models/blog";
+import  { BlogResponse, IBlog } from "@/models/blog";
+
+/**
+ * Repos
+ */
+import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
+import blogService from "@/services/blog.service";
 import catchAsync from "@/utils/catchAsync";
-import config  from '@/config/index'
-import User from "@/models/user";
+import { Request, Response } from "express";
 
 /**
  * Types
  */
+<<<<<<< HEAD
 import type { Request, Response } from 'express'
 import getOrSetRedis from "@/utils/getOrSetRedis";
 import { ensureDocument } from "@/utils/ensureDocument";
@@ -73,5 +69,33 @@ const getAllBlogs = catchAsync(async function(req: Request, res: Response): Prom
     })
     logger.info(`Blogs successfully retrieved ${data.length} blogs`)
 })
+=======
+import { FilterQuery } from "mongoose";
+
+
+const getAllBlogs = catchAsync (async(req: Request, res: Response):Promise<void> => {
+            const limit = Number(req.query) || 10
+            const skip = Number(req.query) || 0
+            const query: FilterQuery<IBlog> = {}
+            
+            const options = {
+                query,
+                skip,
+                limit
+            }
+
+            if (req.userRole === 'user') {
+                query.status = 'published'
+            }
+            
+            const data = await blogService.getAllBlogs(query, options)
+
+            res.status(200).json({
+                code: 'ApiSuccess',
+                message: 'Blogs successfully retrieved',
+                blogs: data
+            })
+        })
+>>>>>>> tests
 
 export default getAllBlogs

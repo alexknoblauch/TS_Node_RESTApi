@@ -7,8 +7,10 @@ import mongoose, {Schema, model} from 'mongoose'
  *  Custom Modules
  */
 import bcrypt from 'bcrypt'
+import { Types } from 'mongoose';
 
 export interface IUser {
+    _id: Types.ObjectId | string;  
     userName: string
     email: string,
     password: string,
@@ -27,6 +29,23 @@ export interface IUser {
     twoFactorEnabled: boolean,
     refreshToken: string
 };
+
+export interface SafeUser {
+    _id: Types.ObjectId | string;
+    userName: string;
+    email: string;
+    role: 'admin' | 'user';
+    firstName?: string;
+    lastName?: string;
+    socialLinks?: {
+        website?: string;
+        youtube?: string;
+        facebook?: string;
+        linkedin?: string;
+        x?: string;
+        instagram?: string;
+    };
+}
 
 const UserSchema = new Schema<IUser>({
     userName: {
@@ -99,6 +118,21 @@ const UserSchema = new Schema<IUser>({
         type: String
     }
 }, { timestamps: true })
+
+UserSchema.methods.toJSON = function() {
+    const user = this.toObject();
+    
+    // Entferne sensitive Felder für JSON Responses
+    delete user.password;
+    delete user.__v; // Mongoose interne Version
+    delete user.updatedAt; // Optional, wenn nicht benötigt
+    
+    // Optional: _id → id umbenennen
+    user.id = user._id;
+    delete user._id;
+    
+    return user;
+};
 
 
 UserSchema.pre('save', async function(next){

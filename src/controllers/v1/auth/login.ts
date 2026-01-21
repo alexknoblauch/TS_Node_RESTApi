@@ -1,35 +1,32 @@
 /**
- * Node Modules
- */
-
-/**
  * Custom Modules
  */
-import { generateAccessToken, generateRefreshToken } from "@/lib/jwt";
-import config from "@/config";
-import { Jwt } from "jsonwebtoken";
-import logger from "@/lib/winston";
-
-
-/**
- *  Models
- */
-import User from "@/models/user";
-import Token from "@/models/token";
-import bcrypt from 'bcrypt'
-
+import authService from "@/services/auth.service";
+import catchAsync from "@/utils/catchAsync";
 /**
  *  Types
  */
 
 import type { Request, Response, NextFunction } from 'express'
+<<<<<<< HEAD
 import type { IUser } from "@/models/user";
 import catchAsync from "@/utils/catchAsync";
 import { ensureDocument } from "@/utils/ensureDocument";
+=======
+>>>>>>> tests
 
-export type UserData = Pick<IUser, 'email' | 'password'>
+const login = catchAsync(async(req: Request, res: Response) => {
+            const credentials = req.body                           // Achtung: kein destructoring
+            const {accessToken, refreshToken} = await authService.login(credentials) 
 
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 Tage
+            })
 
+<<<<<<< HEAD
 const login = catchAsync(async function(req: Request, res: Response): Promise<void>{
     const {email, password} = req.body as UserData
     const user = await  User.findOne({email}).select('email username password role').lean().exec()
@@ -67,6 +64,11 @@ const login = catchAsync(async function(req: Request, res: Response): Promise<vo
         },
         accessToken
     })
+=======
+            res.status(200).json({
+                accessToken,
+            })
+>>>>>>> tests
 })
 
 export default login

@@ -10,11 +10,12 @@ import config from "@/config";
 /**
  * Models
  */
-import User from "@/models/user";
+import User, { IUser } from "@/models/user";
 import catchAsync from "@/utils/catchAsync";
 /**
- * Middlewar
+ * Repos
  */
+import { userRepository } from "@/repository/userRepository/userRepository";
 /**
  * Types
  */
@@ -22,17 +23,14 @@ import { Request, Response } from "express";
 import getOrSetRedis from "@/utils/getOrSetRedis";
 
 
-const getAllUsers = catchAsync(async function (req: Request, res: Response): Promise<void> {
-    const limit = Number(req.query.limit as string) ?? config.defaultResLimit       //query immer string ,  ?? weil nullish coalising, wenn query 0 is wäre es falsy  das heisst der nächste wert würde genommen
-    const offset = Number(req.query.offset as string) ?? config.defaultOffset       // ?? weil nullish coalising, wenn query 0 is wäre es falsy  das heisst der nächste wert würde genommen 
-    const total = await User.countDocuments()
-    const user = await User.findById(req.userId).select('role').lean().exec();
+const getAllUsers = (async function (limit: number, skip: number): Promise<IUser[]> {
+    
+    const users = await userRepository.find( {} , {limit, skip})
 
 
+    const cacheKey = `Users:${limit}:${skip}`
 
-    const cacheKey = `Users:${limit}:${offset}:${user?.role}`
-
-    const data = await getOrSetRedis(cacheKey, async () => {
+    await getOrSetRedis(cacheKey, async () => {
         const users = await User.find()
             .select('-password -__v')                                        //IMMER Passwort nicht mitsenden
             .limit(limit)
@@ -47,14 +45,7 @@ const getAllUsers = catchAsync(async function (req: Request, res: Response): Pro
     })
   
 
-    res.status(200).json({
-        code: 'Success',
-        message: 'Users retreived successfully',
-        users: data,
-        total,
-        limit,
-        offset,
-    })
+    return users
 })
 
 export default getAllUsers

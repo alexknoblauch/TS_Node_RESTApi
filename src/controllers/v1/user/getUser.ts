@@ -24,8 +24,7 @@ import type { AppError } from "@/middleware/errorHandler";
 import getOrSetRedis from "@/utils/getOrSetRedis";
 
 
-const getUser = catchAsync(async function (req: Request, res: Response) {
-    const userId = req.params.userId
+const getUser = (async function (userId:string) {
 
     const cacheKey = `User:${userId}`
 
@@ -42,11 +41,14 @@ const getUser = catchAsync(async function (req: Request, res: Response) {
     })
 
 
+<<<<<<< HEAD
     res.status(200).json({
         code: 'Success',
         message: 'User successfully retreaved.',
         user: data
     })
+=======
+>>>>>>> tests
 })
 
 export default getUser

@@ -1,34 +1,46 @@
 /**
  * Node Modules
  */
-import Blog from "@/models/blog"
-import Comment, { IComment } from "@/models/comment"
-import xss from 'xss'
-
-/**
- * Custom Modules
-*/
+import Comment, { CommentData, IComment } from "@/models/comment"
+import commentService from "@/services/comment.service"
 import catchAsync from "@/utils/catchAsync"
+<<<<<<< HEAD
 import logger from "@/lib/winston"
 
 /**
  * Middleware
  */
 import { AppError } from "@/middleware/errorHandler"
+=======
+
+>>>>>>> tests
 /**
  * Types
  */
 import { Request, Response } from "express"
+<<<<<<< HEAD
 import { Types } from "mongoose"
 import { validateRequired } from "@/utils/validateRequired"
 import { ensureDocument } from "@/utils/ensureDocument"
 
 type CommentData = Pick <IComment, 'comment'>                   //PICK TYPE
+=======
+>>>>>>> tests
 
-const commentBlog =  catchAsync(async function (req:Request, res: Response): Promise<void>{
+
+const commentBlog =  catchAsync(async(req: Request, res: Response) => {
     const userId = req.userId                                   // params = string interference
     const { blogId } = req.params                               // das auch string interference
+    
+    if(!userId) {
+        return res.status(401).json({
+            code: 'Unauthorized',
+            message: 'User not authenticated'
+        })
+    }    
+                             
     const { comment } = req.body as CommentData                 // Wichtig Typisieren!
+<<<<<<< HEAD
  
 
     validateRequired(userId, 'userId', 404)
@@ -48,12 +60,15 @@ const commentBlog =  catchAsync(async function (req:Request, res: Response): Pro
         comment })
         
     logger.info('Comment successfully created')
+=======
+    const createdComment = await commentService.createComment(userId, blogId, comment)
+
+>>>>>>> tests
     res.status(201).json({
         blogId,                     
         userId,                     
-        cleanComment
+        createdComment
     })
-    return
 })
 
 export default commentBlog

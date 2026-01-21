@@ -4,21 +4,56 @@
 
 import {Types, Schema, model} from 'mongoose'
 
-interface IToken {
+export interface IToken {
     token: string
-    userId: Types.ObjectId
+    userId: Types.ObjectId | string
+    createdAt: Date;
+    expiresAt: Date;
+    revoked?: boolean; 
+    revokedAt?: Date; 
+}
+
+export interface ITokenDomain {
+  token: string;
+  userId: string;           // Im Domain immer string!
+  createdAt: Date;
+  expiresAt: Date;
+  revoked?: boolean;
+  revokedAt?: Date | null;
 }
 
 const tokenSchema = new Schema({
     token: {
         type: String,
-        required: true
+        required: true,
+        select: false
     },
     userId: {
         type: Types.ObjectId,
         ref: 'User', 
         required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now, 
+        required: true
+    },
+    expiresAt: {
+        type: Date,
+        required: true,
+        index: { expires: 0 } 
+    },
+    revoked: {
+        type: Boolean,
+        default: false 
+    },
+    revokedAt: {
+        type: Date,
+         default: null
     }
 })
+
+tokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
 
 export default model<IToken>('Token', tokenSchema)

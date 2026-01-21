@@ -27,8 +27,8 @@ import type { Request, Response } from "express";
 
 
 
-const deleteUserById = catchAsync(async function (req: Request, res: Response) {
-    const userId = req.params.userId
+const deleteUserById = (async function (userId: string):Promise<void> {
+
     const result = await User.deleteOne({ _id: userId })
 
     const blogs = await Blog.find({author: userId}).select('banner.publicId').lean().exec()

@@ -12,11 +12,11 @@
     "skipLibCheck": true,
     "moduleResolution": "node",
     "sourceMap": true, 
+    "types": ["node", "jest"],
     "paths": {
       "@/*": ["*"]
-    },
-    "typeRoots": [".src/@types"]
+    }
   },
-  "include": ["src/**/*", "types/**/*"],
+  "include": ["src", "**/*.test.ts"],
   "exclude": ["node_modules", "dist"]
 }

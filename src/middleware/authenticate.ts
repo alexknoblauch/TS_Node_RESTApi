@@ -16,17 +16,14 @@ import logger from "@/lib/winston";
 
 import type { Request, Response, NextFunction } from 'express'
 import type { Types } from 'mongoose'
+<<<<<<< HEAD
 import { AppError } from "./errorHandler";
+=======
+import { userRepository } from "@/repository/userRepository/userRepository";
+>>>>>>> tests
 
 
-declare global {
-  namespace Express {
-    interface Request {                 // damit req.userId in Request aufgenommen wird
-      userId?: Types.ObjectId;   
-    }
-  }
-}
-export default function authenticate(req: Request, res: Response, next: NextFunction): void {
+export default async function authenticate(req: Request, res: Response, next: NextFunction): Promise<void> {
     
     const authHeader = req.headers.authorization;
 
@@ -41,8 +38,19 @@ export default function authenticate(req: Request, res: Response, next: NextFunc
     const [_, token] = authHeader.split(' ');
 
     try {
-        const jwtPayload = verifyAccessToken(token) as { userId: Types.ObjectId };
+        const jwtPayload = verifyAccessToken(token) as { userId: string };
         req.userId = jwtPayload.userId;
+        const user = await userRepository.findById(req.userId)
+
+        if(!user) {
+              res.status(401).json({
+              code: 'AuthenticationError',
+              message: 'User not found'
+          });
+          return
+        }
+
+        req.userRole = user.role
         next();
      } catch (err) {
         logger.error('Token verfication failed')

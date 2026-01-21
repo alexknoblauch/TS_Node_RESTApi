@@ -18,24 +18,15 @@ import catchAsync from "@/utils/catchAsync";
 
 import type { Request, Response } from 'express'
 import type { AppError } from '@/middleware/errorHandler'
+import { userRepository } from "@/repository/userRepository/userRepository";
 
-const updateCurrentUser = catchAsync(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.userId
+type  IUpdatedData = Partial<{
+        username: string, password: string, email: string, firstName: string,lastName: string, website: string, youtube: string, facebook: string, instagram: string, linkedin: string, x: string
+}>
 
-    const {
-        username,
-        password,
-        email,
-        firstName,
-        lastName,
-        website,
-        youtube,
-        facebook,
-        instagram,
-        linkedin,
-        x
-    } = req.body
-    const user = await User.findById(userId).select('-__v')
+const updateCurrentUser = (async (userId: string, updatedData: IUpdatedData): Promise<void> => {
+
+    const user = await User.findById(userId)
 
     if(!user){
         const error = new Error('User not found') as AppError;
@@ -44,28 +35,43 @@ const updateCurrentUser = catchAsync(async (req: Request, res: Response): Promis
         throw error;
     }
 
-    if (username) {user.userName = username}
-    if (email) {user.email = email;}
-    if (password) {
-        user.password = await bcrypt.hash(password, 12);
+    if (
+        updatedData.website ||
+        updatedData.facebook ||
+        updatedData.instagram ||
+        updatedData.linkedin ||
+        updatedData.x ||
+        updatedData.youtube
+        ) {
+        user.socialLinks ??= {}
     }
-    if (firstName) {user.firstName = firstName;}
-    if (lastName) {user.lastName = lastName;}
-    if (!user.socialLinks) {user.socialLinks = {};}
-    if (website) {user.socialLinks.website = website;}
-    if (facebook) {user.socialLinks.facebook = facebook;}
-    if (instagram) {user.socialLinks.instagram = instagram;}
-    if (linkedin) {user.socialLinks.linkedin = linkedin;}
-    if (x) {user.socialLinks.x = x;}
-    if (youtube) {user.socialLinks.youtube = youtube;}
 
-    await user.save()
+    
+    //ACHTUNG: nie updatedData direkt in DB. das ist Client Logik - mutieren zu Server Logik
+    const update: any = {}
+
+    if (updatedData.username) update.username = updatedData.username
+    if (updatedData.email) update.email = updatedData.email
+    if (updatedData.password) {
+        update.password = await bcrypt.hash(updatedData.password, 12)
+    }
+    if (updatedData.firstName) update.firstName = updatedData.firstName
+    if (updatedData.lastName) update.lastName = updatedData.lastName
+
+    const socialLinks: any = {}
+    if (updatedData.website) socialLinks.website = updatedData.website
+    if (updatedData.facebook) socialLinks.facebook = updatedData.facebook
+    if (updatedData.instagram) socialLinks.instagram = updatedData.instagram
+    if (updatedData.linkedin) socialLinks.linkedin = updatedData.linkedin
+    if (updatedData.x) socialLinks.x = updatedData.x
+    if (updatedData.youtube) socialLinks.youtube = updatedData.youtube
+
+    if (Object.keys(socialLinks).length > 0) {
+    update.socialLinks = socialLinks
+    }
+
+    await userRepository.updateById(userId, update)
     logger.info('User successfully updated')
-
-    res.status(200).json({
-        user
-    })
-
 })
 
 export default updateCurrentUser
