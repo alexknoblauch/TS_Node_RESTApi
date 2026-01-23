@@ -1,26 +1,16 @@
 import getBlogBySlug from "@/controllers/v1/blog/getBlogBySlug";
 import logger from "@/lib/winston";
 import { AppError } from "@/middleware/errorHandler";
-import { IBanner, IBlog } from "@/models/blog";
+import { BlogLean, CreateBlogDTO, IBanner, IBlog, UpdateBlogDTO } from "@/models/blog";
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
 import { userRepository } from "@/repository/userRepository/userRepository";
 import { FilterQuery } from "mongoose";
 import xss from "xss";
 
-interface CreateBlog {
-    title: string,
-    content: string,
-    banner: {
-        publicId: string; 
-        url: string; 
-        width: number; 
-        height: number; 
-    }
-    author: string,
-}
+
 
 const blogService = {
-    createBlog: async function(credentials: CreateBlog)  {
+    createBlog: async function(credentials: CreateBlogDTO)  {
         let credentialsObj = {... credentials}
         credentialsObj.content = xss(credentialsObj.content)
 
@@ -72,7 +62,7 @@ const blogService = {
         await blogRepository.deleteById(userId)
     },
 
-    getAllBlogs: async function(query: FilterQuery<IBlog>, options: {skip: number, limit: number}):Promise<IBlog[]> {
+    getAllBlogs: async function(query: FilterQuery<IBlog>, options: {skip: number, limit: number}):Promise<BlogLean[]> {
         const blogs = await blogRepository.find(query, {skip: options.skip, limit: options.limit})
 
         if(!blogs || blogs.length === 0){
@@ -116,7 +106,7 @@ const blogService = {
         return data
     },
 
-    getBlogsByUser: async function(userId: string, query: FilterQuery<IBlog> , options: {queryId: string, skip: number, limit: number}): Promise<IBlog[]> {
+    getBlogsByUser: async function(userId: string, query: FilterQuery<IBlog> , options: {queryId: string, skip: number, limit: number}): Promise<BlogLean[]> {
         const user = await userRepository.findById(userId)
 
         const {queryId, skip, limit} = options
@@ -144,7 +134,7 @@ const blogService = {
         return data
     },
 
-    updateBlog: async function(userId: string, blogId: string, data: { title?: string, content?: string, banner?: IBanner, status?: 'draft' | 'publicated' }): Promise<IBlog>{
+    updateBlog: async function(userId: string, blogId: string, data: { title?: string, content?: string, banner?: IBanner, status?: 'draft' | 'published' }): Promise<UpdateBlogDTO>{
         const user = await userRepository.findById(userId)
         const blog = await blogRepository.findById(blogId)
         const { title, content, banner, status } = data
@@ -177,7 +167,7 @@ const blogService = {
         if(banner) blog.banner = banner
         if(status) blog.status = status
 
-        return blog as IBlog
+        return blog
     }
 }
 

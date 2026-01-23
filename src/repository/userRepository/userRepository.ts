@@ -1,5 +1,6 @@
 // repositories/userRepository.ts
 import User, { IUser } from '@/models/user';
+import { UpdateQuery } from 'mongoose'
 
 export const userRepository = {
 
@@ -38,7 +39,7 @@ export const userRepository = {
         return user.toObject();
     },
 
-    updateById: async (id: string, updateData: Partial<IUser>): Promise<IUser | null> => {
+    updateById: async (id: string, updateData: UpdateQuery<IUser>): Promise<IUser | null> => {
         return User.findByIdAndUpdate(id, updateData, { new: true, lean: true }).exec();
     },
 

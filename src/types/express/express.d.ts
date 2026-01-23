@@ -5,6 +5,7 @@ declare global {
       correlationId?: string;
       user?: IUser;
       userRole?: "admin" | "user"
+      correlationId?: string;
     }
   }
 }

@@ -2,30 +2,34 @@
  * Node Modules
  */
 import mongoose, { Schema, model, Types } from "mongoose"
-import { z } from 'zod'
 
 
-/**
- * Middleware
- */
-/**
- * Types
- */
 /**
  * Models
  */
 
 export interface IComment {
-    _id: Types.ObjectId | string,  
-    blogId: Types.ObjectId | string,
-    userId: Types.ObjectId | string,
-    comment: string,
-}
-
-export interface ICommentCreate {
+    _id: Types.ObjectId,  
     blogId: Types.ObjectId,
     userId: Types.ObjectId,
     comment: string,
+}
+
+export interface CommentLean {
+    _id: string,  
+    blogId: string,
+    userId: string,
+    comment: string,
+}
+
+export interface CommentCreateDTO {
+    blogId: string,
+    userId: string,
+    comment: string,
+}
+
+export interface CommentUpdateDTO {
+    comment?: string,
 }
 
 export type CommentData = Pick <IComment, 'comment'>                   //PICK TYPE

@@ -24,18 +24,7 @@ const logout = catchAsync(async function(req: Request, res: Response): Promise<v
     const refreshToken = req.cookies.refreshToken
     const userId = req.userId as string
 
-<<<<<<< HEAD
-    if (refreshToken){
-        Token.deleteOne({token: refreshToken})
-    }
-    
-    logger.info('User refresh Token deleted successfully', {
-        userId: req.userId,
-        token: refreshToken
-    })
-=======
     await authService.logout(refreshToken, userId)
->>>>>>> tests
 
     res.clearCookie('refreshToken', {
         httpOnly: true,

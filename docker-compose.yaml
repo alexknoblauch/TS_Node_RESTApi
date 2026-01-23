@@ -12,7 +12,7 @@ service:
       MYSQL_ROOT_PASSWORD: "jkefjkwefwlejkf"
       MYSQL_DATABASE: 'fjekjfek'
     restart: always
-    volume:
+    volumes:
       - mysql/var/lib/mysql
 
   phpmyadmin:

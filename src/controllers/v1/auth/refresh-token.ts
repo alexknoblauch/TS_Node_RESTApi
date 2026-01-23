@@ -22,21 +22,12 @@ import catchAsync from "@/utils/catchAsync";
 
 import type { Request, Response } from 'express'
 import { Types } from 'mongoose'
-<<<<<<< HEAD
-import { ensureDocument } from "@/utils/ensureDocument";
-=======
 import authService from "@/services/auth.service";
->>>>>>> tests
 
 
 export const refreshToken = catchAsync(async (req: Request, res: Response) => {
     const { refreshToken } = req.cookies
 
-<<<<<<< HEAD
-    const tokenExists = await Token.exists({ token: refreshToken })
-
-    ensureDocument(tokenExists, 'Token exists')
-=======
     if (!refreshToken) {
         return res.status(400).json({
             success: false,
@@ -44,7 +35,6 @@ export const refreshToken = catchAsync(async (req: Request, res: Response) => {
             message: 'Refresh token is required'
         });
     }
->>>>>>> tests
 
     const accessToken = await authService.refreshToken(refreshToken)
     

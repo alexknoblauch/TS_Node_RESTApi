@@ -70,8 +70,5 @@ export const errorHandler = (
     res.status(500).json({
         code: 'ServerError',
         message: 'Something went wrong',
-        error: err,
-        source: 'server'
-
     });
 };

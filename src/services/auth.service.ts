@@ -19,8 +19,6 @@ import { userRepository } from "@/repository/userRepository/userRepository";
 /**
  * Types
 */
-import { LoginResult } from "@/types/auth";
-import { refreshToken } from "@/controllers/v1/auth/refresh-token";
 import { SafeUser } from "@/models/user";
 import { genUsername } from "@/utils";
 import createTokenError from "@/utils/tokenError";
@@ -31,9 +29,12 @@ interface LoginCredentials {
     password: string
 }
 
-interface RefreshTokenResult {
-    accessToken: string
+interface RegisterCredentials {
+    email: string,
+    password: string,
+    role: 'admin' | 'user'
 }
+
 
 interface RegisterResult {
     user: SafeUser,
@@ -41,14 +42,14 @@ interface RegisterResult {
     refreshToken: string
 }
 
-interface RegisterCredentials {
-    email: string,
-    password: string,
-    role: 'admin' | 'user'
-
+interface LoginResult {
+    accessToken: string
+    refreshToken: string
 }
 
-
+interface RefreshTokenResult {
+    accessToken: string
+}
 
 
 const authService = {

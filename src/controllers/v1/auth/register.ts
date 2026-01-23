@@ -26,28 +26,7 @@ import authService from '@/services/auth.service'
 type UserData = Pick<IUser, 'email' | 'password' | 'role'>
 
 const register = catchAsync(async (req: Request, res: Response): Promise<void> => {
-<<<<<<< HEAD
-    const {email, password, role } = req.body as UserData
-
-    if( role === 'admin' && !config.WHITELIST_ADMINS_EMAIL.includes(email)){
-        res.status(403).json({
-            code: 'AuthorizationError',
-            message: 'Email not allowed for admin registration'
-        })
-
-        logger.warn(`Registration as admin failed: ${email}`)
-         throw new Error('Email not allowed for admin registration');
-    }
-
-    const userName = genUsername()
-    const newUser = await User.create({userName, email, password, role})
-    
-    const accessToken = generateAccessToken(newUser._id)
-    const refreshToken = generateRefreshToken(newUser._id)
-    await Token.create({token: refreshToken, userId: newUser._id })
-=======
     const credentials = req.body as UserData
->>>>>>> tests
 
     const {user, accessToken, refreshToken} = await authService.register(credentials)
                 
@@ -66,15 +45,6 @@ const register = catchAsync(async (req: Request, res: Response): Promise<void> =
         },
         accessToken
     })
-<<<<<<< HEAD
-
-    logger.info('User registred successfully', {
-            username: userName,
-            email: email,
-            role: role
-    })
-=======
->>>>>>> tests
 })
 
 export default register

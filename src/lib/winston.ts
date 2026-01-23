@@ -21,7 +21,7 @@ const correlationIdFormat = winston.format((info) => {
     info.correlationId = correlationId
   }
   return info;
-});
+}); 
 
 const transports: winston.transport[] = [];                       //LOKI for centraliezd log files. winstown würde sosnt in jedem server ein logifle abelgen
 

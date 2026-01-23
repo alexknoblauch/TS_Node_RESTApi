@@ -1,6 +1,6 @@
 import logger from "@/lib/winston";
 import { AppError } from "@/middleware/errorHandler";
-import { IComment } from "@/models/comment";
+import { CommentLean, IComment } from "@/models/comment";
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
 import { commentRepository } from "@/repository/commentRepository/commentRepository";
 import xss from "xss";
@@ -24,8 +24,8 @@ const commentService = {
         const cleanComment = xss(comment)
 
         const createdComment = await commentRepository.create({ 
-            userId: new Types.ObjectId(userId),                    //string to OObjectId machen!!
-            blogId: new Types.ObjectId(blogId),                    //string to OObjectId machen!!
+            userId: userId,                    //string to OObjectId machen!!
+            blogId: blogId,                    //string to OObjectId machen!!
             comment: cleanComment 
         })
         
@@ -33,27 +33,25 @@ const commentService = {
 
         return createdComment
     }),
+    
 
-    getCommentsByBlog: (async function (blogId: string): Promise<IComment[]>{
+    getCommentsByBlog: (async function (blogId: string): Promise<CommentLean[]>{
+        const blog = await blogRepository.findById(blogId)
 
-    const blog = await blogRepository.findById(blogId)
+        if(!blog ){
+            logger.error('Blog not found')
+            const error = new Error('Blog not found') as AppError;
+            error.statusCode = 404;
+            error.code = 'BlogNotFound';
+            throw error;
+        }
 
-    if(!blog ){
-        logger.error('Blog not found')
-        const error = new Error('Blog not found') as AppError;
-        error.statusCode = 404;
-        error.code = 'BlogNotFound';
-        throw error;
-    }
+        const allComments = await commentRepository.find({_id: blogId})
 
-    const allComments = await commentRepository.find({_id: blogId})
+        logger.info('Comments successfully retreaved')
 
- 
-    logger.info('Comments successfully retreaved')
-
-
-    return allComments
-}),
+        return allComments
+    }),
 
     deleteComment: (async function (userId: string, commentId: string): Promise<void>{
 

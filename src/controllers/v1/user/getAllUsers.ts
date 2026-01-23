@@ -1,11 +1,11 @@
 /**
  * Node Modules
  */
+import logger from "@/lib/winston";
 /**
  * Custom Modules
  */
 
-import logger from "@/lib/winston";
 import config from "@/config";
 /**
  * Models
@@ -23,14 +23,17 @@ import { Request, Response } from "express";
 import getOrSetRedis from "@/utils/getOrSetRedis";
 
 
-const getAllUsers = (async function (limit: number, skip: number): Promise<IUser[]> {
-    
-    const users = await userRepository.find( {} , {limit, skip})
+const getAllUsers = catchAsync(async function (req: Request, res: Response): Promise<IUser[]> {
+    const limit = Number(req.query.limit as string) ?? config.defaultResLimit       //query immer string ,  ?? weil nullish coalising, wenn query 0 is wäre es falsy  das heisst der nächste wert würde genommen
+    const offset = Number(req.query.offset as string) ?? config.defaultOffset       // ?? weil nullish coalising, wenn query 0 is wäre es falsy  das heisst der nächste wert würde genommen 
+    const total = await User.countDocuments()
+    const user = await User.findById(req.userId).select('role').lean().exec();
 
 
-    const cacheKey = `Users:${limit}:${skip}`
 
-    await getOrSetRedis(cacheKey, async () => {
+    const cacheKey = `Users:${limit}:${offset}:${user?.role}`
+
+    const users = await getOrSetRedis(cacheKey, async () => {
         const users = await User.find()
             .select('-password -__v')                                        //IMMER Passwort nicht mitsenden
             .limit(limit)
@@ -43,7 +46,6 @@ const getAllUsers = (async function (limit: number, skip: number): Promise<IUser
             }
             return users
     })
-  
 
     return users
 })

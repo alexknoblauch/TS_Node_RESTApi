@@ -25,15 +25,10 @@ import { refreshToken } from '@/controllers/v1/auth/refresh-token'
 import register  from '@/controllers/v1/auth/register'
 import validationErrorMiddelware from '@/middleware/validationError'
 import authenticate from '@/middleware/authenticate'
-<<<<<<< HEAD
-//import { setup2FA } from '../controller/auth/login' 
-
-=======
 import validateAuthRegister from '@/middleware/validate/auth/validateAuthRegister'
 import validateAuthLogin from '@/middleware/validate/auth/validateAuthLogin'
 import login from '@/controllers/v1/auth/login'
 import validateAuthRefreshToken from '@/middleware/validate/auth/validateAuthRefreshToken'
->>>>>>> tests
 /**
  *  Models
  */
@@ -45,9 +40,9 @@ router.get('/2fa/setup',
  authenticate
 )
 // disable2FA
-router.post('/2fa/disable', authenticate, 
+router.post('/2fa/disable',
+    authenticate, 
 );
-
 
 
 router.post('/register', 

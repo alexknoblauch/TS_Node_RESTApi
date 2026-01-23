@@ -19,22 +19,21 @@ import Blog from '@/models/blog'
 /**
  * Types
  */
-import type { BlogData, IBanner, IBlog } from '@/models/blog'
+import type { Request, Response } from 'express'
+import type { IBlog } from '@/models/blog'
 import type { AppError } from '@/middleware/errorHandler'
-import { blogRepository } from '@/repository/blogRepository/blogreposiroty'
-import { Request, Response } from 'express'
-import blogService from '@/services/blog.service'
 
 
-const createBlog = catchAsync(async(req: Request, res: Response) => {
+type BlogData = Pick<IBlog, 'title' | 'content' | 'banner' | 'status' >
+
+const createBlog = catchAsync(async function(req: Request, res: Response): Promise<void>{
     const { title, content, banner, status } = req.body as BlogData
-    const userId = req.userId as string
+    const userId = req.userId
 
-    const credentials = {author: userId, title, content, banner, status}
+    const cleanContent = xss(content)
+    const newEntry = await Blog.create({ title, content: cleanContent, banner, status, author: userId })
 
-    const blog = await blogService.createBlog(credentials) 
     
-<<<<<<< HEAD
     ensureDocument(newEntry, 'New Blog')
 
     logger.info('New Blog entry creted')
@@ -44,14 +43,7 @@ const createBlog = catchAsync(async(req: Request, res: Response) => {
         code: 'BlogCreated',
         message: 'Successfully new Blog created',
         newEntry
-=======
-    res.status(200).json({
-        message: 'user successfully created',
-        success: true,
-        blog
->>>>>>> tests
     })
-
-})  
+})
 
 export default createBlog

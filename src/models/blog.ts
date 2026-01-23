@@ -19,44 +19,42 @@ export interface IBlog {
     title: string,
     slug: string,
     content: string,
-    banner: {
-        publicId: string,
-        url: string
-        width: number,
-        height: number
-    }
+    banner: IBanner,
     author: Types.ObjectId | string,                    // | string hinzufügen für clean architecture
     viewsCount: number,
     likesCount: number
     commentsCount: number,
-    status: 'draft' | 'publicated'
+    status: 'draft' | 'published'
 }
 
 export interface BlogLean {
-    _id: Types.ObjectId | string;  
+    _id: string;  
     title: string,
     slug: string,
     content: string,
-    banner: {
-        publicId: string,
-        url: string
-        width: number,
-        height: number
-    }
-    author: string | Types.ObjectId,                    // | string hinzufügen für clean architecture
-    viewsCount: number,
-    likesCount: number
-    commentsCount: number,
-    status: 'draft' | 'publicated'
+    author: string,                    // | string hinzufügen für clean architecture
+    banner: IBanner,
+    viewsCount?: number,
+    likesCount?: number
+    commentsCount?: number,
+    status: 'draft' | 'published'
 }
 
-export interface BlogBasic {
-    _id: Types.ObjectId | string;  
+// ✅ Klar definiert: DIESE Felder MÜSSEN da sein
+export type BlogBasic = Pick <BlogLean, '_id' | 'title' | 'slug' | 'author' | 'status'>
+
+export interface CreateBlogDTO {
     title: string,
-    slug: string,
     content: string,
-    author: string | Types.ObjectId,                    // | string hinzufügen für clean architecture
-    status: 'draft' | 'publicated'
+    banner: IBanner,
+    author: string,
+}
+
+export interface UpdateBlogDTO {
+    title?: string;
+    content?: string;
+    banner?: IBanner;
+    status?: 'draft' | 'published';
 }
 
 

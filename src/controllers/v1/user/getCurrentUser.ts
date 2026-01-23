@@ -18,7 +18,6 @@ import getOrSetRedis from "@/utils/getOrSetRedis";
 
 import type {Request, Response} from 'express'
 
-<<<<<<< HEAD
 const getCurrentUser = catchAsync(async (req: Request, res: Response): Promise<void> =>{
     const userId = req.userId
 
@@ -32,11 +31,6 @@ const getCurrentUser = catchAsync(async (req: Request, res: Response): Promise<v
     res.status(200).json({
         user: data
     })
-=======
-const getCurrentUser = (async (userId: string): Promise<void> =>{
-    const user = await User.findById(userId)
-
->>>>>>> tests
 }) 
 
 export default getCurrentUser

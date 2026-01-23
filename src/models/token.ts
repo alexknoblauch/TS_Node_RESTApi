@@ -6,14 +6,14 @@ import {Types, Schema, model} from 'mongoose'
 
 export interface IToken {
     token: string
-    userId: Types.ObjectId | string
+    userId: Types.ObjectId 
     createdAt: Date;
     expiresAt: Date;
     revoked?: boolean; 
     revokedAt?: Date; 
 }
 
-export interface ITokenDomain {
+export interface ITokenPersistence {
   token: string;
   userId: string;           // Im Domain immer string!
   createdAt: Date;
@@ -53,7 +53,6 @@ const tokenSchema = new Schema({
     }
 })
 
-tokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 
 export default model<IToken>('Token', tokenSchema)

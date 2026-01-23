@@ -2,7 +2,6 @@
  * Node Modules
  */
 
-import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 
 /**
  * Custom Modules
@@ -15,12 +14,8 @@ import logger from "@/lib/winston";
  */
 
 import type { Request, Response, NextFunction } from 'express'
-import type { Types } from 'mongoose'
-<<<<<<< HEAD
-import { AppError } from "./errorHandler";
-=======
 import { userRepository } from "@/repository/userRepository/userRepository";
->>>>>>> tests
+import { AppError } from "./errorHandler";
 
 
 export default async function authenticate(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -28,7 +23,7 @@ export default async function authenticate(req: Request, res: Response, next: Ne
     const authHeader = req.headers.authorization;
 
     if (!authHeader?.startsWith('Bearer ')) {
-        logger.error('No Bearer Token found')
+        logger.warn('No Bearer Token found')
         const error = new Error('No Bearer Token found') as AppError;
         error.statusCode = 401;
         error.code = 'BeararNotFound';
