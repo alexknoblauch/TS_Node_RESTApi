@@ -22,6 +22,11 @@ export interface ITokenPersistence {
   revokedAt?: Date | null;
 }
 
+export interface TokenCreateDTO {
+    token: string,
+    userId: string
+}
+
 const tokenSchema = new Schema({
     token: {
         type: String,

@@ -1,25 +1,22 @@
 import logger from "@/lib/winston";
 import { AppError } from "@/middleware/errorHandler";
-import { CommentLean, IComment } from "@/models/comment";
+import { CommentCreateDTO, CommentLean, IComment } from "@/models/comment";
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
 import { commentRepository } from "@/repository/commentRepository/commentRepository";
 import xss from "xss";
 
-import { Types } from 'mongoose'
 import { userRepository } from "@/repository/userRepository/userRepository";
+import { ensureDocument } from "@/utils/ensureDocument";
 
 const commentService = {
-    createComment: (async function (userId: string, blogId: string, comment: string): Promise<IComment>{
+    createComment: (async function (credentials: CommentCreateDTO): Promise<CommentLean | null>{
+        const {userId, blogId, comment} = credentials
 
         const blog = await blogRepository.findById(blogId)
+        ensureDocument(blog, 'Blog')
 
-        if(!blog){
-            logger.error('Blog not found')
-            const error = new Error('Blog not found') as AppError;
-            error.statusCode = 404;
-            error.code = 'BlogNotFound';
-            throw error;
-        }
+        const user = await userRepository.findById(userId)
+        ensureDocument(user, 'User')
 
         const cleanComment = xss(comment)
 
@@ -37,42 +34,22 @@ const commentService = {
 
     getCommentsByBlog: (async function (blogId: string): Promise<CommentLean[]>{
         const blog = await blogRepository.findById(blogId)
+        ensureDocument(blog, 'Blog')
 
-        if(!blog ){
-            logger.error('Blog not found')
-            const error = new Error('Blog not found') as AppError;
-            error.statusCode = 404;
-            error.code = 'BlogNotFound';
-            throw error;
-        }
-
-        const allComments = await commentRepository.find({_id: blogId})
+        const allComments = await commentRepository.find({ blogId })
 
         logger.info('Comments successfully retreaved')
 
         return allComments
     }),
 
+
     deleteComment: (async function (userId: string, commentId: string): Promise<void>{
+        const comment = await commentRepository.findById(commentId) as any        //wegen toString()
+        ensureDocument(comment, 'Comment')
 
-        const comment = await commentRepository.find({_id: commentId}) as any        //wegen toString()
         const user = await userRepository.findById(userId)
-
-        if(!comment){
-            logger.error('Comment not found')
-            const error = new Error('Comment not found') as AppError;
-            error.statusCode = 404;
-            error.code = 'CommentNotFound';
-            throw error;
-        }
-
-        if(!user){
-            logger.error('User not found')
-            const error = new Error('User not found') as AppError;
-            error.statusCode = 404;
-            error.code = 'UserNotFound';
-            throw error;
-        }
+        ensureDocument(user, 'User')
 
         if(comment.userId.toString() !== userId && user.role !== 'admin' ) {
             logger.error('User tried to delete a comment without permission')

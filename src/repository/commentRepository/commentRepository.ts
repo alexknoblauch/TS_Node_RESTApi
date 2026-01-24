@@ -1,8 +1,34 @@
 import Comment, { CommentCreateDTO, CommentLean, IComment } from "@/models/comment";
 
 export const commentRepository = {
-    create: async function(data: CommentCreateDTO):Promise<IComment> {
-        return await Comment.create(data)
+    create: async function(data: CommentCreateDTO): Promise<CommentLean | null> {
+        const comment =  await Comment.create(data)
+
+        const commentObj = comment.toObject()
+
+        const leanComment = {
+            ... commentObj,
+            _id: commentObj._id.toString(),
+            blogId: commentObj.blogId.toString(),
+            userId: commentObj.userId.toString()
+        }
+
+        return leanComment
+    },
+
+    findById: async function(commentId: string): Promise<CommentLean | null> {
+        const comment = await Comment.findById(commentId)
+        if(!comment) return null
+        const commentObj = comment.toObject()
+
+        const leanComment = {
+            ... commentObj,
+            _id: commentObj._id.toString(),       
+            blogId: commentObj.blogId.toString(),
+            userId: commentObj.userId.toString()
+        }
+
+        return leanComment
     },
 
     find: async function(filter: object, options?: {limit?: number; skip?: number; select?: string; sort?: any;}):Promise<CommentLean[]> {

@@ -1,14 +1,15 @@
 // repositories/userRepository.ts
 import Blog, { BlogBasic, BlogLean, IBlog } from '@/models/blog';
+import { ensureDocument } from '@/utils/ensureDocument';
 
 /**
  * Types
  */
 
-import { FilterQuery, Types, UpdateQuery } from 'mongoose';                     //excluded kritische values des schema
+import { FilterQuery, Types, UpdateQuery } from 'mongoose';       // excludes kritische values des schema
 
 export const blogRepository = {
-    findById: async(id: string):Promise<BlogLean | null> => {
+    findById: async(id: string): Promise<BlogLean | null> => {
         const blog = await Blog.findById(id).lean().exec()
         if(!blog) return null
         
@@ -26,11 +27,10 @@ export const blogRepository = {
 
         if(options.populate){query = query.populate(options.populate)}
         if(options.sort){ query = query.sort(options.sort)}
-        if(options.skip){ query = query.skip(options.skip)}
-        if(options.limit){ query = query.limit(options.limit)}
+        if(options.skip !== undefined){ query = query.skip(options.skip)}        //skip limit auf undefined cehcken
+        if(options.limit !== undefined){ query = query.limit(options.limit)}     //skip limit auf undefined cehcken
 
         const blog = await query.lean().exec()
-
 
         const leanBlog = blog.map(blog => {
             return {
@@ -43,35 +43,53 @@ export const blogRepository = {
         return leanBlog
     },
 
-    findBySlug: async(slug: string, populate?: string):Promise<BlogLean[] | null> => {
-        let query = Blog.find({slug: slug})
+    findBySlug: async(slug: string, populate?: string):Promise<BlogLean | null> => {
+        let query = Blog.findOne({slug: slug})
 
         if(populate){
             query = query.populate(populate)
         }
 
         const blog = await query.lean().exec()
+        if(!blog) return null                       //nicht ensure Document
 
-        const leanBlog = blog.map(blog => {
-            return {
+        const leanBlog = {
                 ...blog,
                 _id: blog._id.toString(),
                 author: blog.author.toString()
-            }
-        })
+        }
 
         return leanBlog
     },
     
-    create: async(data: Partial<IBlog>):Promise<IBlog> => {
-        return Blog.create(data)
+    create: async(data: CreateBlogDTO): Promise<BlogLean> => {
+        const newBlog = await  Blog.create(data)
+
+        const blogObj = newBlog.toObject()
+
+        const blog = {
+            ... blogObj,
+            _id:  blogObj._id.toString(),
+            author: blogObj.author.toString()
+        }
+
+        return blog
     },
 
-    update: async(id:string, updatedData: UpdateQuery<IBlog>):Promise<IBlog | null> => {
-        return await Blog.findByIdAndUpdate(id, updatedData, { new: true }).exec()
+    update: async(id:string, updatedData: UpdateQuery<IBlog>):Promise<BlogLean | null> => {
+        const newBlog = await Blog.findByIdAndUpdate(id, updatedData, { new: true }).lean().exec()
+        if(!newBlog) return null
+
+        const blog = {
+            ... newBlog,
+            _id:  newBlog._id.toString(),
+            author: newBlog.author.toString()
+        }
+
+        return blog
     },
 
-    deleteById: async (id:string): Promise<boolean | null> => {
+    deleteById: async (id:string): Promise<boolean> => {
         const result = await Blog.deleteOne({_id: id})
         return result.deletedCount === 1
     }

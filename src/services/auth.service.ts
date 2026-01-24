@@ -22,6 +22,7 @@ import { userRepository } from "@/repository/userRepository/userRepository";
 import { SafeUser } from "@/models/user";
 import { genUsername } from "@/utils";
 import createTokenError from "@/utils/tokenError";
+import { ensureDocument } from "@/utils/ensureDocument";
 
 
 interface LoginCredentials {
@@ -58,28 +59,25 @@ const authService = {
         const user = await userRepository.findByEmailForLogin(email)
 
         if(!user){
-            const error = new Error(`No User found with email ${email}`) as AppError;
-            error.statusCode = 400;
-            error.code = 'UserNotFound';
+            const error = new Error('Invalid Login') as AppError;
+            error.statusCode = 401;                 //LOGIN IMMER 401 kein ensureDocuments
+            error.code = 'Invalid Login';
             throw error;
-        }
-        
+        }       
+
         const passwordMatch = await bcrypt.compare(password, user.password)
 
         if(!passwordMatch){
-            const error = new Error('Invalid password') as AppError;
-            error.statusCode = 401; 
-            error.code = 'InvalidPassword';
+            const error = new Error('Invalid Login') as AppError;
+            error.statusCode = 401;                 //LOGIN IMMER 401 kein ensureDocuments
+            error.code = 'Invalid Login';
             throw error;
         }
 
         const accessToken = generateAccessToken(user._id.toString())
         const refreshToken = generateRefreshToken(user._id.toString())
 
-        logger.info('Refresh Token created for', {
-            user: user,
-            token: refreshToken
-        })
+        logger.info('Refresh Token created for')
 
         await tokenRepository.create(refreshToken, user._id.toString())
 
@@ -121,18 +119,10 @@ const authService = {
 
     async logout (refreshToken: string, userId: string):Promise<void> {
         if (refreshToken){
-            tokenRepository.delete(refreshToken)
+            await tokenRepository.delete(refreshToken)
         }
         
-        logger.info('User refresh Token deleted successfully', {
-            token: refreshToken,
-            userId
-
-        })
-
-        logger.info('User logged out successfully', {
-            userId        
-        })
+        logger.info('User logged out', { userId })
     }
 }
 

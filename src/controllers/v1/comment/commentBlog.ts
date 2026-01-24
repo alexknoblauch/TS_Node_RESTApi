@@ -22,7 +22,8 @@ const commentBlog =  catchAsync(async(req: Request, res: Response) => {
     }    
                              
     const { comment } = req.body as CommentData                 // Wichtig Typisieren!
-    const createdComment = await commentService.createComment(userId, blogId, comment)
+    const credentials = { userId, blogId, comment }
+    const createdComment = await commentService.createComment(credentials)
 
     res.status(201).json({
         blogId,                     
