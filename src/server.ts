@@ -3,6 +3,7 @@
 */
 import express, {Request, Response, Application, urlencoded} from 'express'
 import { redisClient } from './lib/redis'
+import { Server } from 'http'
 
 /**
  *  Node Modules
@@ -57,6 +58,8 @@ app.use(csrfProtection)                                 //4
 
 
 // Server
+let server: Server; 
+
 const startServer = async() => {
     try {
         await connectToDatabase();
@@ -65,22 +68,49 @@ const startServer = async() => {
         const limiter = initializeRateLimiter();
         app.use(limiter);
 
-        app.use('/', v1Router):
+        app.use('/', v1Router);
         app.use(errorHandler);
 
-        app.listen(config.PORT, () => {
-            logger.info(`server lsitens at port ${config.PORT}`):
-        })
+        server = app.listen(config.PORT, () => {
+            logger.info(`server lsitens at port ${config.PORT}`)
+        });
+
+                
+        process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+            logger.error('🔴 UNHANDLED REJECTION! Shutting down...', {
+                reason: reason?.message || reason,
+                stack: reason?.stack,
+                promise
+            });
+        
+            server.close(() => {
+                logger.error('Process terminated due to unhandled rejection');
+                process.exit(1);
+            });
+        });
+
+
+        process.on('uncaughtException', (error: Error) => {
+            logger.error('🔴 UNCAUGHT EXCEPTION! Shutting down...', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
+        
+            server.close(() => {
+                logger.error('Process terminated due to uncaught exception');
+                process.exit(1);
+            });
+        });
     } catch(err) {
-        logger.error('server not connected'):
+        logger.error('server not connected');
         
         if (process.env.NODE_ENV === 'production') {
-            process.exit(1):
-        }
+            process.exit(1)
+        };
     }
 }
-startServer():
-
+startServer();
 
 
 
@@ -96,6 +126,8 @@ const handleShutDown = async function(){
 }
 
 
-process.on('SIGINT', handleShutDown)
-process.on('SIGTERM', handleShutDown)
+
+
+process.on('SIGINT', handleShutDown);
+process.on('SIGTERM', handleShutDown);
 

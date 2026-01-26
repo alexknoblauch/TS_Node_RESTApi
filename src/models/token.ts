@@ -27,6 +27,11 @@ export interface TokenCreateDTO {
     userId: string
 }
 
+export interface TokenUpdateDTO {
+    token: string,
+    userId: string
+}
+
 const tokenSchema = new Schema({
     token: {
         type: String,

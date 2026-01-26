@@ -58,8 +58,9 @@ export const errorHandler = (
 
     if (err.name === 'UploadApiError' || err.http_code) {
         res.status(err.http_code as number).json({                                      // as number einfach aber
-        code: err.http_code as number < 500 ? 'ValidationError' : 'CloudinaryError',
+            code: err.http_code as number < 500 ? 'ValidationError' : 'CloudinaryError',
             message: err.message,
+            source: 'Upload API Error'
         });
         return 
     }
@@ -70,5 +71,6 @@ export const errorHandler = (
     res.status(500).json({
         code: 'ServerError',
         message: 'Something went wrong',
+        source: 'Server Error'
     });
 };
