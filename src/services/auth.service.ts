@@ -23,6 +23,7 @@ import { SafeUser } from "@/models/user";
 import { genUsername } from "@/utils";
 import createTokenError from "@/utils/tokenError";
 import { ensureDocument } from "@/utils/ensureDocument";
+import InvalidCrednetials from "@/errors/InvalidCredentials";
 
 
 interface LoginCredentials {
@@ -58,20 +59,12 @@ const authService = {
         const { password, email } = credentials
         const user = await userRepository.findByEmailForLogin(email)
 
-        if(!user){
-            const error = new Error('Invalid Login') as AppError;
-            error.statusCode = 401;                 //LOGIN IMMER 401 kein ensureDocuments
-            error.code = 'Invalid Login';
-            throw error;
-        }       
+        ensureDocument(user, 'User')    
 
         const passwordMatch = await bcrypt.compare(password, user.password)
 
         if(!passwordMatch){
-            const error = new Error('Invalid Login') as AppError;
-            error.statusCode = 401;                 //LOGIN IMMER 401 kein ensureDocuments
-            error.code = 'Invalid Login';
-            throw error;
+            throw new InvalidCrednetials()
         }
 
         const accessToken = generateAccessToken(user._id.toString())

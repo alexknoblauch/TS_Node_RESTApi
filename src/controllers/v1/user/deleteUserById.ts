@@ -5,50 +5,29 @@
 import User from "@/models/user";
 import Blog from "@/models/blog";
 
-
-/**
- * Middleware
- */
- import type { AppError } from '@/middleware/errorHandler'
-
 /**
  * Custom Modules
  */
 
-import catchAsync from "@/utils/catchAsync";
 import logger from "@/lib/winston";
-/**
- * Types
- */
-
-import type { Request, Response } from "express";
-
-
+import { ensureDocument } from "@/utils/ensureDocument";
 
 
 
 const deleteUserById = (async function (userId: string):Promise<void> {
-
-    const result = await User.deleteOne({ _id: userId })
-
+    const user = await User.findById(userId)
+    ensureDocument(user, 'User')
+    
     const blogs = await Blog.find({author: userId}).select('banner.publicId').lean().exec()
-
+    
     // await cloudenary.delete(banner)                  //img löschen
-
+    
+    await User.deleteOne({ _id: userId })
     await Blog.deleteMany({author: userId})
     logger.info('Blogs of User delted', {
         userId,
         blogs
     })
-    
-    if (result.deletedCount === 0) {                                //deleteCount ist mongoose method
-        const error = new Error('User not found') as AppError;
-        error.statusCode = 404;
-        error.code = 'UserNotFound';
-        throw error;
-    }
-
-    res.status(204).send()
 })
 
 export default deleteUserById

@@ -1,7 +1,7 @@
 /**
  *  Node Modules
 */
-import express, {Request, Response, Application, urlencoded} from 'express'
+import express, {Request, Response, Application, urlencoded, NextFunction} from 'express'
 import { redisClient } from './lib/redis'
 import { Server } from 'http'
 
@@ -32,6 +32,7 @@ import { correlationIdMiddleware } from './middleware/correlationId'
 */
 import v1Router from './routes/v1/index'
 import initializeRateLimiter from './lib/express_rate_limit'
+import { serverClose } from './utils/serverClose'
 
 
 /**
@@ -69,38 +70,31 @@ const startServer = async() => {
         app.use(limiter);
 
         app.use('/', v1Router);
-        app.use(errorHandler);
-
+        
         server = app.listen(config.PORT, () => {
             logger.info(`server lsitens at port ${config.PORT}`)
         });
-
-                
+        
+        
         process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
-            logger.error('🔴 UNHANDLED REJECTION! Shutting down...', {
+            logger.error('UNHANDLED REJECTION! Shutting down...', {
                 reason: reason?.message || reason,
                 stack: reason?.stack,
                 promise
             });
-        
-            server.close(() => {
-                logger.error('Process terminated due to unhandled rejection');
-                process.exit(1);
-            });
+            
+            serverClose(server, 'Process terminated due to unhandled rejection')    //Harter Exit
         });
-
-
+        
+        
         process.on('uncaughtException', (error: Error) => {
-            logger.error('🔴 UNCAUGHT EXCEPTION! Shutting down...', {
+            logger.error('UNCAUGHT EXCEPTION! Shutting down...', {
                 message: error.message,
                 stack: error.stack,
                 name: error.name
             });
-        
-            server.close(() => {
-                logger.error('Process terminated due to uncaught exception');
-                process.exit(1);
-            });
+            
+            serverClose(server, 'Process terminated due to uncaught exception')     //Harter Exit
         });
     } catch(err) {
         logger.error('server not connected');
@@ -114,19 +108,38 @@ startServer();
 
 
 
+
+//ERROR HANDLING
+app.use('/api/*', (req: Request, res: Response, next: NextFunction) => {
+    const error = new Error(`API endpoint ${req.method} ${req.originalUrl} not found`);
+    (error as any).statusCode = 404;
+    (error as any).code = 'ROUTE_NOT_FOUND';
+    next(error);
+});
+
+app.all('*', (req: Request, res: Response, next: NextFunction) => {
+    const error = new Error(`Route ${req.method} ${req.originalUrl} not found`);
+    (error as any).statusCode = 404;
+    (error as any).code = 'ROUTE_NOT_FOUND';
+    next(error);
+});
+
+app.use(errorHandler);
+
+
+
+
+//EXIT PROCESS
 const handleShutDown = async function(){
     try {
         await disconnectDatabase();
-
+        
         logger.info('server shut down');
         process.exit(0);
     } catch(err) {
         logger.error('error during server shutdown');
     }
 }
-
-
-
 
 process.on('SIGINT', handleShutDown);
 process.on('SIGTERM', handleShutDown);

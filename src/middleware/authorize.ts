@@ -16,7 +16,8 @@ import catchAsync from "@/utils/catchAsync";
  */
 
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
-import  { AppError }  from "@/middleware/errorHandler";
+import { ensureDocument } from "@/utils/ensureDocument";
+import AppError from "@/utils/AppError";
 
 export type AuthRole = 'admin' | 'user'
 
@@ -25,19 +26,17 @@ const authorize = (roles: AuthRole[]): RequestHandler  => {     // RequestHandle
         
         const userId = req.userId
         const user = await User.findById(userId)
-
-        if(!user){
-            const error = new Error('Access denied, no User found') as AppError;
-            error.statusCode =  404;
-            error.code = 'UserNotFound'; 
-            throw error;
-        }        
+        ensureDocument(user, 'User')     
 
         if(!roles.includes(user.role)){
-            const error = new Error('Access denied, Roles not correct') as AppError;
-            error.statusCode = 403;
-            error.code = 'AuthorizationError';
-            throw error;        
+
+            logger.info('Access denied, Roles not correct', {
+                reason: 'ROLE_DENIED',   
+                ip: req.ip,
+                userAgent: req.headers['user-agent'],
+                action: 'AUTH_ATTEMPT'
+            })
+            throw new AppError('Access denied, Roles not correct', 401, 'AuthorizationError');      
         }
 
         next()

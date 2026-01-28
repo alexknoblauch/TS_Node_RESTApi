@@ -20,7 +20,8 @@ import logger from '../../../lib/winston'
 import { Request, Response } from "express";
 import { IUser } from "../../../models/user";
 import { generateAccessToken, generateRefreshToken } from "../../../lib/jwt";
-import { AppError } from "@/middleware/errorHandler";
+import AppError from "@/utils/AppError";
+import { ensureDocument } from "@/utils/ensureDocument";
 
 type LoginUser = Pick<IUser, 'password' | 'email'> & {
   twoFactorCode?: string;
@@ -30,27 +31,29 @@ const login = async function (req: Request, res: Response): Promise<void> {
   const { email, password, twoFactorCode } = req.body as LoginUser;
 
   if (!email || !password) {
-    logger.error('Email and password required')
-    const error = new Error('Email and password required') as AppError;
-    error.statusCode = 400;
-    error.code = 'EMAIL_PASSWORD_REQUIRED';
-    throw error;
+    logger.info('Invalid email or password', {
+      reason: 'USER_NOT_FOUND_OR_PASSWORD_INVALID',
+      email: email,         
+      ip: req.ip,
+      userAgent: req.headers['user-agent'],
+      action: 'LOGIN_ATTEMPT'
+    })
+    throw new AppError('Email and password required', 400, 'EMAIL_PASSWORD_REQUIRED');
   }
 
   const user = await User.findOne({ email });
-  if (!user) {
-    const error = new Error('Invalid email or password') as AppError;
-    error.statusCode = 401;
-    error.code = 'INVALID_CREDENTIALS';
-    throw error;
-  }
+  ensureDocument(user, 'User')
 
   const pwCompare = await bcrypt.compare(password, user.password);
   if (!pwCompare) {
-    const error = new Error('Invalid email or password') as AppError;
-    error.statusCode = 401;
-    error.code = 'INVALID_CREDENTIALS';
-    throw error;
+    logger.info('Invalid email or password', {
+      reason: 'USER_NOT_FOUND_OR_PASSWORD_INVALID',
+      email: email,         
+      ip: req.ip,
+      userAgent: req.headers['user-agent'],
+      action: 'LOGIN_ATTEMPT'
+    })
+    throw new AppError('Invalid email or password', 401, 'INVALID_CREDENTIALS');
   }
 
   // 2FA CHECK - NUR DIESEN TEIL HINZUGEFÜGT
@@ -79,7 +82,7 @@ const login = async function (req: Request, res: Response): Promise<void> {
       const error = new Error('Invalid 2FA code') as AppError;
       error.statusCode = 401;
       error.code = 'INVALID_2FA_CODE';
-      throw error;
+     throw new AppError('Invalid 2FA code', 401, 'INVALID_2FA_CODE');
     }
   }
 

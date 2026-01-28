@@ -20,8 +20,6 @@ import Like from '@/models/like'
  * Types
  */
 import type { Request, Response } from 'express'
-import type { IBlog } from '@/models/blog'
-import type { AppError } from '@/middleware/errorHandler'
 import { ensureDocument } from '@/utils/ensureDocument'
 /**
  * Purify the blog content

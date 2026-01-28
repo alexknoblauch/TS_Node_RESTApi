@@ -21,14 +21,13 @@ import Like from '@/models/like'
  */
 import type { Request, Response } from 'express'
 import type { IBlog } from '@/models/blog'
-import type { AppError } from '@/middleware/errorHandler'
 import { ensureDocument } from '@/utils/ensureDocument'
+import AppError from '@/utils/AppError'
 /**
  * Purify the blog content
  */
 
 const likeBlog = catchAsync(async function(req: Request, res: Response): Promise<void>{
-
     const { userId }  = req.params
     const { blogId } = req.params
 
@@ -39,14 +38,15 @@ const likeBlog = catchAsync(async function(req: Request, res: Response): Promise
     const existingLike = await Like.findOne({userId, blogId})
 
     if(existingLike){
-        logger.info('like already set', {
-            blog,
-            userId
+        logger.info('like already exists', {
+            reason: 'LIKE_ALREADY_EXISTS',
+            blog: blog?._id,
+            userId,   
+            ip: req.ip,
+            userAgent: req.headers['user-agent'],
+            action: 'LIKE_ATTEMPT'
         })
-        const error = new Error('Like already given') as AppError;
-        error.statusCode = 400;
-        error.code = 'BadRequest';
-        throw error; 
+        throw new AppError('Like already exists', 409, 'BadRequest');       // CONFLICT
     }
 
 

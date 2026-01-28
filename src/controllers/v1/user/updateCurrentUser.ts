@@ -1,51 +1,26 @@
 /**
  * Custom Modules
  */
-
 import logger from "@/lib/winston";
 import bcrypt from 'bcrypt'
-
 /**
  * Models
  */
-
 import User from "@/models/user";
-import catchAsync from "@/utils/catchAsync";
-
 /**
  * Types
  */
-
-import type { Request, Response } from 'express'
-import type { AppError } from '@/middleware/errorHandler'
 import { userRepository } from "@/repository/userRepository/userRepository";
+import AppError from "@/utils/AppError";
+import { ensureDocument } from "@/utils/ensureDocument";
 
 type  IUpdatedData = Partial<{
         username: string, password: string, email: string, firstName: string,lastName: string, website: string, youtube: string, facebook: string, instagram: string, linkedin: string, x: string
 }>
 
 const updateCurrentUser = (async (userId: string, updatedData: IUpdatedData): Promise<void> => {
-
     const user = await User.findById(userId)
-
-    if(!user){
-        const error = new Error('User not found') as AppError;
-        error.statusCode = 404;
-        error.code = 'UserNotFound';
-        throw error;
-    }
-
-    if (
-        updatedData.website ||
-        updatedData.facebook ||
-        updatedData.instagram ||
-        updatedData.linkedin ||
-        updatedData.x ||
-        updatedData.youtube
-        ) {
-        user.socialLinks ??= {}
-    }
-
+    ensureDocument(user, 'User')
     
     //ACHTUNG: nie updatedData direkt in DB. das ist Client Logik - mutieren zu Server Logik
     const update: any = {}
