@@ -1,10 +1,14 @@
-import { AppError } from "@/middleware/errorHandler";
+import { httpError } from "./httpError";
+import { Request } from 'express'
 
-const createTokenError = (code: string, statusCode: number = 401) => {
-    const error = new Error('Invalid or expired authentication token') as AppError;
-    error.statusCode = statusCode;
-    error.code = code;
-    return error;
-};
+const tokenError = function(req: Request, message = 'Invalid Token') {
+    httpError({
+        req,
+        message,
+        statusCode: 401,
+        code: 'INVALID_TOKEN',
+        action: 'AUTHENTICATION'
+    })
+}
 
-export default createTokenError
+export default tokenError

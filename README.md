@@ -17,6 +17,7 @@ Repositories: Datenzugriff abstrahieren
 Interfaces in Modellen: Trennung von Mongoose-Logik und TypeScript-Typen
 Middleware: Authentifizierung, Autorisierung, Error-Handling, Validierung
 Logging: Erweiterte Winston-Konfiguration für Produktion
+Errors: Service und HTTP Layer trennen, Prod und Dev in global Errorhandler.
 
 
 
@@ -32,6 +33,7 @@ Unit Tests - mit Jest und Mock-Injection
 
 
 Dieses Projekt dient als Blueprint und half mir neue Techniken kennen zu lernen und Analysieren.
+Ich habe über Abstrahierungen und Layers gelernt, sowie best practices in Express.
 Es ist nicht als fertige API gedacht, ich habe das Postman Testing ab einem gewissen Zeitpunkt abgesetzt.
 Einen grossteil der Funktionen und Files habe ich mehrmals repetiert und im Kopf abgespeichert, ein anderer Teil ist Boilerplate ready for Production.
 Alle Zeilen des Codes sind anaylsiert und verstanden als auch der Datenfluss der kompletten API.
