@@ -1,7 +1,7 @@
 /**
  *  Node modules
  */
-import getOrSetRedis from "@/utils/infra/getOrSetRedis";
+import getOrSetRedis from "@/utils/infra/cache/getOrSetRedis";
 import dotenv from "dotenv";
 dotenv.config();
 

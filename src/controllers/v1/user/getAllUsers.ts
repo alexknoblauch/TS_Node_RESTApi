@@ -20,7 +20,7 @@ import { userRepository } from "@/repository/userRepository/userRepository";
  * Types
  */
 import { Request, Response } from "express";
-import getOrSetRedis from "@/utils/infra/getOrSetRedis";
+import getOrSetRedis from "@/utils/infra/cache/getOrSetRedis";
 
 
 const getAllUsers = catchAsync(async function (req: Request, res: Response): Promise<IUser[]> {

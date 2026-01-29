@@ -32,7 +32,8 @@ import { correlationIdMiddleware } from './middleware/correlationId'
 */
 import v1Router from './routes/v1/index'
 import initializeRateLimiter from './lib/express_rate_limit'
-import { serverClose } from './utils/infra/serverClose'
+import { serverClose } from './infra/server/serverClose'
+import AppError from './errors/service/AppError'
 
 
 /**
@@ -111,16 +112,12 @@ startServer();
 
 //ERROR HANDLING
 app.use('/api/*', (req: Request, res: Response, next: NextFunction) => {
-    const error = new Error(`API endpoint ${req.method} ${req.originalUrl} not found`);
-    (error as any).statusCode = 404;
-    (error as any).code = 'ROUTE_NOT_FOUND';
+    const error = new AppError(`API endpoint ${req.method} ${req.originalUrl} not found`, 404, 'ROUTE_NOT_FOUND');
     next(error);
 });
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
-    const error = new Error(`Route ${req.method} ${req.originalUrl} not found`);
-    (error as any).statusCode = 404;
-    (error as any).code = 'ROUTE_NOT_FOUND';
+    const error = new AppError(`API endpoint ${req.method} ${req.originalUrl} not found`, 404, 'ROUTE_NOT_FOUND');
     next(error);
 });
 

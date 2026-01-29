@@ -8,20 +8,10 @@ import DailyRotateFile from 'winston-daily-rotate-file'
  * Node Modules
  */
 import config from '../config'
-import { asyncLocalStorageInstance } from '@/utils/context/correlationStore';
+import { correlationIdFormat } from '@/infra/logger/correalationIdFormat';
+
 
 const { combine, timestamp, json, errors, align, printf, colorize } = winston.format;
-
-const correlationIdFormat = winston.format((info) => {
-  const correlationId = asyncLocalStorageInstance.getStore() as string;
-  
-  if (!correlationId) {
-    info.correlationId = 'N/A';
-  } else {
-    info.correlationId = correlationId
-  }
-  return info;
-}); 
 
 const transports: winston.transport[] = [];                       //LOKI for centraliezd log files. winstown würde sosnt in jedem server ein logifle abelgen
 
