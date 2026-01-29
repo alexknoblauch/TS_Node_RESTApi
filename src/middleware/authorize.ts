@@ -9,15 +9,15 @@ import logger from "@/lib/winston";
  */
 
 import User from "@/models/user";
-import catchAsync from "@/utils/catchAsync";
+import catchAsync from "@/utils/async/catchAsync";
 
 /**
  * Types
  */
 
 import type { Request, Response, NextFunction, RequestHandler } from 'express'
-import { ensureDocument } from "@/utils/ensureDocument";
-import AppError from "@/utils/AppError";
+import { ensureDocument } from "@/utils/validation/ensureDocument";
+import AppError from "@/errors/service errors/AppError";
 
 export type AuthRole = 'admin' | 'user'
 
@@ -29,14 +29,13 @@ const authorize = (roles: AuthRole[]): RequestHandler  => {     // RequestHandle
         ensureDocument(user, 'User')     
 
         if(!roles.includes(user.role)){
-
             logger.info('Access denied, Roles not correct', {
                 reason: 'ROLE_DENIED',   
                 ip: req.ip,
                 userAgent: req.headers['user-agent'],
                 action: 'AUTH_ATTEMPT'
             })
-            throw new AppError('Access denied, Roles not correct', 401, 'AuthorizationError');      
+            throw new AppError('Access denied, Roles not correct', 403, 'AuthorizationError');      
         }
 
         next()

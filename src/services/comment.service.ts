@@ -6,7 +6,7 @@ import { commentRepository } from "@/repository/commentRepository/commentReposit
 import xss from "xss";
 
 import { userRepository } from "@/repository/userRepository/userRepository";
-import { ensureDocument } from "@/utils/ensureDocument";
+import { ensureDocument } from "@/utils/validation/ensureDocument";
 
 const commentService = {
     createComment: (async function (credentials: CommentCreateDTO): Promise<CommentLean | null>{

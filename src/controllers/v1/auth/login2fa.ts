@@ -20,8 +20,10 @@ import logger from '../../../lib/winston'
 import { Request, Response } from "express";
 import { IUser } from "../../../models/user";
 import { generateAccessToken, generateRefreshToken } from "../../../lib/jwt";
-import AppError from "@/utils/AppError";
-import { ensureDocument } from "@/utils/ensureDocument";
+import AppError from "@/errors/service errors/AppError";
+import { ensureDocument } from "@/utils/validation/ensureDocument";
+import { badRequest } from "@/utils/Error files/badRequestError";
+import { authError } from "@/utils/Error files/authError";
 
 type LoginUser = Pick<IUser, 'password' | 'email'> & {
   twoFactorCode?: string;
@@ -31,14 +33,7 @@ const login = async function (req: Request, res: Response): Promise<void> {
   const { email, password, twoFactorCode } = req.body as LoginUser;
 
   if (!email || !password) {
-    logger.info('Invalid email or password', {
-      reason: 'USER_NOT_FOUND_OR_PASSWORD_INVALID',
-      email: email,         
-      ip: req.ip,
-      userAgent: req.headers['user-agent'],
-      action: 'LOGIN_ATTEMPT'
-    })
-    throw new AppError('Email and password required', 400, 'EMAIL_PASSWORD_REQUIRED');
+    badRequest(req, 'Email or Password wrong')
   }
 
   const user = await User.findOne({ email });
@@ -46,14 +41,7 @@ const login = async function (req: Request, res: Response): Promise<void> {
 
   const pwCompare = await bcrypt.compare(password, user.password);
   if (!pwCompare) {
-    logger.info('Invalid email or password', {
-      reason: 'USER_NOT_FOUND_OR_PASSWORD_INVALID',
-      email: email,         
-      ip: req.ip,
-      userAgent: req.headers['user-agent'],
-      action: 'LOGIN_ATTEMPT'
-    })
-    throw new AppError('Invalid email or password', 401, 'INVALID_CREDENTIALS');
+    authError(req, 'Email or Password wrong')
   }
 
   // 2FA CHECK - NUR DIESEN TEIL HINZUGEFÜGT
@@ -79,9 +67,12 @@ const login = async function (req: Request, res: Response): Promise<void> {
     });
 
     if (!verified) {
-      const error = new Error('Invalid 2FA code') as AppError;
-      error.statusCode = 401;
-      error.code = 'INVALID_2FA_CODE';
+      logger.info('Twofactor authentication failed', {
+        reason: 'TWOFACTOR_ATUH_FAILED',
+        ip: req.ip,
+        userAgent: req.headers['user-agent'],
+        action: '"2FA_AUTH_ATTEMPT'
+      })
      throw new AppError('Invalid 2FA code', 401, 'INVALID_2FA_CODE');
     }
   }

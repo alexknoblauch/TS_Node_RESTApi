@@ -8,15 +8,15 @@ import logger from "@/lib/winston";
  * Models
  */
 import Blog from "@/models/blog";
-import catchAsync from "@/utils/catchAsync";
+import catchAsync from "@/utils/async/catchAsync";
 
 /**
  * Types
  */
 import type { Request, Response, NextFunction } from "express";
-import { ensureDocument } from "@/utils/ensureDocument";
-import AppError from "@/utils/AppError";
-import { notFound } from "@/utils/HTTP Error files/notFoundError";
+import { ensureDocument } from "@/utils/validation/ensureDocument";
+import AppError from "@/errors/service errors/AppError";
+import { notFound } from "@/errors/http errors/notFoundError";
 
 /**
  * Constants

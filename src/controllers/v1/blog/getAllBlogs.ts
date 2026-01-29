@@ -7,7 +7,7 @@ import  { IBlog } from "@/models/blog";
  * Repos
  */
 import blogService from "@/services/blog.service";
-import catchAsync from "@/utils/catchAsync";
+import catchAsync from "@/utils/async/catchAsync";
 import { Request, Response } from "express";
 
 /**

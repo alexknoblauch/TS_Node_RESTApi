@@ -6,7 +6,7 @@ import xss from 'xss'
 /**
  * Custom Modules
 */
-import catchAsync from "@/utils/catchAsync"
+import catchAsync from "@/utils/async/catchAsync"
 import logger from '@/lib/winston'
 /**
  * Models
@@ -20,7 +20,7 @@ import Like from '@/models/like'
  * Types
  */
 import type { Request, Response } from 'express'
-import { ensureDocument } from '@/utils/ensureDocument'
+import { ensureDocument } from '@/utils/validation/ensureDocument'
 /**
  * Purify the blog content
  */

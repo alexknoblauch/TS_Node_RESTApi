@@ -14,7 +14,7 @@ import { generateAccessToken, verifyRefreshToken } from "@/lib/jwt";
  */
 
 import Token from '@/models/token'
-import catchAsync from "@/utils/catchAsync";
+import catchAsync from "@/utils/async/catchAsync";
 
 /**
  * Types

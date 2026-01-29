@@ -1,4 +1,4 @@
-import AppError from "./AppError";
+import AppError from "../AppError";
 
 class InvalidCrednetials extends AppError {
     constructor(message = 'Invalid Login') {

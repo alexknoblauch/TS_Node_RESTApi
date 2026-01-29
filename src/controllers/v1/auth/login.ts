@@ -2,7 +2,7 @@
  * Custom Modules
  */
 import authService from "@/services/auth.service";
-import catchAsync from "@/utils/catchAsync";
+import catchAsync from "@/utils/async/catchAsync";
 /**
  *  Types
  */

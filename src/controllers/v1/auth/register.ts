@@ -6,7 +6,7 @@ import  { genUsername }  from '@/utils/index'
 import { generateAccessToken, generateRefreshToken} from '@/lib/jwt'
 import Token from '@/models/token'
 import config from '@/config'
-import catchAsync from '../../../utils/catchAsync';
+import catchAsync from '../../../utils/async/catchAsync';
 
 /**
  * Models

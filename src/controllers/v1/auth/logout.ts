@@ -3,7 +3,7 @@
  */
 import  logger  from "@/lib/winston";
 import config from "@/config";
-import catchAsync from "@/utils/catchAsync";
+import catchAsync from "@/utils/async/catchAsync";
 
 /**
  *  Models
@@ -17,7 +17,6 @@ import Token from '@/models/token'
 
 import type { Request, Response } from 'express'
 import authService from "@/services/auth.service";
-import { AppError } from "@/middleware/errorHandler";
 
 
 const logout = catchAsync(async function(req: Request, res: Response): Promise<void>{

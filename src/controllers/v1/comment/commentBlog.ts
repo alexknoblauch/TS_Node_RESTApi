@@ -3,7 +3,7 @@
  */
 import Comment, { CommentData, IComment } from "@/models/comment"
 import commentService from "@/services/comment.service"
-import catchAsync from "@/utils/catchAsync"
+import catchAsync from "@/utils/async/catchAsync"
 /**
  * Types
  */

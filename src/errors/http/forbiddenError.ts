@@ -1,4 +1,6 @@
 import { httpError } from "./httpError";
+import { Request } from 'express'
+
 
 export const forbidden = (req: Request, message = 'Access denied') =>
   httpError({

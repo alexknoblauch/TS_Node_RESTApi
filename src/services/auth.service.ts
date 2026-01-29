@@ -21,9 +21,9 @@ import { userRepository } from "@/repository/userRepository/userRepository";
 */
 import { SafeUser } from "@/models/user";
 import { genUsername } from "@/utils";
-import createTokenError from "@/utils/tokenError";
-import { ensureDocument } from "@/utils/ensureDocument";
-import InvalidCrednetials from "@/errors/InvalidCredentials";
+import createTokenError from "@/errors/http errors/tokenError";
+import { ensureDocument } from "@/utils/validation/ensureDocument";
+import InvalidCrednetials from "@/errors/service errors/InvalidCredentials";
 
 
 interface LoginCredentials {
@@ -66,7 +66,7 @@ const authService = {
         if(!passwordMatch){
             throw new InvalidCrednetials()
         }
-
+ 
         const accessToken = generateAccessToken(user._id.toString())
         const refreshToken = generateRefreshToken(user._id.toString())
 

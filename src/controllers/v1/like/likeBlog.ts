@@ -1,12 +1,7 @@
 /**
- * Node Modules
- */
-
-import xss from 'xss'
-/**
  * Custom Modules
 */
-import catchAsync from "@/utils/catchAsync"
+import catchAsync from "@/utils/async/catchAsync"
 import logger from '@/lib/winston'
 /**
  * Models
@@ -20,9 +15,8 @@ import Like from '@/models/like'
  * Types
  */
 import type { Request, Response } from 'express'
-import type { IBlog } from '@/models/blog'
-import { ensureDocument } from '@/utils/ensureDocument'
-import AppError from '@/utils/AppError'
+import { ensureDocument } from '@/utils/validation/ensureDocument'
+import AppError from '@/errors/service errors/AppError'
 /**
  * Purify the blog content
  */
@@ -32,7 +26,6 @@ const likeBlog = catchAsync(async function(req: Request, res: Response): Promise
     const { blogId } = req.params
 
     const blog = await Blog.findById(blogId).select('likeCount').exec()
-
     ensureDocument(blog, 'Blog')
     
     const existingLike = await Like.findOne({userId, blogId})

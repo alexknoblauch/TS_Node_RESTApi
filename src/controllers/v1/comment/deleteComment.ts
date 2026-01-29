@@ -1,7 +1,7 @@
 /**
  * Custom Modules
 */
-import catchAsync from "@/utils/catchAsync"
+import catchAsync from "@/utils/async/catchAsync"
 
 /**
  * Types

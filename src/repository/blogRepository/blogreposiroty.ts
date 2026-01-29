@@ -1,6 +1,6 @@
 // repositories/userRepository.ts
-import Blog, { BlogBasic, BlogLean, IBlog } from '@/models/blog';
-import { ensureDocument } from '@/utils/ensureDocument';
+import Blog, { BlogBasic, BlogLean, CreateBlogDTO, IBlog } from '@/models/blog';
+import { ensureDocument } from '@/utils/validation/ensureDocument';
 
 /**
  * Types

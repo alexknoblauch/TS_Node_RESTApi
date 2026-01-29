@@ -3,7 +3,7 @@ import { AppError } from "@/middleware/errorHandler";
 import { BlogLean, CreateBlogDTO, IBanner, IBlog, UpdateBlogDTO } from "@/models/blog";
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
 import { userRepository } from "@/repository/userRepository/userRepository";
-import { ensureDocument } from "@/utils/ensureDocument";
+import { ensureDocument } from "@/utils/validation/ensureDocument";
 import { FilterQuery } from "mongoose";
 import xss from "xss";
 

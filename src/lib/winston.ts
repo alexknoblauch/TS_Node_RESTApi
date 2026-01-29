@@ -8,7 +8,7 @@ import DailyRotateFile from 'winston-daily-rotate-file'
  * Node Modules
  */
 import config from '../config'
-import { asyncLocalStorageInstance } from '@/utils/correlationStore';
+import { asyncLocalStorageInstance } from '@/utils/context/correlationStore';
 
 const { combine, timestamp, json, errors, align, printf, colorize } = winston.format;
 

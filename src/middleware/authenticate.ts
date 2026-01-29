@@ -2,12 +2,10 @@
  * Custom Modules
  */
 import { verifyAccessToken } from "@/lib/jwt";
-import logger from "@/lib/winston";
 /**
  * Custom Modules
  */
-import AppError from "@/utils/AppError";
-import catchAsync from "@/utils/catchAsync";
+import catchAsync from "@/utils/async/catchAsync";
 import { authError } from "@/utils/Error files/authError";
 /**
  * Types

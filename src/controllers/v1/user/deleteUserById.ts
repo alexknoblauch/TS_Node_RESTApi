@@ -10,7 +10,7 @@ import Blog from "@/models/blog";
  */
 
 import logger from "@/lib/winston";
-import { ensureDocument } from "@/utils/ensureDocument";
+import { ensureDocument } from "@/utils/validation/ensureDocument";
 
 
 

@@ -32,7 +32,7 @@ import { correlationIdMiddleware } from './middleware/correlationId'
 */
 import v1Router from './routes/v1/index'
 import initializeRateLimiter from './lib/express_rate_limit'
-import { serverClose } from './utils/serverClose'
+import { serverClose } from './utils/infra/serverClose'
 
 
 /**
@@ -77,7 +77,7 @@ const startServer = async() => {
         
         
         process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
-            logger.error('UNHANDLED REJECTION! Shutting down...', {
+            logger.error('UNHANDLED REJECTION! Shutting down...', {     //Rejected Promise = inkonsisenz
                 reason: reason?.message || reason,
                 stack: reason?.stack,
                 promise
@@ -87,7 +87,7 @@ const startServer = async() => {
         });
         
         
-        process.on('uncaughtException', (error: Error) => {
+        process.on('uncaughtException', (error: Error) => {             //Error ohne handler
             logger.error('UNCAUGHT EXCEPTION! Shutting down...', {
                 message: error.message,
                 stack: error.stack,

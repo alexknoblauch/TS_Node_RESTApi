@@ -1,5 +1,5 @@
 import logger from "@/lib/winston";
-import AppError from "../AppError";
+import AppError from "../service errors/AppError";
 import { Request } from 'express'
 
 type HttpErrorOptions = {
@@ -19,7 +19,6 @@ export function httpError({
   action = 'REQUEST',
   reason = code
 }: HttpErrorOptions): never {
-
   logger.info(message, {
     reason,
     action,

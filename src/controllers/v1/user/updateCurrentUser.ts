@@ -11,8 +11,7 @@ import User from "@/models/user";
  * Types
  */
 import { userRepository } from "@/repository/userRepository/userRepository";
-import AppError from "@/utils/AppError";
-import { ensureDocument } from "@/utils/ensureDocument";
+import { ensureDocument } from "@/utils/validation/ensureDocument";
 
 type  IUpdatedData = Partial<{
         username: string, password: string, email: string, firstName: string,lastName: string, website: string, youtube: string, facebook: string, instagram: string, linkedin: string, x: string

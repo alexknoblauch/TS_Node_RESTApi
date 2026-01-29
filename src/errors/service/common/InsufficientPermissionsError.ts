@@ -1,4 +1,4 @@
-import AppError from "./AppError";
+import AppError from "../AppError";
 
 class InsufficientPermissionsError extends AppError {
     constructor(message = 'Insufficient Permissions') {

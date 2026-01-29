@@ -11,7 +11,7 @@ import config from "@/config";
  * Models
  */
 import User, { IUser } from "@/models/user";
-import catchAsync from "@/utils/catchAsync";
+import catchAsync from "@/utils/async/catchAsync";
 /**
  * Repos
  */
@@ -20,7 +20,7 @@ import { userRepository } from "@/repository/userRepository/userRepository";
  * Types
  */
 import { Request, Response } from "express";
-import getOrSetRedis from "@/utils/getOrSetRedis";
+import getOrSetRedis from "@/utils/infra/getOrSetRedis";
 
 
 const getAllUsers = catchAsync(async function (req: Request, res: Response): Promise<IUser[]> {

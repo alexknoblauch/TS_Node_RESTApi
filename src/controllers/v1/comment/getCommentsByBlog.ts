@@ -6,7 +6,7 @@ import { Request, Response } from "express"
  * Service
  */
 import commentService from "@/services/comment.service"
-import catchAsync from "@/utils/catchAsync"
+import catchAsync from "@/utils/async/catchAsync"
 
 
 const getCommentsByBlog =  catchAsync(async(req: Request, res: Response) => {

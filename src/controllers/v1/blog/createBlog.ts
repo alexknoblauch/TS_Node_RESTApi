@@ -6,9 +6,9 @@ import xss from 'xss'
 /**
  * Custom Modules
 */
-import catchAsync from "@/utils/catchAsync"
+import catchAsync from "@/utils/async/catchAsync"
 import logger from '@/lib/winston'
-import { ensureDocument } from '@/utils/ensureDocument'
+import { ensureDocument } from '@/utils/validation/ensureDocument'
 /**
  * Models
  */
@@ -21,7 +21,6 @@ import Blog from '@/models/blog'
  */
 import type { Request, Response } from 'express'
 import type { IBlog } from '@/models/blog'
-import type { AppError } from '@/middleware/errorHandler'
 
 
 type BlogData = Pick<IBlog, 'title' | 'content' | 'banner' | 'status' >

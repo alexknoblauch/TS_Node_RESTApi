@@ -1,7 +1,7 @@
 import { generateAccessToken, verifyAccessToken, verifyRefreshToken } from "@/lib/jwt";
 import { Token } from "@/models/token2";
-import { ensureDocument } from "@/utils/ensureDocument";
-import { validateRequired } from "@/utils/validateRequired";
+import { ensureDocument } from "@/utils/validation/ensureDocument";
+import { validateRequired } from "@/utils/validation/validateRequired";
 import { Request, Response } from "express";
 
 const refreshToken2 = function(req: Request, res: Response){
