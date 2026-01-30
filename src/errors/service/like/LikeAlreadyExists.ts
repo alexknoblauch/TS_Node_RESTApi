@@ -1,4 +1,4 @@
-import AppError from "../AppError";
+import AppError from "../ServiceAppError";
 
 class LikeAlreadyExists extends AppError {
     constructor(message = 'Like already exists'){

@@ -1,4 +1,4 @@
-class AppError extends Error {
+class HttpAppError extends Error {
   statusCode: number;
   status: string;
   isOperational: boolean;
@@ -18,4 +18,4 @@ class AppError extends Error {
   }
 }
 
-export default AppError;
+export default HttpAppError;

@@ -1,4 +1,4 @@
-import AppError from "../AppError";
+import AppError from "../ServiceAppError";
 
 class LikeNotFound extends AppError {
     constructor(message = 'Like not found'){

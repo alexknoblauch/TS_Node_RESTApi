@@ -1,4 +1,4 @@
-import AppError from "@/errors/service/AppError";
+import AppError from "@/errors/service/ServiceAppError";
 import logger from "@/lib/winston";
 import { Request, Response, NextFunction } from 'express'
 
@@ -18,7 +18,6 @@ export const errorHandler = (err: unknown, req: Request, res: Response, next: Ne
         errorCode: err.errorCode
       });
     }
-
 
     logger.error('Non-operational error in production:', err);
 

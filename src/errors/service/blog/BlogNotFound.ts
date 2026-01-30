@@ -1,9 +1,8 @@
-import AppError from "../AppError";
+import ServiceAppError from "../ServiceAppError";
 
-class BlogNotFound extends AppError {
-    constructor(message = 'Blog not found'){
-        super(message, 404, 'BLOG_NOT_FOUND')
-
+class BlogNotFound extends ServiceAppError {
+    constructor(){
+        super('Blog not found', 'BLOG_NOT_FOUND')
     }
 }
 

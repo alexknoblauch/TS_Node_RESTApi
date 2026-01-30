@@ -1,9 +1,7 @@
-import AppError from "../AppError";
+import ServiceAppError from "../ServiceAppError";
 
-class InsufficientPermissionsError extends AppError {
-    constructor(message = 'Insufficient Permissions') {
-        super(message, 403, 'INSUFFICIENT_PERMISSIONS')
+class InsufficientPermissionsError extends ServiceAppError {
+    constructor(){
+        super('Insufficient Permissions', 'INSUFFICIENT_PERMISSIONS')
     }
 }
-
-export default InsufficientPermissionsError

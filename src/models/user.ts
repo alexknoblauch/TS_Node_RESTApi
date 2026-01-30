@@ -2,6 +2,7 @@
  *  Node Modules
  */
 import mongoose, {Schema, model} from 'mongoose'
+import crypto from 'crypto'
 
 /**
  *  Custom Modules
@@ -27,7 +28,11 @@ export interface IUser {
     },
     twoFactorSecret: string,
     twoFactorEnabled: boolean,
-    refreshToken: string
+    refreshToken: string,
+    passwordResetToken: string,
+    passwordResetTokenExpires: Date
+
+    generateResetPasswordToken():string
 };
 
 export interface SafeUser {
@@ -116,6 +121,9 @@ const UserSchema = new Schema<IUser>({
     },
     refreshToken: {
         type: String
+    },
+    passwordResetToken: {
+        type: String
     }
 }, { timestamps: true })
 
@@ -141,5 +149,14 @@ UserSchema.pre('save', async function(next){
     this.password = await bcrypt.hash(this.password, 10)
     next()
 })
+
+UserSchema.methods.generateResetPasswordToken = function(): string {
+    const resetToken = crypto.randomBytes(32).toString('hex')
+
+    this.passwordResetToken = crypto.createHash('sha256').update(resetToken)
+    this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000
+
+    return resetToken
+}
 
 export default model<IUser>('User', UserSchema)

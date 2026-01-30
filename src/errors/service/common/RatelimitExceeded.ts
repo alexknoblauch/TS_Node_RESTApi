@@ -1,4 +1,4 @@
-import AppError from "../AppError";
+import AppError from "../ServiceAppError";
 
 class RatelimitExceeded extends AppError {
     constructor (message = 'Too many tries') {

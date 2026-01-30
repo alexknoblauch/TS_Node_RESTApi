@@ -1,4 +1,4 @@
-import AppError from "../AppError";
+import AppError from "../ServiceAppError";
 
 class EmailAdressAlreadyExists extends AppError{
     constructor(message = 'Email Adress already exists') {

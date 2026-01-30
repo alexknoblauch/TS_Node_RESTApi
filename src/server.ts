@@ -33,7 +33,7 @@ import { correlationIdMiddleware } from './middleware/correlationId'
 import v1Router from './routes/v1/index'
 import initializeRateLimiter from './lib/express_rate_limit'
 import { serverClose } from './infra/server/serverClose'
-import AppError from './errors/service/AppError'
+import AppError from './errors/service/ServiceAppError'
 
 
 /**
@@ -42,7 +42,7 @@ import AppError from './errors/service/AppError'
 export const app: Application = express()
 
 
-//Configure CORS options
+//Configure CORS options 
 const corsOptions: CorsOptions = {
  origin: true
 }

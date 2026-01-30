@@ -6,11 +6,6 @@ import jwt from 'jsonwebtoken'
  * Custom Modules
  */
 import config from '@/config'
-/**
- * Types 
- */
-import { Types } from 'mongoose'
-
 
 interface TokenPayload {
     userId: string;

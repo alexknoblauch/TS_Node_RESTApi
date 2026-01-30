@@ -1,4 +1,4 @@
-import AppError from "../AppError";
+import AppError from "../ServiceAppError";
 
 class UserNotFound extends AppError {
     constructor(message = 'User not found'){

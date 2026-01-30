@@ -1,9 +1,8 @@
-import AppError from "../AppError";
+import ServiceAppError from "../ServiceAppError";
 
-class CommentNotFound extends AppError {
-    constructor(message = 'Comment not found'){
-        super(message, 404, 'COMMENT_NOT_FOUND')
-
+class CommentNotFound extends ServiceAppError{
+    constructor(){
+        super('Comment not found', 'COMMENT_NOT_FOUND')
     }
 }
 

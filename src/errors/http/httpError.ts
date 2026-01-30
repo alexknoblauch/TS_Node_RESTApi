@@ -1,6 +1,7 @@
 import logger from "@/lib/winston";
 import { Request } from 'express'
 import AppError from "../service/AppError";
+import HttpAppError from "./HTTPAppError";
 
 type HttpErrorOptions = {
   req: Request;
@@ -26,5 +27,5 @@ export function httpError({
     userAgent: req.headers['user-agent']
   });
 
-  throw new AppError(message, statusCode, code);
+  throw new HttpAppError(message, statusCode, code);
 }
