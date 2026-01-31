@@ -1,10 +1,9 @@
-import AppError from "../ServiceAppError";
+import ServiceAppError from "../ServiceAppError";
 
-class InvalidCrednetials extends AppError {
-    constructor(message = 'Invalid Login') {
-        super(message, 401, 'INVALID_CREDENTIALS');
-        this.name = 'InvalidCredentials';
+class InvalidCredentials extends ServiceAppError {
+    constructor(){
+        super('InvalidCredentials', 'INVALID_CREDENTIALS')
     }
 }
 
-export default InvalidCrednetials
+export default InvalidCredentials

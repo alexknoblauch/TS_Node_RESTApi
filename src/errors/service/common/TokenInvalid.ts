@@ -1,8 +1,8 @@
-import AppError from "../ServiceAppError";
+import ServiceAppError from "../ServiceAppError";
 
-class TokenInvalid extends AppError{
-    constructor(message = 'Invalid Token'){
-        super(message, 401, 'TOKEN_INVALID')
+class TokenInvalid extends ServiceAppError {
+    constructor(){
+        super('Invalid Token', 'INVALID_TOKEN')
     }
 }
 

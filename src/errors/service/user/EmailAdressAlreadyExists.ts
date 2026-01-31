@@ -1,9 +1,9 @@
-import AppError from "../ServiceAppError";
+import ServiceAppError from "../ServiceAppError";
 
-class EmailAdressAlreadyExists extends AppError{
-    constructor(message = 'Email Adress already exists') {
-        super(message, 409, 'EMAIL_ALREADY_EXISTS')
+class EmailAlreadyExists extends ServiceAppError {
+    constructor(){
+        super('Email already exists', 'EMAIL_ALREADY_EXISTS')
     }
 }
 
-export default EmailAdressAlreadyExists
+export default EmailAlreadyExists

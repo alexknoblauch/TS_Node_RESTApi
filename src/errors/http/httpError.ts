@@ -1,6 +1,5 @@
 import logger from "@/lib/winston";
 import { Request } from 'express'
-import AppError from "../service/AppError";
 import HttpAppError from "./HTTPAppError";
 
 type HttpErrorOptions = {

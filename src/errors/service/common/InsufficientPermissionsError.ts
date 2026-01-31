@@ -5,3 +5,5 @@ class InsufficientPermissionsError extends ServiceAppError {
         super('Insufficient Permissions', 'INSUFFICIENT_PERMISSIONS')
     }
 }
+
+export default InsufficientPermissionsError

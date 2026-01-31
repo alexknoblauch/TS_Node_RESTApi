@@ -1,8 +1,8 @@
-import AppError from "../ServiceAppError"
+import ServiceAppError from "../ServiceAppError";
 
-class UsernameAlreadyExists extends AppError {
-    constructor(message: 'Username already exists'){
-        super(message, 409, 'USERNAME_ALREADY_EXISTS')
+class UsernameAlreadyExists extends ServiceAppError {
+    constructor(){
+        super('Username already exists', 'USERNAME_ALREADY_EXISTS')
     }
 }
 

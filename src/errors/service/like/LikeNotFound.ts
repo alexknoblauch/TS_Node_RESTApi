@@ -1,9 +1,8 @@
-import AppError from "../ServiceAppError";
+import ServiceAppError from "../ServiceAppError";
 
-class LikeNotFound extends AppError {
-    constructor(message = 'Like not found'){
-        super(message, 404, 'LIKE_NOT_FOUND')
-
+class LikeNotFound extends ServiceAppError {
+    constructor(){
+        super('Like not found', 'LIKE_NOT_FOUND')
     }
 }
 

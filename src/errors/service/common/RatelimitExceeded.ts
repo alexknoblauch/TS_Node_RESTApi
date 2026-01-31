@@ -1,8 +1,8 @@
-import AppError from "../ServiceAppError";
+import ServiceAppError from "../ServiceAppError";
 
-class RatelimitExceeded extends AppError {
-    constructor (message = 'Too many tries') {
-        super(message, 429, 'RATE_LIMIT_EXCEEDED')
+class RatelimitExceeded extends ServiceAppError {
+    constructor(){
+        super('Too many tries', 'RATELIMIT_EXCEEDED')
     }
 }
 
