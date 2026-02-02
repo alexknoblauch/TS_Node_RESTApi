@@ -2,9 +2,8 @@
  *  Node Modules
  */
 
-import { Request, Response, Router } from 'express'
-import { body, cookie } from 'express-validator'
-import bcrypt from 'bcrypt'
+import { Router } from 'express'
+
 
 /**
  *  Custom Modules
@@ -29,6 +28,9 @@ import validateAuthRegister from '@/middleware/validate/auth/validateAuthRegiste
 import validateAuthLogin from '@/middleware/validate/auth/validateAuthLogin'
 import login from '@/controllers/v1/auth/login'
 import validateAuthRefreshToken from '@/middleware/validate/auth/validateAuthRefreshToken'
+import sendEmail from '@/infra/mail/mailer.service'
+import passwordForgot from '@/controllers/v1/auth/passwordForogt'
+import passwordReset from '@/controllers/v1/auth/passwordReset'
 /**
  *  Models
  */
@@ -63,7 +65,10 @@ router.post('/refresh-token',
     refreshToken
 )
 
-router.post('/logout',authenticate,  logout)
+router.post('/logout', authenticate, logout)
 
+router.post('/forgot-password', passwordForgot)         //keine middelware; muss öffentliche route sein
+router.patch('/reset-password/:token', passwordReset)   //keine middelware; muss öffentliche route sein
+router.post('/change-password', authenticate, passwordChange)
 
 export default router

@@ -1,17 +1,16 @@
-import AppError from "@/errors/service/ServiceAppError";
+import HttpAppError from "@/errors/http/HTTPAppError";
 import logger from "@/lib/winston";
 import { Request, Response, NextFunction } from 'express'
 
 
-function isAppError(err: unknown): err is AppError {      //APP 
-  return err instanceof AppError;
+function isHtttpAppError(err: unknown): err is HttpAppError {      //APP 
+  return err instanceof HttpAppError;
 }
 
 
 export const errorHandler = (err: unknown, req: Request, res: Response, next: NextFunction) => {
-  
   if (process.env.NODE_ENV === 'production') {
-    if (isAppError(err) && err.isOperational) {
+    if (isHtttpAppError(err) && err.isOperational) {
       return res.status(err.statusCode).json({
         status: err.status,
         message: err.message,
@@ -27,10 +26,19 @@ export const errorHandler = (err: unknown, req: Request, res: Response, next: Ne
     });
     
   } else if (process.env.NODE_ENV === 'development') {
-      return res.status(500).json({
-        message: 'Unknown error',
-      });
+      if (isHtttpAppError(err)) {
+          return res.status(err.statusCode).json({
+          status: err.status,
+          message: err.message,
+          errorCode: err.errorCode,
+          stack: err.stack
+        });
+      } else {
+        return res.status(500).json({
+          status: 'error',
+          message: 'unknwn error',
+          stack: err instanceof Error ? err.stack : undefined         // wichtige TS definition 
+        })
+      }
   }
-  
-  return res.status(500).json({ message: 'Internal server error' });
 };

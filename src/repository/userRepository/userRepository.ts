@@ -1,15 +1,52 @@
 // repositories/userRepository.ts
-import User, { IUser } from '@/models/user';
+import User, { IUser, UserBase, UserDocument, UserLean } from '@/models/user';
 import { UpdateQuery } from 'mongoose'
 
 export const userRepository = {
 
-    findByEmail: async (email: string): Promise<IUser | null> => {
-        return await User.findOne({ email }).lean().exec();
+    findByEmail: async (email: string): Promise<UserLean | null> => {
+        const user = await User.findOne({ email }).lean().exec();
+
+        if(!user) return null
+
+        const leanUser = {
+            ...user,
+            _id: user._id.toString()
+        }
+
+        return leanUser
     },
 
-    findByEmailForLogin: async (email: string): Promise<IUser | null> => {
-        return await User.findOne({ email }).select('+password').lean().exec();        // Alle Felder + email
+    findDocumentById: async (userId: string): Promise<UserDocument | null> => {
+        const user = await User.findById(userId).exec()
+        return user as UserDocument | null
+    },
+
+    findDocumentByEmail: async (email: string): Promise<UserDocument | null> => {     // Instanz Ebene speziell
+        const user =  await User.findOne({ email }).exec();
+        return user as UserDocument | null
+    },
+
+    findDocumentByToken: async(token: string): Promise<UserDocument | null> => {
+        const user = await User.findOne({passwordResetToken: token, passwordResetTokenExpires: { $gt: new Date() }})
+        return user as UserDocument | null
+    },
+
+    save: async (user: UserDocument):Promise<UserDocument> => {         // INSTANAZ METHODE
+        return await user.save()
+    },
+
+    findByEmailForLogin: async (email: string): Promise<UserLean | null> => {
+        const user = await User.findOne({ email }).select('+password').lean().exec();        // Alle Felder + email
+        
+        if(!user) return null
+
+        const leanUser = {
+            ...user,
+            _id: user._id.toString()
+        }
+
+        return leanUser
     },
 
     find: async (filter: any, options?: {
@@ -18,29 +55,65 @@ export const userRepository = {
             select?: string;
             sort?: any;
         }
-        ): Promise<IUser[]> => {
+        ): Promise<UserLean[]> => {
 
-            let query = User.find(filter);
+            let query = await User.find(filter);
 
-            if (options?.select) query = query.select(options.select);
-            if (options?.sort) query = query.sort(options.sort);
-            if (options?.skip !== undefined) query = query.skip(options.skip);
-            if (options?.limit !== undefined) query = query.limit(options.limit);
+            query.map((query: any) => {
+                if (options?.select) query = query.select(options.select);
+                if (options?.sort) query = query.sort(options.sort);
+                if (options?.skip !== undefined) query = query.skip(options.skip);
+                if (options?.limit !== undefined) query = query.limit(options.limit);
+            })
+     
 
-            return query.lean().exec();
+            const user = await query.lean().exec();
+
+            const leanUser = user.map(user => {
+                return {
+                        ...user,
+                        _id: user._id.toString()
+                    }
+            })
+ 
+            return leanUser
         },
 
-    findById: async(id: string):Promise<Partial<IUser> | null> => {
-        return await User.findById(id)
+    findById: async(id: string):Promise<UserLean | null> => {
+        const user = await User.findById(id).lean().exec()
+
+        if(!user) return null
+
+        const leanUser = {
+            ...user,
+            _id: user._id.toString()
+        }
+        
+        return leanUser
     },
 
-    create: async (userData: Partial<IUser>): Promise<IUser> => {
+    create: async (userData: UserBase): Promise<UserLean> => {
         const user = await User.create(userData);
-        return user.toObject();
+
+        const leanUser = {
+            ...user,
+            _id: user._id.toString()
+        }
+
+        return leanUser
     },
 
-    updateById: async (id: string, updateData: UpdateQuery<IUser>): Promise<IUser | null> => {
-        return User.findByIdAndUpdate(id, updateData, { new: true, lean: true }).exec();
+    updateById: async (id: string, updateData: UpdateQuery<UserBase>): Promise<UserLean | null> => {
+        const user = await User.findByIdAndUpdate(id, updateData, { new: true, lean: true }).exec();
+
+        if(!user) return null
+
+        const leanUser = {
+            ... user,
+            _id: user._id.toString()
+        }
+
+        return leanUser
     },
 
     deleteById: async (id: string): Promise<boolean> => {

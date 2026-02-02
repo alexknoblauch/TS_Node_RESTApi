@@ -64,5 +64,4 @@ const tokenSchema = new Schema({
 })
 
 
-
 export default model<IToken>('Token', tokenSchema)

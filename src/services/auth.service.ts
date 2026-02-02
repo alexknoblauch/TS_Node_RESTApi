@@ -6,7 +6,6 @@ import logger from "@/lib/winston";
 /**
  * Middleware
  */
-import { AppError } from "@/middleware/errorHandler";
 /**
  * Node Modules
 */
@@ -19,11 +18,14 @@ import { userRepository } from "@/repository/userRepository/userRepository";
 /**
  * Types
 */
-import { SafeUser } from "@/models/user";
-import { genUsername } from "@/utils";
-import createTokenError from "@/errors/http errors/tokenError";
+import { SafeUser, UserDocument } from "@/models/user";
 import { ensureDocument } from "@/utils/validation/ensureDocument";
-import InvalidCrednetials from "@/errors/service errors/InvalidCredentials";
+import InvalidCrednetials from "@/errors/service/common/InvalidCredentials";
+import sendEmail from "@/infra/mail/mailer.service";
+import TokenError from "@/errors/service/common/TokenError";
+import forgotpassword from "@/controllers/v1/auth/passwordForogt";
+import ServiceAppError from "@/errors/service/ServiceAppError";
+import MailerError from "@/infra/mail/MailerError";
 
 
 interface LoginCredentials {
@@ -80,11 +82,13 @@ const authService = {
 
     async refreshToken (refreshToken: string): Promise<RefreshTokenResult> {
         const tokenExists = await tokenRepository.findOneWithToken(refreshToken)
+        ensureDocument(tokenExists, 'Token')
 
-        if (!tokenExists) throw createTokenError('TokenNotFound', 401); 
-        if (tokenExists.revoked) throw createTokenError('TokenRevoked');
-        if (!tokenExists.expiresAt) throw createTokenError('TokenInvalid');
-        if (tokenExists.expiresAt < new Date()) throw createTokenError('TokenExpired');
+
+        if (!tokenExists) throw new TokenError('Invalid token', 'INVALID_TOKEN'); 
+        if (tokenExists.revoked) throw new TokenError('Revoked Token', 'REVOKED_TOKEN');
+        if (!tokenExists.expiresAt) throw new TokenError('Expired Token', 'EXPIRED_TOKEN');
+        if (tokenExists.expiresAt < new Date()) throw new TokenError('Expired Token', 'EXPIRED_TOKEN');
 
         const jwtPayload = verifyRefreshToken(refreshToken) as { userId: string }
         const accessToken = generateAccessToken(jwtPayload.userId.toString())
@@ -100,7 +104,7 @@ const authService = {
             throw new Error('Email not allowed for admin registration');
         }
 
-        const userName = genUsername()
+        const userName = 'test'
         const user = await userRepository.create({userName, email, password, role})
         const accessToken = generateAccessToken(user._id.toString())
         const refreshToken = generateRefreshToken(user._id.toString())
@@ -116,7 +120,38 @@ const authService = {
         }
         
         logger.info('User logged out', { userId })
-    }
+    },
+
+    async forgotpassword (credentials: Record<string, string>):Promise<void> {
+        const { email, baseURL } = credentials     
+
+        const user = await userRepository.findDocumentByEmail(email)
+        ensureDocument(user, 'User')
+
+        const resetToken = user.createResetPasswordToken()
+        await userRepository.save(user)                             // ABSPEICHERN WICHTIG!!
+
+        const resetUrl = `${baseURL}/${resetToken}`
+        
+        const message = `We have received a password reset request. Please use the link down below\n\n${resetUrl}\n\n This reset password link will be valid for 10 minutes.`
+        
+        try{
+            await sendEmail ({
+                email: user.email,
+                subject: 'Password reset request',
+                message
+            })      
+        } catch(err){
+            user.passwordResetToken = ''
+            user.passwordResetTokenExpires = null
+            await userRepository.save(user)
+    
+            throw new MailerError()
+        }
+    },
 }
 
 export default authService
+
+
+

@@ -1,7 +1,7 @@
 /**
  *  Node Modules
  */
-import mongoose, {Schema, model} from 'mongoose'
+import mongoose, {Schema, model, Document} from 'mongoose'
 import crypto from 'crypto'
 
 /**
@@ -9,6 +9,8 @@ import crypto from 'crypto'
  */
 import bcrypt from 'bcrypt'
 import { Types } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
+
 
 export interface IUser {
     _id: Types.ObjectId | string;  
@@ -30,10 +32,64 @@ export interface IUser {
     twoFactorEnabled: boolean,
     refreshToken: string,
     passwordResetToken: string,
-    passwordResetTokenExpires: Date
-
-    generateResetPasswordToken():string
+    passwordResetTokenExpires: Date | null
+    
+    createResetPasswordToken():string
 };
+
+
+export interface UserBase {
+  userName: string;
+  email: string;
+  password: string;
+  role: 'admin' | 'user';
+  firstName?: string;
+  lastName?: string;
+  socialLinks?: {
+    website?: string;
+    youtube?: string;
+    facebook?: string;
+    linkedin?: string;
+    x?: string;
+    instagram?: string;
+  };
+  twoFactorSecret: string;
+  twoFactorEnabled: boolean;
+  refreshToken: string;
+  passwordResetToken: string;
+  passwordResetTokenExpires: Date | null;
+}
+
+export interface UserLean {
+    _id: string;  
+    userName: string
+    email: string,
+    password: string,
+    role: 'admin' | 'user'
+    firstName?: string,
+    lastName?: string,
+    socialLinks?: {
+        website?: string,
+        youtube?: string
+        facebook?: string,
+        linkedin?: string,
+        x?: string,
+        instagram?: string
+    },
+    twoFactorSecret: string,
+    twoFactorEnabled: boolean,
+    refreshToken: string,
+    passwordResetToken: string,
+    passwordResetTokenExpires: Date | null
+}
+
+
+export type UserDocument = HydratedDocument<UserBase & {        //HydratedDocument: inkludiert mongoose funtkionen save() toObject() ect
+  createResetPasswordToken(): string;
+}>;
+
+
+
 
 export interface SafeUser {
     _id: Types.ObjectId | string;
@@ -52,7 +108,8 @@ export interface SafeUser {
     };
 }
 
-const UserSchema = new Schema<IUser>({
+const UserSchema = new Schema<UserDocument>({
+    
     userName: {
         type: String,
         required: [true, 'Username ist required'],
@@ -130,12 +187,12 @@ const UserSchema = new Schema<IUser>({
 UserSchema.methods.toJSON = function() {
     const user = this.toObject();
     
-    // Entferne sensitive Felder für JSON Responses
     delete user.password;
     delete user.__v; // Mongoose interne Version
     delete user.updatedAt; // Optional, wenn nicht benötigt
-    
-    // Optional: _id → id umbenennen
+    delete user.refreshToken;
+    delete user.passwordResetToken;
+    delete user.passwordResetTokenExpires;
     user.id = user._id;
     delete user._id;
     
@@ -143,14 +200,14 @@ UserSchema.methods.toJSON = function() {
 };
 
 
-UserSchema.pre('save', async function(next){
-    if (!this.isModified('password')) return next();       //MONGOOSE: return zuerst! sonst wird await ausgeführt
+UserSchema.pre('save', async function(this: UserDocument, next: any){       // this arbeitet auf instanz ebene 
+    if (!this.isModified('password')) return next();     
 
     this.password = await bcrypt.hash(this.password, 10)
     next()
 })
 
-UserSchema.methods.generateResetPasswordToken = function(): string {
+UserSchema.methods.createResetPasswordToken = function(): string {
     const resetToken = crypto.randomBytes(32).toString('hex')
 
     this.passwordResetToken = crypto.createHash('sha256').update(resetToken)
@@ -159,4 +216,16 @@ UserSchema.methods.generateResetPasswordToken = function(): string {
     return resetToken
 }
 
-export default model<IUser>('User', UserSchema)
+export default model<UserDocument>('User', UserSchema)
+
+
+
+UserSchema.methods.createResetPasswordToken = function(){
+    const resetToken = crypto.randomBytes(32).toString('hex')
+    const encryptedToken = crypto.createHash('sha256').update(resetToken).digest('hex') // hash ist Obj digest macht string
+
+    this.passwordResetToken = encryptedToken
+    this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000
+
+    return resetToken
+}

@@ -4,6 +4,7 @@
 
 import { genSlug } from '@/utils'
 import mongoose, { Schema, Types, model } from 'mongoose'
+import crypto from 'crypto'
 
 export type BlogData = Pick<IBlog, 'title' | 'content' | 'banner' | 'status' >
 
@@ -126,13 +127,18 @@ const blogSchema = new Schema<IBlog>({
     }
 )
 
-blogSchema.pre('validate', function(next) {
+blogSchema.pre('validate', function(next: any) {
     const doc = this as IBlog;                      // TS kennt type von this nicht! oder "noImplicitThis": false
     if (doc.title && !doc.slug) {
         doc.slug = genSlug(doc.title);
     }
     next();
 });
+
+
+blogSchema.methods.createPasswordResetToken = function(){
+    const resetToken = crypto.randomBytes(32).toString('hex')
+}
 
 
 export default model<IBlog>('Blog', blogSchema)

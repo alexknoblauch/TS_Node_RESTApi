@@ -12,7 +12,7 @@
     "skipLibCheck": true,
     "moduleResolution": "node",
     "sourceMap": true, 
-    "types": ["node", "jest"],
+    "types": ["node", "jest", "express"],
     "paths": {
       "@/*": ["*"]
     }

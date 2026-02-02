@@ -9,3 +9,5 @@ export const notFound = (req: Request, message = 'Not found') =>
     code: 'NOT_FOUND',
     action: 'REQUEST'
   });
+
+  export default notFound

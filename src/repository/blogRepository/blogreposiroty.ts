@@ -6,7 +6,10 @@ import { ensureDocument } from '@/utils/validation/ensureDocument';
  * Types
  */
 
-import { FilterQuery, Types, UpdateQuery } from 'mongoose';       // excludes kritische values des schema
+import { Types, UpdateQuery } from 'mongoose';       // excludes kritische values des schema
+
+import { FilterQuery } from 'mongoose';
+
 
 export const blogRepository = {
     findById: async(id: string): Promise<BlogLean | null> => {

@@ -10,6 +10,9 @@ class ServiceAppError extends Error {
     this.context = context
 
     Error.captureStackTrace(this, this.constructor)
+
+    Object.setPrototypeOf(this, new.target.prototype);        //extends Error Prolem fix
+
   }
 }
 
