@@ -18,7 +18,7 @@ import { userRepository } from "@/repository/userRepository/userRepository";
 /**
  * Types
 */
-import { SafeUser, UserDocument } from "@/models/user";
+import { RefreshtokenInput, RefreshTokenResult, SafeUser, UserBase, UserCreateInput, UserDocument } from "@/models/user";
 import { ensureDocument } from "@/utils/validation/ensureDocument";
 import InvalidCrednetials from "@/errors/service/common/InvalidCredentials";
 import sendEmail from "@/infra/mail/mailer.service";
@@ -26,6 +26,7 @@ import TokenError from "@/errors/service/common/TokenError";
 import forgotpassword from "@/controllers/v1/auth/passwordForogt";
 import ServiceAppError from "@/errors/service/ServiceAppError";
 import MailerError from "@/infra/mail/MailerError";
+import { refreshToken } from "@/controllers/v1/auth/refresh-token";
 
 
 interface LoginCredentials {
@@ -49,10 +50,6 @@ interface RegisterResult {
 interface LoginResult {
     accessToken: string
     refreshToken: string
-}
-
-interface RefreshTokenResult {
-    accessToken: string
 }
 
 
@@ -84,7 +81,6 @@ const authService = {
         const tokenExists = await tokenRepository.findOneWithToken(refreshToken)
         ensureDocument(tokenExists, 'Token')
 
-
         if (!tokenExists) throw new TokenError('Invalid token', 'INVALID_TOKEN'); 
         if (tokenExists.revoked) throw new TokenError('Revoked Token', 'REVOKED_TOKEN');
         if (!tokenExists.expiresAt) throw new TokenError('Expired Token', 'EXPIRED_TOKEN');
@@ -105,7 +101,8 @@ const authService = {
         }
 
         const userName = 'test'
-        const user = await userRepository.create({userName, email, password, role})
+        const userData = {userName, email, password, role} as UserBase
+        const user = await userRepository.create(userData)
         const accessToken = generateAccessToken(user._id.toString())
         const refreshToken = generateRefreshToken(user._id.toString())
 
@@ -147,8 +144,15 @@ const authService = {
             await userRepository.save(user)
     
             throw new MailerError()
-        }
+        } 
     },
+
+    register2: async function(credentials: UserBase) {
+        const user = userRepository.create(credentials)
+        ensureDocument(user, 'User')
+
+        return user
+    }
 }
 
 export default authService

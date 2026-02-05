@@ -52,11 +52,12 @@ const corsOptions: CorsOptions = {
 app.use(correlationIdMiddleware)
 app.use(cors(corsOptions))
 app.use(cookieParser())                                 //1
-app.use(express.json())                                 //2
-app.use(express.urlencoded({ extended: true }))         //3
 app.use(compression({ threshold: 1024 }))
 app.use(helmet())
-app.use(csrfProtection)                                 //4
+app.use(csrfProtection)                                 //2
+
+app.use(express.json())                                 
+app.use(express.urlencoded({ extended: true }))         
 
 
 // Server
@@ -97,7 +98,7 @@ const startServer = async() => {
             
             serverClose(server, 'Process terminated due to uncaught exception')     //Harter Exit
         });
-    } catch(err) {
+    } catch (err) {
         logger.error('server not connected');
         
         if (process.env.NODE_ENV === 'production') {

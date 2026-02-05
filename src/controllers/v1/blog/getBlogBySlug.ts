@@ -7,11 +7,14 @@ import type { Request, Response } from 'express'
  */
 
 import blogService from "@/services/blog.service";
+import catchAsync from '@/utils/async/catchAsync';
+import { ensureDocument } from '@/utils/validation/ensureDocument';
 
 
 
-const getBlogBySlug = (async(req: Request, res: Response) => {
+const getBlogBySlug = catchAsync(async(req: Request, res: Response) => {
             const userId = req.userId 
+            ensureDocument(userId, 'Userid')
 
             if(!userId) {
                 return res.status(401).json({
@@ -20,6 +23,7 @@ const getBlogBySlug = (async(req: Request, res: Response) => {
                 })
             }
             const slug = req.params.slug             // /:slug
+            ensureDocument(slug, 'Slug')
             const data = await blogService.getBlogBySlug(userId, slug)
 
             res.status(200).json({

@@ -26,5 +26,5 @@ export function httpError({
     userAgent: req.headers['user-agent']
   });
 
-  throw new HttpAppError(message, statusCode, code);
+  throw new HttpAppError(message, statusCode, code, action, reason);
 }

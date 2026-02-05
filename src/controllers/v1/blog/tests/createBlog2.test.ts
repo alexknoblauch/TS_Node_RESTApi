@@ -1,122 +1,93 @@
-import { CreateBlog, IBlog } from "@/models/blog"
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty"
 import blogService from "@/services/blog.service"
 
-jest.mock('@/repository/blogRepository')
-
+jest.mock('@/repository/blogRepository/blogeposiroty')
 
 const mockedBlogRepository = blogRepository as jest.Mocked<typeof blogRepository>
 
-
 describe('createBlog', () => {
-    it('should create a Blog ', async() => {
+    it('should create a blog', async function() {
         mockedBlogRepository.create.mockResolvedValue({
-            _id: '123' as any, 
-            author: '1234',
-            title: 'hallo',
-            content: 'hallo',
+            _id: '123',
+            title: 'string',
+            slug: 'string',
+            content: 'string',
             banner: {
-                publicId: '12345',
-                url: 'hallo',
+                publicId: 'string', 
+                url: 'string', 
                 width: 1,
-                height: 1 
-            }
-        } as IBlog);
+                height: 1
+            },
+            author: '1234', 
+            status: 'draft'
+        })
 
-
-        const result = await blogService.createBlog({
-            author: '1234',
-            title: 'hallo',
-            content: 'hallo',
+        const data = {
+            title: 'string',
+            slug: 'string',
+            content: 'string',
             banner: {
-                publicId: '12345',
-                url: 'hallo',
+                publicId: 'string', 
+                url: 'string', 
                 width: 1,
-                height: 1 
-            }
-        });
+                height: 1
+            },
+            author: '1234', 
+            status: 'draft'
+        }
+
+        const result = await blogService.createBlog(data)
+
+        expect(blogRepository.create).toHaveBeenCalledWith(data)
 
         expect(result).toEqual({
-            _id: '123', 
-            author: '1234',
-            title: 'hallo',
-            content: 'hallo',
+            _id: '123',
+            title: 'string',
+            slug: 'string',
+            content: 'string',
             banner: {
-                publicId: '12345',
-                url: 'hallo',
+                publicId: 'string', 
+                url: 'string', 
                 width: 1,
-                height: 1 
-            }
-        });
-
-        expect(mockedBlogRepository.create).toHaveBeenCalledWith({
-            author: '1234',
-            title: 'hallo',
-            content: 'hallo',
-            banner: {
-                publicId: '12345',
-                url: 'hallo',
-                width: 1,
-                height: 1 
-            }
-        });
-    });
-
-
-    it('should thrown an error when DB not available', async() => {
-        mockedBlogRepository.create.mockRejectedValue(new Error('DB not found'));
-
-        await expect(blogService.createBlog({
-            author: '1234',
-            title: 'hallo',
-            content: 'hallo',
-            banner: {
-                publicId: '12345',
-                url: 'hallo',
-                width: 1,
-                height: 1 
-            }
-            })).rejects.toThrow('DB not found');
-
-            expect(blogRepository.create).toHaveBeenCalledWith({
-                author: '1234',
-                title: 'hallo',
-                content: 'hallo',
-                banner: {
-                    publicId: '12345',
-                    url: 'hallo',
-                    width: 1,
-                    height: 1 
-                }
-            });
-        });
-
-
-        it('should throw an error when invalid data', async() => {
-            mockedBlogRepository.create.mockResolvedValue(null as any) 
-
-            await expect(blogService.createBlog({
-                author: '1234',
-                title: 'hallo',
-                content: 'hallo',
-                banner: {
-                    publicId: '12345',
-                    url: 'hallo',
-                    width: 1,
-                    height: 1 
-                }
-            })).rejects.toThrow('No Blog Created')
-
-            expect(mockedBlogRepository.create).toHaveBeenCalledWith({
-                author: '1234',
-                title: 'hallo',
-                content: 'hallo',
-                banner: {
-                    publicId: '12345',
-                    url: 'hallo',
-                    width: 1,
-                    height: 1 
-                }
-            })
+                height: 1
+            },
+            author: '1234', 
+            status: 'draft'
         })
+    })
+
+    describe('throw error when false input', async() => {
+        (mockedBlogRepository.create as jest.Mock).mockResolvedValue(null)
+
+        mockedBlogRepository.create.mockResolvedValue({
+            _id: '123',
+            title: 'string',
+            slug: 'string',
+            content: 'string',
+            banner: {
+                publicId: 'string', 
+                url: 'string', 
+                width: 1,
+                height: 1
+            },
+            author: '1234', 
+            status: 'draft'
+        })
+
+        const data = {
+            title: 'string',
+            slug: 'string',
+            content: 'string',
+            banner: {
+                publicId: 'string', 
+                url: 'string', 
+                width: 1,
+                height: 1
+            },
+            author: '1234', 
+            status: 'draft'
+        }
+
+        expect(blogService.createBlog(data)).rejects.toThrow('DB error')
+    })
 })

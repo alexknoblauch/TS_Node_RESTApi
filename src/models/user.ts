@@ -12,32 +12,6 @@ import { Types } from 'mongoose';
 import { HydratedDocument } from 'mongoose';
 
 
-export interface IUser {
-    _id: Types.ObjectId | string;  
-    userName: string
-    email: string,
-    password: string,
-    role: 'admin' | 'user'
-    firstName?: string,
-    lastName?: string,
-    socialLinks?: {
-        website?: string,
-        youtube?: string
-        facebook?: string,
-        linkedin?: string,
-        x?: string,
-        instagram?: string
-    },
-    twoFactorSecret: string,
-    twoFactorEnabled: boolean,
-    refreshToken: string,
-    passwordResetToken: string,
-    passwordResetTokenExpires: Date | null
-    
-    createResetPasswordToken():string
-};
-
-
 export interface UserBase {
   userName: string;
   email: string;
@@ -89,8 +63,6 @@ export type UserDocument = HydratedDocument<UserBase & {        //HydratedDocume
 }>;
 
 
-
-
 export interface SafeUser {
     _id: Types.ObjectId | string;
     userName: string;
@@ -108,8 +80,34 @@ export interface SafeUser {
     };
 }
 
+export interface LoginInput {
+    email: string;
+    password: string;
+}
+
+export interface LogoutInput {
+    userId: string;
+    refreshToken: string;
+}
+
+export interface RefreshtokenInput {
+    refreshToken: string,
+    userId: string
+}
+
+export interface RefreshTokenResult {
+  accessToken: string
+}
+
+export interface UserCreateInput {
+    userName: string,
+    email: string, 
+    password: string, 
+    role: 'user' | 'admin'
+}
+
+
 const UserSchema = new Schema<UserDocument>({
-    
     userName: {
         type: String,
         required: [true, 'Username ist required'],

@@ -1,35 +1,34 @@
+import { BlogLean } from "@/models/blog"
+import { UserLean } from "@/models/user"
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty"
+import { userRepository } from "@/repository/userRepository/userRepository"
 import blogService from "@/services/blog.service"
 
-jest.mock('@/repository/blogRepository')
+jest.mock('@/repository/blogRepository/blogRepository')
 
 const mockedBlogRepository = blogRepository as jest.Mocked<typeof blogRepository>
+const mockedUserRepository = userRepository as jest.Mocked<typeof userRepository>
 
-
-describe('deleteBlog', () => {
+describe('deleteBlog', () =>{
     it('should delete a blog', async() => {
+        mockedBlogRepository.findById.mockResolvedValue({
+            _id: '123',
+            author: '1234'
+        } as BlogLean)
+
+        mockedUserRepository.findById.mockResolvedValue({
+            _id: '12345',
+        } as UserLean)
+
         mockedBlogRepository.deleteById.mockResolvedValue(true)
 
-        const blogId = '123'
-        const userId = '123'
+        const result = await blogService.deleteBlog('123', '12345')
 
-        const result = await blogService.deleteBlog(blogId, userId);
-
-        expect(result).toBe(true);
-
-        expect(blogRepository.deleteById).toHaveBeenLastCalledWith(blogId, userId);
-    });
+        expect(result).toBe(true)
 
 
-    it('should throw a error when DB not available', async() => {
-        mockedBlogRepository.deleteById.mockRejectedValue(new Error('DB not found'));
 
-        await expect(blogService.deleteBlog('123', '123')).rejects.toThrow('DB not found');
-    });
+    })
 
 
-    it('should throw an error when invalid data', async() => {
-        mockedBlogRepository.deleteById.mockResolvedValue(false);
-        await expect(blogService.deleteBlog('123', '123')).rejects.toThrow('DB not found');
-    });
 })

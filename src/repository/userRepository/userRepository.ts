@@ -1,6 +1,6 @@
 // repositories/userRepository.ts
 import User, { IUser, UserBase, UserDocument, UserLean } from '@/models/user';
-import { UpdateQuery } from 'mongoose'
+import { Query, UpdateQuery } from 'mongoose'
 
 export const userRepository = {
 
@@ -49,25 +49,15 @@ export const userRepository = {
         return leanUser
     },
 
-    find: async (filter: any, options?: {
-            limit?: number;
-            skip?: number;
-            select?: string;
-            sort?: any;
-        }
-        ): Promise<UserLean[]> => {
+    find: async (filter: any, options?: {limit?: number, skip?: number, select?: string, sort?: any}): Promise<UserLean[]> => {
+            let query: Query<UserDocument[], UserDocument> = User.find(filter);  // query.select könnte types verändern. Query<> garantiert types und löst das problem
 
-            let query = await User.find(filter);
+            if (options?.select) query = query.select(options.select);
+            if (options?.sort) query = query.sort(options.sort);
+            if (options?.skip !== undefined) query = query.skip(options.skip);
+            if (options?.limit !== undefined) query = query.limit(options.limit);
 
-            query.map((query: any) => {
-                if (options?.select) query = query.select(options.select);
-                if (options?.sort) query = query.sort(options.sort);
-                if (options?.skip !== undefined) query = query.skip(options.skip);
-                if (options?.limit !== undefined) query = query.limit(options.limit);
-            })
-     
-
-            const user = await query.lean().exec();
+            const user = await query.lean<UserLean[]>().exec();
 
             const leanUser = user.map(user => {
                 return {

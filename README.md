@@ -11,13 +11,15 @@ Jest - für Unit Tests
 
 
 ## Architektur & Design
-Controllers: Saubere Trennung der Endpunkte
-Services: Geschäftslogik kapseln, lose Kopplung
-Repositories: Datenzugriff abstrahieren
-Interfaces in Modellen: Trennung von Mongoose-Logik und TypeScript-Typen
-Middleware: Authentifizierung, Autorisierung, Error-Handling, Validierung
-Logging: Erweiterte Winston-Konfiguration für Produktion
-Errors: Service und HTTP Layer trennen, Prod und Dev in global Errorhandler.
+Controllers: Http basierte Controller
+Services: Businesslogic kapseln - Lose Kopplung
+Repositories: Funktionales abstrahieren der DB
+Interfaces: BaseUser, LeanUser, DocumentUser + CRUD Interfaces.
+Statis Methods: Usermodel direkt anstueren.
+Middleware: Authenticate, Authorize, ErrorHandling, Validation, CorrelationId
+Logging: Winston mit Redis counter, correlationId, log level, file rotation.
+Errors: ServiceError und HTTPError - Layer trennen.
+Error Handler: Prod und Dev unterscheiden - verschiden viel information leaken. AppError und ServerError unterscheiden.
 
 
 

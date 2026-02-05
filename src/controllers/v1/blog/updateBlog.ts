@@ -12,7 +12,6 @@ const updateBlog = async(req: Request, res: Response) => {
     
             const dataObj = req.body as BlogData
 
-
             if(req.body == null) return
             const userId = req.userId
             if(!userId) {

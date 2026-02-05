@@ -31,6 +31,7 @@ import validateAuthRefreshToken from '@/middleware/validate/auth/validateAuthRef
 import sendEmail from '@/infra/mail/mailer.service'
 import passwordForgot from '@/controllers/v1/auth/passwordForogt'
 import passwordReset from '@/controllers/v1/auth/passwordReset'
+import passwordChange from '@/controllers/v1/auth/passwordChange'
 /**
  *  Models
  */

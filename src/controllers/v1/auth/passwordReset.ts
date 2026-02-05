@@ -15,7 +15,7 @@ const passwordReset = async function(req: Request, res: Response, next: NextFunc
     user.password = req.body.password
     user.passwordResetToken = ''
     user.passwordResetTokenExpires = null
-    userRepository.save(user)
+    await userRepository.save(user)
 }
 
 export default passwordReset
