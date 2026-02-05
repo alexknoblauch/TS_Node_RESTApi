@@ -2,7 +2,6 @@
  * Node Modules
  */
 
-import { genSlug } from '@/utils'
 import mongoose, { Schema, Types, model } from 'mongoose'
 import crypto from 'crypto'
 
@@ -130,7 +129,7 @@ const blogSchema = new Schema<IBlog>({
 blogSchema.pre('validate', function(next: any) {
     const doc = this as IBlog;                      // TS kennt type von this nicht! oder "noImplicitThis": false
     if (doc.title && !doc.slug) {
-        doc.slug = genSlug(doc.title);
+        doc.slug = 'placeholder for function';
     }
     next();
 });
