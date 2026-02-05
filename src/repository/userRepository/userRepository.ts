@@ -110,4 +110,8 @@ export const userRepository = {
         const result = await User.deleteOne({ _id: id }).exec();
         return result.deletedCount > 0;
     },
+
+    findDocumentByEmail2: async function(email: string): Promise<UserDocument | null> {
+        return await User.findOne({email}).exec()
+    }
 };

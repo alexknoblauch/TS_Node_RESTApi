@@ -76,6 +76,18 @@ const authService = {
         return {accessToken, refreshToken}
     },
 
+    async forgotpassword (email: string, baseURL: string): Promise<UserDocument> {
+        const user = userRepository.findDocumentByEmail(email)
+        ensureDocument(user, 'User')
+
+        const token = user.createResetPasswordToken()
+        await userRepository.save(user)
+
+        const resetUrl = `${baseURL}/${token}`
+
+        return token
+    },
+
 
     async refreshToken (refreshToken: string): Promise<RefreshTokenResult> {
         const tokenExists = await tokenRepository.findOneWithToken(refreshToken)
@@ -147,12 +159,7 @@ const authService = {
         } 
     },
 
-    register2: async function(credentials: UserBase) {
-        const user = userRepository.create(credentials)
-        ensureDocument(user, 'User')
-
-        return user
-    }
+ 
 }
 
 export default authService
