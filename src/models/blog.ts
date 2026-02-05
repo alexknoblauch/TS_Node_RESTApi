@@ -4,9 +4,10 @@
 
 import mongoose, { HydratedDocument, Schema, Types, model } from 'mongoose'
 import crypto from 'crypto'
-import { HydrationBoundary } from '@tanstack/react-query';
-import { UserBase } from './user';
 
+/**
+ * Interfaces
+ */
 export type BlogData = Pick<IBlog, 'title' | 'content' | 'banner' | 'status' >
 
 export type IBanner = {
@@ -18,15 +19,15 @@ export type IBanner = {
 
 export interface IBlog {
     _id: Types.ObjectId;  
-    title: string,
-    slug: string,
-    content: string,
-    banner: IBanner,
-    author: Types.ObjectId | string,                    // | string hinzufügen für clean architecture
-    viewsCount: number,
-    likesCount: number
-    commentsCount: number,
-    status: 'draft' | 'published'
+    title: string;
+    slug: string;
+    content: string;
+    banner: IBanner;
+    author: Types.ObjectId | string;                    // | string hinzufügen für clean architecture
+    viewsCount: number;
+    likesCount: number;
+    commentsCount: number;
+    status: 'draft' | 'published';
 }
 
 export interface BlogBase {
@@ -43,26 +44,24 @@ export interface BlogBase {
 
 export interface BlogLean {
     _id: string;  
-    title: string,
-    slug: string,
-    content: string,
-    author: string,                    // | string hinzufügen für clean architecture
-    banner: IBanner,
-    viewsCount?: number,
-    likesCount?: number
-    commentsCount?: number,
-    status: 'draft' | 'published'
+    title: string;
+    slug: string;
+    content: string;
+    author: string;                    // | string hinzufügen für clean architecture
+    banner: IBanner;
+    viewsCount?: number;
+    likesCount?: number;
+    commentsCount?: number;
+    status: 'draft' | 'published';
 }
 
-export type BlogDocument = HydratedDocument<UserBase>
-
-export type BlogBasic = Pick <BlogLean, '_id' | 'title' | 'slug' | 'author' | 'status'>
+export type BlogDocument = HydratedDocument<BlogBase>
 
 export interface CreateBlogDTO {
-    title: string,
-    content: string,
-    banner: IBanner,
-    author: string,
+    title: string;
+    content: string;
+    banner: IBanner;
+    author: string;
 }
 
 export interface UpdateBlogDTO {
@@ -71,7 +70,6 @@ export interface UpdateBlogDTO {
     banner?: IBanner;
     status?: 'draft' | 'published';
 }
-
 
 /**
  * Schema

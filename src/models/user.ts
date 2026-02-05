@@ -11,6 +11,28 @@ import bcrypt from 'bcrypt'
 import { Types } from 'mongoose';
 import { HydratedDocument } from 'mongoose';
 
+export interface IUser {
+    userName: string;
+    email: string;
+    password: string;
+    role: 'admin' | 'user';
+    firstName?: string;
+    lastName?: string;    
+    socialLinks?: {
+        website?: string;
+        youtube?: string;
+        facebook?: string;
+        linkedin?: string;
+        x?: string;
+        instagram?: string;
+    };
+    twoFactorSecret?: string;
+    twoFactorEnabled?: boolean;
+    refreshToken?: string;
+    passwordResetToken?: string;
+    passwordResetTokenExpires?: Date | null;
+}
+
 
 export interface UserBase {
   userName: string;
@@ -107,7 +129,7 @@ export interface UserCreateInput {
 }
 
 
-const UserSchema = new Schema<UserDocument>({
+const UserSchema = new Schema<IUser>({
     userName: {
         type: String,
         required: [true, 'Username ist required'],
@@ -214,7 +236,7 @@ UserSchema.methods.createResetPasswordToken = function(): string {
     return resetToken
 }
 
-export default model<UserDocument>('User', UserSchema)
+export default model<IUser>('User', UserSchema)
 
 
 

@@ -1,13 +1,13 @@
-// repositories/userRepository.ts
-import Blog, { BlogBasic, BlogDocument, BlogLean, CreateBlogDTO, IBlog } from '@/models/blog';
-import { ensureDocument } from '@/utils/validation/ensureDocument';
+/**
+ * Models
+ */
+import Blog, { BlogBase,  BlogDocument, BlogLean, CreateBlogDTO, IBlog } from '@/models/blog';
 
 /**
  * Types
  */
 
-import { Types, UpdateQuery } from 'mongoose';       // excludes kritische values des schema
-
+import {UpdateQuery } from 'mongoose';       // excludes kritische values des schema
 import { FilterQuery } from 'mongoose';
 
 
