@@ -1,6 +1,7 @@
+import BlogNotFound from "@/errors/service/blog/BlogNotFound";
+import InsufficientPermissionsError from "@/errors/service/common/InsufficientPermissionsError";
 import logger from "@/lib/winston";
-import { AppError } from "@/middleware/errorHandler";
-import { BlogLean, CreateBlogDTO, IBanner, IBlog, UpdateBlogDTO } from "@/models/blog";
+import { BlogBase, BlogDocument, BlogLean, CreateBlogDTO, IBanner, IBlog, UpdateBlogDTO } from "@/models/blog";
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
 import { userRepository } from "@/repository/userRepository/userRepository";
 import { ensureDocument } from "@/utils/validation/ensureDocument";
@@ -10,7 +11,7 @@ import xss from "xss";
 
 
 const blogService = {
-    createBlog: async function(credentials: CreateBlogDTO)  {
+    createBlog: async function(credentials: CreateBlogDTO):Promise<BlogLean>  {
         let credentialsObj = {... credentials}
         credentialsObj.content = xss(credentialsObj.content)
 
@@ -19,10 +20,9 @@ const blogService = {
         return newEntry
     },
 
-    deleteBlog: async function(userId: string, blogId: string) {
+    deleteBlog: async function(userId: string, blogId: string):Promise<void> {
         const user = await userRepository.findById(userId)
         ensureDocument(user, 'User')
-
 
         const blog = await blogRepository.findById(blogId)
         ensureDocument(blog, 'Blog')
@@ -32,11 +32,7 @@ const blogService = {
                 blog,
                 userId
             })
-
-            const error = new Error(`Pessmissions for delte blog denies`) as AppError;
-            error.statusCode = 403;
-            error.code = 'AuthorizationError';
-            throw error;
+            throw new InsufficientPermissionsError()
         }
 
         //await cloudenary.delet(......)        //IMG nicht vergessen zu deleten
@@ -44,7 +40,7 @@ const blogService = {
         await blogRepository.deleteById(blogId)
     },
 
-    getAllBlogs: async function(query: FilterQuery<IBlog>, options: {skip: number, limit: number}):Promise<BlogLean[]> {
+    getAllBlogs: async function(query: FilterQuery<BlogBase>, options: {skip: number, limit: number}):Promise<BlogLean[]> {
         const blogs = await blogRepository.find(query, {skip: options.skip, limit: options.limit})
 
         if(blogs.length === 0){
@@ -57,7 +53,7 @@ const blogService = {
         return blogs
     },
 
-    getBlogBySlug: async function(userId: string, slug: string) {
+    getBlogBySlug: async function(userId: string, slug: string):Promise<BlogLean> {
         const user = await userRepository.findById(userId)
         ensureDocument(user, 'User')
         
@@ -66,13 +62,13 @@ const blogService = {
         
         if(user.role === 'user'&& data.status === 'draft') {
             logger.warn('A User tried to access Draft Blog')
-            throw new Error('User can not access Draft Blog')
+            throw new InsufficientPermissionsError()
         }
 
         return data
     },
 
-    getBlogsByUser: async function(userId: string, query: FilterQuery<IBlog> , options: {queryId: string, skip: number, limit: number}): Promise<BlogLean[]> {
+    getBlogsByUser: async function(userId: string, query: FilterQuery<BlogBase> , options: {queryId: string, skip: number, limit: number}): Promise<BlogLean[]> {
         const user = await userRepository.findById(userId)
         ensureDocument(user, 'User')
 
@@ -85,20 +81,17 @@ const blogService = {
         const data = await blogRepository.find({author: queryId, ...query}, {skip, limit})
 
         if(!data || data.length === 0) {
-            const error = new Error('No Blogs found for user') as AppError
-            error.statusCode = 404
-            error.code = 'ApiError'
-            throw error
+            throw new BlogNotFound()
         }
 
         return data
     },
 
-    updateBlog: async function(userId: string, blogId: string, data: { title?: string, content?: string, banner?: IBanner, status?: 'draft' | 'published' }): Promise<UpdateBlogDTO>{
+    updateBlog: async function(userId: string, blogId: string, data: { title?: string, content?: string, banner?: IBanner, status?: 'draft' | 'published' }): Promise<BlogDocument>{
         const user = await userRepository.findById(userId)
         ensureDocument(user, 'User')
 
-        const blog = await blogRepository.findById(blogId)
+        const blog = await blogRepository.findDocumentById(blogId)
         ensureDocument(blog, 'Blog')
 
         const { title, content, banner, status } = data
@@ -109,14 +102,10 @@ const blogService = {
                 blog
             })
 
-            const error = new Error('Access denied') as AppError;
-            error.statusCode = 403;
-            error.code = 'AuthorizationError';
-            throw error; 
+            throw new InsufficientPermissionsError()
         }
 
         if(title) blog.title = title
-
         if(content) {
             const cleanContent = xss(content)
             blog.content = cleanContent

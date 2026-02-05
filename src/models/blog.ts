@@ -2,8 +2,10 @@
  * Node Modules
  */
 
-import mongoose, { Schema, Types, model } from 'mongoose'
+import mongoose, { HydratedDocument, Schema, Types, model } from 'mongoose'
 import crypto from 'crypto'
+import { HydrationBoundary } from '@tanstack/react-query';
+import { UserBase } from './user';
 
 export type BlogData = Pick<IBlog, 'title' | 'content' | 'banner' | 'status' >
 
@@ -27,6 +29,18 @@ export interface IBlog {
     status: 'draft' | 'published'
 }
 
+export interface BlogBase {
+    title: string;
+    slug: string;
+    content: string;
+    author: string;           
+    banner: IBanner;
+    viewsCount?: number;
+    likesCount?: number;
+    commentsCount?: number;
+    status: 'draft' | 'published';
+}
+
 export interface BlogLean {
     _id: string;  
     title: string,
@@ -40,7 +54,8 @@ export interface BlogLean {
     status: 'draft' | 'published'
 }
 
-// ✅ Klar definiert: DIESE Felder MÜSSEN da sein
+export type BlogDocument = HydratedDocument<UserBase>
+
 export type BlogBasic = Pick <BlogLean, '_id' | 'title' | 'slug' | 'author' | 'status'>
 
 export interface CreateBlogDTO {

@@ -36,25 +36,25 @@ export interface UserBase {
 
 export interface UserLean {
     _id: string;  
-    userName: string
-    email: string,
-    password: string,
-    role: 'admin' | 'user'
-    firstName?: string,
-    lastName?: string,
+    userName: string;
+    email: string;
+    password: string;
+    role: 'admin' | 'user';
+    firstName?: string;
+    lastName?: string;
     socialLinks?: {
-        website?: string,
-        youtube?: string
-        facebook?: string,
-        linkedin?: string,
-        x?: string,
-        instagram?: string
+        website?: string;
+        youtube?: string;
+        facebook?: string;
+        linkedin?: string;
+        x?: string;
+        instagram?: string;
     },
-    twoFactorSecret: string,
-    twoFactorEnabled: boolean,
-    refreshToken: string,
-    passwordResetToken: string,
-    passwordResetTokenExpires: Date | null
+    twoFactorSecret: string;
+    twoFactorEnabled: boolean;
+    refreshToken: string;
+    passwordResetToken: string;
+    passwordResetTokenExpires: Date | null;
 }
 
 
@@ -91,19 +91,19 @@ export interface LogoutInput {
 }
 
 export interface RefreshtokenInput {
-    refreshToken: string,
-    userId: string
+    refreshToken: string;
+    userId: string;
 }
 
 export interface RefreshTokenResult {
-  accessToken: string
+  accessToken: string;
 }
 
 export interface UserCreateInput {
-    userName: string,
-    email: string, 
-    password: string, 
-    role: 'user' | 'admin'
+    userName: string;
+    email: string;
+    password: string;
+    role: 'user' | 'admin';
 }
 
 

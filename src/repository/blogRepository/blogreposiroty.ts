@@ -1,5 +1,5 @@
 // repositories/userRepository.ts
-import Blog, { BlogBasic, BlogLean, CreateBlogDTO, IBlog } from '@/models/blog';
+import Blog, { BlogBasic, BlogDocument, BlogLean, CreateBlogDTO, IBlog } from '@/models/blog';
 import { ensureDocument } from '@/utils/validation/ensureDocument';
 
 /**
@@ -25,7 +25,12 @@ export const blogRepository = {
         return leanBlog
     },
 
-    find: async(queryObj: FilterQuery<IBlog>, options: {populate?: string, sort?: string, skip?: number, limit?: number}):Promise<BlogLean[]> => {
+    findDocumentById: async(userId: string): Promise<BlogDocument | null> => {
+        const user = await Blog.findById(userId).exec()
+        return user as BlogDocument | null
+    },
+
+    find: async(queryObj: FilterQuery<BlogBase>, options: {populate?: string, sort?: string, skip?: number, limit?: number}):Promise<BlogLean[]> => {
         let query = Blog.find(queryObj)
 
         if(options.populate){query = query.populate(options.populate)}
