@@ -14,7 +14,7 @@ const sendEmail = async (options: Record<string, string>) => {
 
     const info = await transporter.sendMail(mailOptions);
 
-    logger.info('📧 Email sent:', info.messageId);
+    logger.info('Email sent:', info.messageId);
     return { success: true, messageId: info.messageId };
     
   } catch (error) {

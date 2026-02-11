@@ -12,15 +12,12 @@ import config from "@/config";
  */
 import User, { IUser } from "@/models/user";
 import catchAsync from "@/utils/async/catchAsync";
-/**
- * Repos
- */
-import { userRepository } from "@/repository/userRepository/userRepository";
+
 /**
  * Types
  */
 import { Request, Response } from "express";
-import getOrSetRedis from "@/utils/infra/cache/getOrSetRedis";
+import getOrSetRedis from "@/infra/cache/getOrSetRedis";
 
 
 const getAllUsers = catchAsync(async function (req: Request, res: Response): Promise<IUser[]> {

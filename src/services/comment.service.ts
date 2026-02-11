@@ -1,5 +1,4 @@
 import logger from "@/lib/winston";
-import { AppError } from "@/middleware/errorHandler";
 import { CommentCreateDTO, CommentLean, IComment } from "@/models/comment";
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
 import { commentRepository } from "@/repository/commentRepository/commentRepository";
@@ -7,9 +6,10 @@ import xss from "xss";
 
 import { userRepository } from "@/repository/userRepository/userRepository";
 import { ensureDocument } from "@/utils/validation/ensureDocument";
+import InsufficientPermissionsError from "@/errors/service/common/InsufficientPermissionsError";
 
 const commentService = {
-    createComment: (async function (credentials: CommentCreateDTO): Promise<CommentLean | null>{
+    createComment: (async function (credentials: CommentCreateDTO): Promise<CommentLean>{
         const {userId, blogId, comment} = credentials
 
         const blog = await blogRepository.findById(blogId)
@@ -53,10 +53,7 @@ const commentService = {
 
         if(comment.userId.toString() !== userId && user.role !== 'admin' ) {
             logger.error('User tried to delete a comment without permission')
-            const error = new Error('User tried to delete a comment without permission') as AppError;
-            error.statusCode = 403;
-            error.code = 'UserNotFound';
-            throw error;
+            throw new InsufficientPermissionsError()
         }       
 
         await commentRepository.deleteById(commentId)

@@ -1,7 +1,7 @@
 /**
  * Models
  */
-import  { IBlog } from "@/models/blog";
+import  { BlogLean, IBlog } from "@/models/blog";
 
 /**
  * Repos
@@ -19,7 +19,7 @@ import { FilterQuery } from "mongoose";
 const getAllBlogs = catchAsync (async(req: Request, res: Response):Promise<void> => {
             const limit = Number(req.query.limit) || 10
             const skip = Number(req.query.skip) || 0
-            const query: FilterQuery<IBlog> = {}
+            const query: FilterQuery<BlogLean> = {}
 
             if (req.userRole === 'user') {
                 query.status = 'published'

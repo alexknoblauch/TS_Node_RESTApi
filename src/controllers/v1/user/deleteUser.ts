@@ -10,7 +10,6 @@ import { userRepository } from "@/repository/userRepository/userRepository";
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
  
 const deleteUser = (async (userId: string):Promise<void> => {
-
     const result = await userRepository.deleteById(userId)
 
     const blogs = await blogRepository.find({author: userId}, {})

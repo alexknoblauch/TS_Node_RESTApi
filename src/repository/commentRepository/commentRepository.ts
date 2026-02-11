@@ -1,7 +1,8 @@
-import Comment, { CommentCreateDTO, CommentLean, IComment } from "@/models/comment";
+import Comment, { CommentBase, CommentCreateDTO, CommentLean, IComment } from "@/models/comment";
+import { FilterQuery } from "mongoose";
 
 export const commentRepository = {
-    create: async function(data: CommentCreateDTO): Promise<CommentLean | null> {
+    create: async function(data: CommentCreateDTO): Promise<CommentLean> {
         const comment =  await Comment.create(data)
 
         const commentObj = comment.toObject()
@@ -31,7 +32,7 @@ export const commentRepository = {
         return leanComment
     },
 
-    find: async function(filter: object, options?: {limit?: number; skip?: number; select?: string; sort?: any;}):Promise<CommentLean[]> {
+    find: async function(filter: FilterQuery<CommentBase>, options?: {limit?: number; skip?: number; select?: string; sort?: any;}):Promise<CommentLean[]> {
         const query = Comment.find(filter).lean();
 
         if(options?.limit) query.limit(options.limit);

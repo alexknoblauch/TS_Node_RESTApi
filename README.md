@@ -12,14 +12,14 @@ Jest - für Unit Tests
 
 ## Architektur & Design
 Controllers: Http basierte Controller
-Services: Businesslogic kapseln - Lose Kopplung
+Services: Business logic kapseln - Lose Kopplung
 Repositories: Funktionales abstrahieren der DB
 Interfaces: BaseUser, LeanUser, DocumentUser + CRUD Interfaces.
 Statis Methods: Usermodel direkt anstueren.
 Middleware: Authenticate, Authorize, ErrorHandling, Validation, CorrelationId
 Logging: Winston mit Redis counter, correlationId, log level, file rotation.
 Errors: ServiceError und HTTPError - Layer trennen.
-Error Handler: Prod und Dev unterscheiden - verschiden viel information leaken. AppError und ServerError unterscheiden.
+Error Handler: Prod und Dev unterscheiden - verschiden viel Information leaken. AppError und ServerError unterscheiden.
 
 
 

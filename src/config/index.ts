@@ -37,7 +37,8 @@ const config = {
 
     CLOUDENARY_CLOUD_NAME: process.env.CLOUDENARY_CLOUD_NAME!,
     CLOUDENARY_API_KEY: process.env.CLOUDENARY_API_KEY!,
-    CLOUDENARY_CLOUD_SECRET: process.env.CLOUDENARY_CLOUD_SECRET!
+    CLOUDENARY_CLOUD_SECRET: process.env.CLOUDENARY_CLOUD_SECRET!,
+    CORS_ORIGINS: 'options'
 }
 
 export default config

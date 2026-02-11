@@ -72,18 +72,40 @@ export interface UserLean {
         x?: string;
         instagram?: string;
     },
-    twoFactorSecret: string;
-    twoFactorEnabled: boolean;
-    refreshToken: string;
-    passwordResetToken: string;
-    passwordResetTokenExpires: Date | null;
+    twoFactorSecret?: string;
+    twoFactorEnabled?: boolean;
+    refreshToken?: string;
+    passwordResetToken?: string;
+    passwordResetTokenExpires?: Date | null;
 }
-
 
 export type UserDocument = HydratedDocument<UserBase & {        //HydratedDocument: inkludiert mongoose funtkionen save() toObject() ect
   createResetPasswordToken(): string;
 }>;
 
+
+export interface UserRegister {
+    userName: string,
+    email: string,
+    password: string
+    role: 'user' | 'admin'
+}
+
+export interface LoginCredentials {
+    email: string, 
+    password: string
+}
+
+
+export interface LoginResult {
+    accessToken: string
+    refreshToken: string
+}
+
+export interface LoginInput {
+    email: string;
+    password: string;
+}
 
 export interface SafeUser {
     _id: Types.ObjectId | string;
@@ -100,11 +122,6 @@ export interface SafeUser {
         x?: string;
         instagram?: string;
     };
-}
-
-export interface LoginInput {
-    email: string;
-    password: string;
 }
 
 export interface LogoutInput {

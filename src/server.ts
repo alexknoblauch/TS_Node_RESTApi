@@ -44,20 +44,43 @@ export const app: Application = express()
 
 //Configure CORS options 
 const corsOptions: CorsOptions = {
- origin: true
+    origin: config.CORS_ORIGINS,
 }
 
 
 // Middleware
 app.use(correlationIdMiddleware)
 app.use(cors(corsOptions))
-app.use(cookieParser())                                 //1
 app.use(compression({ threshold: 1024 }))
 app.use(helmet())
-app.use(csrfProtection)                                 //2
 
 app.use(express.json())                                 
 app.use(express.urlencoded({ extended: true }))         
+app.use(cookieParser())                                 
+app.use(csrfProtection)   
+
+
+
+// Process
+process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+    logger.error('UNHANDLED REJECTION! Shutting down...', {     //Rejected Promise = inkonsisenz
+        reason: reason?.message || reason,
+        stack: reason?.stack,
+        promise
+    });
+    
+    serverClose(server, 'Process terminated due to unhandled rejection')    //Harter Exit
+});
+
+process.on('uncaughtException', (error: Error) => {             //Error ohne handler
+    logger.error('UNCAUGHT EXCEPTION! Shutting down...', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+    });
+    
+    serverClose(server, 'Process terminated due to uncaught exception')     //Harter Exit
+});
 
 
 // Server
@@ -76,28 +99,6 @@ const startServer = async() => {
         server = app.listen(config.PORT, () => {
             logger.info(`server lsitens at port ${config.PORT}`)
         });
-        
-        
-        process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
-            logger.error('UNHANDLED REJECTION! Shutting down...', {     //Rejected Promise = inkonsisenz
-                reason: reason?.message || reason,
-                stack: reason?.stack,
-                promise
-            });
-            
-            serverClose(server, 'Process terminated due to unhandled rejection')    //Harter Exit
-        });
-        
-        
-        process.on('uncaughtException', (error: Error) => {             //Error ohne handler
-            logger.error('UNCAUGHT EXCEPTION! Shutting down...', {
-                message: error.message,
-                stack: error.stack,
-                name: error.name
-            });
-            
-            serverClose(server, 'Process terminated due to uncaught exception')     //Harter Exit
-        });
     } catch (err) {
         logger.error('server not connected');
         
@@ -112,11 +113,6 @@ startServer();
 
 
 //ERROR HANDLING
-app.use('/api/*', (req: Request, res: Response, next: NextFunction) => {
-    const error = new AppError(`API endpoint ${req.method} ${req.originalUrl} not found`, 404, 'ROUTE_NOT_FOUND');
-    next(error);
-});
-
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
     const error = new AppError(`API endpoint ${req.method} ${req.originalUrl} not found`, 404, 'ROUTE_NOT_FOUND');
     next(error);

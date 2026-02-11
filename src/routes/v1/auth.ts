@@ -8,7 +8,6 @@ import { Router } from 'express'
 /**
  *  Custom Modules
  */
-import  User, { IUser }  from '@/models/user'
 import  logout from '@/controllers/v1/auth/logout'
 
 

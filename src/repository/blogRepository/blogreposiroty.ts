@@ -30,7 +30,7 @@ export const blogRepository = {
         return user as BlogDocument | null
     },
 
-    find: async(queryObj: FilterQuery<BlogBase>, options: {populate?: string, sort?: string, skip?: number, limit?: number}):Promise<BlogLean[]> => {
+    find: async(queryObj: FilterQuery<BlogBase>, options: {populate?: string, sort?: string, skip?: number, limit?: number}):Promise<BlogLean[] | NonNullable> => {
         let query = Blog.find(queryObj)
 
         if(options.populate){query = query.populate(options.populate)}

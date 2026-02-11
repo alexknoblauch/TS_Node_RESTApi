@@ -55,7 +55,7 @@ export interface BlogLean {
     status: 'draft' | 'published';
 }
 
-export type BlogDocument = HydratedDocument<BlogBase>
+export type BlogDocument = HydratedDocument<IBlog>
 
 export interface CreateBlogDTO {
     title: string;

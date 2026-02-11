@@ -2,6 +2,7 @@
  * Custom Modules
  */
 
+import getOrSetRedis from "@/infra/cache/getOrSetRedis";
 import logger from "@/lib/winston";
 
 /**
@@ -10,7 +11,6 @@ import logger from "@/lib/winston";
 
 import User from "@/models/user";
 import catchAsync from "@/utils/async/catchAsync";
-import getOrSetRedis from "@/utils/infra/cache/getOrSetRedis";
 
 /**
  * Types

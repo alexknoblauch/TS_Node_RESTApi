@@ -18,39 +18,13 @@ import { userRepository } from "@/repository/userRepository/userRepository";
 /**
  * Types
 */
-import { RefreshtokenInput, RefreshTokenResult, SafeUser, UserBase, UserCreateInput, UserDocument } from "@/models/user";
+import { LoginCredentials, LoginResult, RefreshtokenInput, RefreshTokenResult, SafeUser, UserBase, UserCreateInput, UserDocument, UserRegister } from "@/models/user";
 import { ensureDocument } from "@/utils/validation/ensureDocument";
 import InvalidCrednetials from "@/errors/service/common/InvalidCredentials";
 import sendEmail from "@/infra/mail/mailer.service";
 import TokenError from "@/errors/service/common/TokenError";
-import forgotpassword from "@/controllers/v1/auth/passwordForogt";
-import ServiceAppError from "@/errors/service/ServiceAppError";
 import MailerError from "@/infra/mail/MailerError";
 import { refreshToken } from "@/controllers/v1/auth/refresh-token";
-
-
-interface LoginCredentials {
-    email: string, 
-    password: string
-}
-
-interface RegisterCredentials {
-    email: string,
-    password: string,
-    role: 'admin' | 'user'
-}
-
-
-interface RegisterResult {
-    user: SafeUser,
-    accessToken: string,    
-    refreshToken: string
-}
-
-interface LoginResult {
-    accessToken: string
-    refreshToken: string
-}
 
 
 const authService = {
@@ -76,19 +50,6 @@ const authService = {
         return {accessToken, refreshToken}
     },
 
-    async forgotpassword (email: string, baseURL: string): Promise<UserDocument> {
-        const user = userRepository.findDocumentByEmail(email)
-        ensureDocument(user, 'User')
-
-        const token = user.createResetPasswordToken()
-        await userRepository.save(user)
-
-        const resetUrl = `${baseURL}/${token}`
-
-        return token
-    },
-
-
     async refreshToken (refreshToken: string): Promise<RefreshTokenResult> {
         const tokenExists = await tokenRepository.findOneWithToken(refreshToken)
         ensureDocument(tokenExists, 'Token')
@@ -104,7 +65,7 @@ const authService = {
         return {accessToken}
     },
 
-    async register (credentials: RegisterCredentials): Promise<RegisterResult> {
+    async register (credentials: UserRegister): Promise<{user: SafeUser; accessToken: string; refreshToken: string}> {
         const { email, password, role } = credentials;
 
         if(role === 'admin' /*&& !config.WHITELIST_ADMINS_EMAIL.includes(email)*/){
@@ -157,9 +118,7 @@ const authService = {
     
             throw new MailerError()
         } 
-    },
-
- 
+    }
 }
 
 export default authService

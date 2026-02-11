@@ -1,7 +1,7 @@
 import BlogNotFound from "@/errors/service/blog/BlogNotFound";
 import InsufficientPermissionsError from "@/errors/service/common/InsufficientPermissionsError";
 import logger from "@/lib/winston";
-import { BlogBase, BlogDocument, BlogLean, CreateBlogDTO, IBanner, IBlog, UpdateBlogDTO } from "@/models/blog";
+import { BlogBase, BlogDocument, BlogLean, CreateBlogDTO, IBanner } from "@/models/blog";
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
 import { userRepository } from "@/repository/userRepository/userRepository";
 import { ensureDocument } from "@/utils/validation/ensureDocument";
@@ -20,7 +20,7 @@ const blogService = {
         return newEntry
     },
 
-    deleteBlog: async function(userId: string, blogId: string):Promise<void> {
+    deleteBlog: async function(blogId: string, userId: string):Promise<void> {
         const user = await userRepository.findById(userId)
         ensureDocument(user, 'User')
 
@@ -32,11 +32,12 @@ const blogService = {
                 blog,
                 userId
             })
+
             throw new InsufficientPermissionsError()
         }
 
         //await cloudenary.delet(......)        //IMG nicht vergessen zu deleten
-        
+    
         await blogRepository.deleteById(blogId)
     },
 

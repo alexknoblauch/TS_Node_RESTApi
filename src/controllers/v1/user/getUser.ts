@@ -10,12 +10,11 @@ import logger from "@/lib/winston";
 /**
  * Types
  */
-import getOrSetRedis from "@/utils/infra/cache/getOrSetRedis";
 import { ensureDocument } from "@/utils/validation/ensureDocument";
+import getOrSetRedis from "@/infra/cache/getOrSetRedis";
 
 
 const getUser = (async function (userId:string) {
-
     const cacheKey = `User:${userId}`
 
     const data = await getOrSetRedis(cacheKey, async () => {

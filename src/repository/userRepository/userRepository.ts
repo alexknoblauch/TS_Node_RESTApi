@@ -95,7 +95,6 @@ export const userRepository = {
 
     updateById: async (id: string, updateData: UpdateQuery<UserBase>): Promise<UserLean | null> => {
         const user = await User.findByIdAndUpdate(id, updateData, { new: true, lean: true }).exec();
-
         if(!user) return null
 
         const leanUser = {
@@ -109,9 +108,5 @@ export const userRepository = {
     deleteById: async (id: string): Promise<boolean> => {
         const result = await User.deleteOne({ _id: id }).exec();
         return result.deletedCount > 0;
-    },
-
-    findDocumentByEmail2: async function(email: string): Promise<UserDocument | null> {
-        return await User.findOne({email}).exec()
     }
 };

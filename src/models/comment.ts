@@ -1,7 +1,7 @@
 /**
  * Node Modules
  */
-import mongoose, { Schema, model, Types } from "mongoose"
+import mongoose, { Schema, model, Types, HydratedDocument } from "mongoose"
 
 
 /**
@@ -9,30 +9,41 @@ import mongoose, { Schema, model, Types } from "mongoose"
  */
 
 export interface IComment {
-    _id: Types.ObjectId,  
-    blogId: Types.ObjectId,
-    userId: Types.ObjectId,
-    comment: string,
+    _id: Types.ObjectId;
+    blogId: Types.ObjectId;
+    userId: Types.ObjectId;
+    comment: string;
+}
+
+export interface CommentBase {
+    _id: string;
+    blogId: string;
+    userId: string;
+    comment: string;
 }
 
 export interface CommentLean {
-    _id: string,  
-    blogId: string,
-    userId: string,
-    comment: string,
+    _id: string;
+    blogId: string;
+    userId: string;
+    comment: string;
 }
 
+export type CommentDocument = HydratedDocument<IComment>;
+
 export interface CommentCreateDTO {
-    blogId: string,
-    userId: string,
-    comment: string,
+    blogId: string;
+    userId: string;
+    comment: string;
 }
 
 export interface CommentUpdateDTO {
-    comment?: string,
+    comment?: string;
 }
 
-export type CommentData = Pick <IComment, 'comment'>                   //PICK TYPE
+export type CommentData = {
+    comment: string
+}
 
 
 const commentSchema = new Schema<IComment>({

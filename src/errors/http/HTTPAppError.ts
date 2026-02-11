@@ -1,16 +1,16 @@
 class HttpAppError extends Error {
-  statusCode: number
-  status: string
-  isOperational: boolean
-  errorCode: string
-  action?: string
-  reason?: string
+  readonly statusCode: number
+  readonly code: string
+  readonly status: string
+  readonly isOperational: boolean
+  readonly action?: string
+  readonly reason?: string
 
-  constructor(message: string, statusCode: number, errorCode:string, action?: string, reason?: string) {
+  constructor(message: string, statusCode: number, code:string, action?: string, reason?: string) {
     super(message);
     
     this.statusCode = statusCode;
-    this.errorCode = errorCode
+    this.code = code
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error'; 
     this.isOperational = true;
     this.action = action

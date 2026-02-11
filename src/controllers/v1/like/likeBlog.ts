@@ -16,7 +16,7 @@ import Like from '@/models/like'
  */
 import type { Request, Response } from 'express'
 import { ensureDocument } from '@/utils/validation/ensureDocument'
-import AppError from '@/errors/service errors/AppError'
+import httpConflictError from "@/errors/http/httpConflictError"
 /**
  * Purify the blog content
  */
@@ -39,7 +39,9 @@ const likeBlog = catchAsync(async function(req: Request, res: Response): Promise
             userAgent: req.headers['user-agent'],
             action: 'LIKE_ATTEMPT'
         })
-        throw new AppError('Like already exists', 409, 'BadRequest');       // CONFLICT
+
+        const error = httpConflictError(req, 'like already exists')      // CONFLICT 409
+        throw error
     }
 
 

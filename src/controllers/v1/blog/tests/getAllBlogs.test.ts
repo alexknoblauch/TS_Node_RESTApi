@@ -1,35 +1,39 @@
-jest.mock('@/repository/blogRepository')
-
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty"
+import { userRepository } from "@/repository/userRepository/__mocks__/userRepository"
 import blogService from "@/services/blog.service"
 
+jest.mock('@repository/userRepository/userRepository')
+jest.mock('@repository/blogRepository/blogRepository')
+
+const mockedBlogRepository = blogRepository as jest.Mocked<typeof blogRepository>
+const mockedUserRepository = userRepository as jest.Mocked<typeof userRepository>
+
 describe('getAllBlogs', () => {
-    it('happy path', async() => {
-        const mockBlogs = [
-            { _id: '1', title: 'Blog1', content: 'abc', author: '123', slug: 'blog1', banner: { publicId: '1', url: 'url', width: 1, height: 1 }, viewsCount:0, likesCount:0, commentsCount:0, status:'draft' },
-            { _id: '2', title: 'Blog2', content: 'def', author: '456', slug: 'blog2', banner: { publicId: '2', url: 'url', width: 1, height: 1 }, viewsCount:0, likesCount:0, commentsCount:0, status:'draft' },
-        ];
+    it('should retreive all Blogs of a user', async() => {
+        mockedBlogRepository.find.mockResolvedValue([
+            {_id: '123', author: '1234'},
+            {_id: '321', author: '1234'}
+        ])
 
-        (blogRepository.find as jest.Mock).mockResolvedValue(mockBlogs)
+        const result = await blogService.getAllBlogs({author: '1234'}, {limit:1, skip:1})
 
-        const result = await blogService.getAllBlogs({}, { skip: 10, limit: 0 })
-
-        expect(blogRepository.find).toHaveBeenCalledWith({}, { limit: 10, skip: 0 });
-
-        expect(result).toEqual(mockBlogs);
-    }),
-
-    
-    it('should throw error when user not found', async() => {
-        (blogRepository.find as jest.Mock).mockResolvedValue(null)
-
-        await expect(blogService.getAllBlogs({}, { limit: 10, skip: 0 })).rejects.toThrow('User not found')
-    }),
-
+        expect(result).toEqual([
+            {_id: '123', author: '1234'},
+            {_id: '321', author: '1234'}
+        ])
+    })
 
     it('should throw an Error when DB not available', async() => {
-        (blogRepository.find as jest.Mock).mockRejectedValue(new Error('DB Error'))
-        
-        await expect(blogService.getAllBlogs({}, { limit: 10, skip: 0 })).rejects.toThrow('DB Error')
+        mockedBlogRepository.find.mockRejectedValue(new Error('DB not found'))
+
+        await expect(blogService.getAllBlogs({author: '1234'}, {limit:1, skip:1})).rejects.toThrow('DB not found')
+    })
+
+    it('shuold find no Blogs when User not exists', async() => {
+        mockedBlogRepository.find.mockResolvedValue([])
+
+        const result = await blogService.getAllBlogs({author: '666666'}, {limit:1, skip:1})
+
+        expect(result).toEqual([])
     })
 })
