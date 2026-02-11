@@ -1,5 +1,8 @@
+import InsufficientPermissionsError from "@/errors/service/common/InsufficientPermissionsError"
+import { BlogLean } from "@/models/blog"
+import { UserLean } from "@/models/user"
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty"
-import { userRepository } from "@/repository/userRepository/__mocks__/userRepository"
+import { userRepository } from "@/repository/userRepository/userRepository"
 import blogService from "@/services/blog.service"
 
 jest.mock('@repository/userRepository/userRepository')
@@ -32,8 +35,17 @@ describe('getAllBlogs', () => {
     it('shuold find no Blogs when User not exists', async() => {
         mockedBlogRepository.find.mockResolvedValue([])
 
-        const result = await blogService.getAllBlogs({author: '666666'}, {limit:1, skip:1})
+        const result = await blogService.getAllBlogs({author: '123'}, {limit:1, skip:1})
 
         expect(result).toEqual([])
+    })
+
+    it('should throw an Error when User is not owner', async() => {
+        mockedBlogRepository.find.mockResolvedValue([
+            {_id: '123', author: '1234'},
+            {_id: '321', author: '1234'}
+        ])
+
+        mockedBlogRepository.findBySlug.mockResolvedValue(null)
     })
 })

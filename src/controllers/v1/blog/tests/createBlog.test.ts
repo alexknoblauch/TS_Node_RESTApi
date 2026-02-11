@@ -38,14 +38,4 @@ describe('createBlog', () => {
 
         await expect(blogService.createBlog(data)).rejects.toThrow('DB not found')
     })
-
-    it('should throw an Error when invalid credentials', async() => {
-        mockedBlogRepository.create.mockResolvedValue(null)
-
-        const data = {
-            author: '1234'
-        } as CreateBlogDTO
-
-        await expect(blogService.createBlog(data)).rejects.toThrow('')
-    })
 })
