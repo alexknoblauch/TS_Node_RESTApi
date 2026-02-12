@@ -39,13 +39,4 @@ describe('getAllBlogs', () => {
 
         expect(result).toEqual([])
     })
-
-    it('should throw an Error when User is not owner', async() => {
-        mockedBlogRepository.find.mockResolvedValue([
-            {_id: '123', author: '1234'},
-            {_id: '321', author: '1234'}
-        ])
-
-        mockedBlogRepository.findBySlug.mockResolvedValue(null)
-    })
 })

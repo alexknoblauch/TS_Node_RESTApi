@@ -61,7 +61,7 @@ const blogService = {
         const data = await blogRepository.findBySlug(slug)
         ensureDocument(data, 'Data')
         
-        if(user.role === 'user'&& data.status === 'draft') {
+        if(user.role === 'user' && data.status === 'draft') {
             logger.warn('A User tried to access Draft Blog')
             throw new InsufficientPermissionsError()
         }

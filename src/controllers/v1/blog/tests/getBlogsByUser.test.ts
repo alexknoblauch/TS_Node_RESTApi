@@ -1,72 +1,45 @@
-jest.mock('@/repository/blogRepository')
-jest.mock('@/repository/userRepository')
-
+import UserNotFound from "@/errors/service/user/UserNotFound"
+import { BlogLean } from "@/models/blog"
+import { UserLean } from "@/models/user"
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty"
 import { userRepository } from "@/repository/userRepository/userRepository"
-import getBlogsByUser from "../getBlogsByUser"
-import { IUser } from "@/models/user"
+import blogService from "@/services/blog.service"
 
+jest.mock('@repository/userRepository/userRepository')
+jest.mock('@repository/blogRepository/blogRepository')
 
-const MockedUserRepository = userRepository as jest.Mocked<typeof userRepository>
-const MockedBlogRepository = blogRepository as jest.Mocked<typeof blogRepository>;
+const mockedBlogRepository = blogRepository as jest.Mocked<typeof blogRepository>
+const mockedUserRepository = userRepository as jest.Mocked<typeof userRepository>
 
+describe('getBlogsByUser', () => {
+    it('should get all Blogs of a User', async() => {
+        mockedUserRepository.findById.mockResolvedValue({
+            _id: '123',
+            role: 'user'
+        } as UserLean)
 
-describe('find blogs by user', () => {
-    it('should find blog by userid', async() => {
-        MockedUserRepository.findById.mockResolvedValue({
-                _id: '123',
-                role: 'user'
-        } as IUser)
+        mockedBlogRepository.find.mockResolvedValue([{
+            _id: '1234',
+            author: '123'
+        } as BlogLean])
 
-        const blogs = [
-            {
-                _id: '123',
-                author: 'alex123',                    // | string hinzufügen für clean architecture
-                status: 'published' 
-            }
-        ]
+        const restult = await blogService.getBlogsByUser('123', {}, {queryId: '1', limit: 1, skip: 1})
 
-        const blogRepositoryMock = blogRepository as jest.Mocked<typeof blogRepository>;
-
-
-        (blogRepositoryMock.findById as jest.Mock).mockResolvedValue(blogs)
-
-        const result = await getBlogsByUser('123', {}, '123', 0, 10)
-
-        expect(blogRepositoryMock.findById).toHaveBeenCalled()
-
-        expect(result).toEqual(blogs)
-    }),
-
-    
-    it('should throw error when user not found', async() => {
-        (userRepository.findById as jest.Mock).mockResolvedValue(null)
-
-        await expect(getBlogsByUser('123', {}, '123', 0, 10)).rejects.toThrow('User not found')
-    }),
-
-    it('should throw an error when DB not available', async() => {
-        (MockedUserRepository.findById as jest.Mock).mockRejectedValue(new Error('DB not found'))
-
-        await expect(getBlogsByUser('123', {}, '123', 0, 10)).rejects.toThrow('DB not found')
+        expect(restult).toEqual([{
+            _id: '1234',
+            author: '123'
+        }])
     })
 
-    
-    it('should throw an Error when Blog not found', async() => {
-        MockedUserRepository.findById.mockResolvedValue({
-                _id: '123',
-                role: 'user'
-        } as IUser)
+    it('should throw an Error when DB is not available', async() => {
+        mockedUserRepository.findById.mockRejectedValue(new Error('DB not found'))
 
-        MockedBlogRepository.findById.mockResolvedValue(null)
-
-        await expect(getBlogsByUser('123', {}, '123', 0, 10)).rejects.toThrow('Blog not found')
+        await expect(blogService.getBlogsByUser('123', {}, {queryId: '1', limit: 1, skip: 1})).rejects.toThrow('DB not found')
     })
 
+    it('should throw an Error when User not found', async() => {
+        mockedUserRepository.findById.mockResolvedValue(null)
 
-    it('should thorw an error when DB is down', async() => {
-        MockedBlogRepository.findById.mockRejectedValue(new Error('DB error'))
-
-        await expect(getBlogsByUser('123', {}, '123', 0, 10)).rejects.toThrow('DB error')
+        await expect(blogService.getBlogsByUser('123', {}, {queryId: '1', limit: 1, skip: 1})).rejects.toThrow(UserNotFound)
     })
 })
