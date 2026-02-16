@@ -1,145 +1,115 @@
 import BlogNotFound from "@/errors/service/blog/BlogNotFound"
+import CommentNotFound from "@/errors/service/comment/CommentNotFound"
 import UserNotFound from "@/errors/service/user/UserNotFound"
 import { BlogLean } from "@/models/blog"
+import { CommentLean } from "@/models/comment"
 import { UserLean } from "@/models/user"
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty"
 import { commentRepository } from "@/repository/commentRepository/commentRepository"
 import { userRepository } from "@/repository/userRepository/userRepository"
-import blogService from "@/services/blog.service"
 import commentService from "@/services/comment.service"
 
-jest.mock('@repository/commentRepository/commentRepository')
-jest.mock('@repository/blogRepository/blogRepository')
-jest.mock('@repository/userRepository/userRepository')
+jest.mock('@repository/commentRepository')
+jest.mock('@repository/userRepository')
+jest.mock('@repository/blogRepository')
 
-const mockedCommentRepositry = commentRepository as jest.Mocked<typeof commentRepository>
-const mockedBlogRepositry = blogRepository as jest.Mocked<typeof blogRepository>
-const mockedUsertRepositry = userRepository as jest.Mocked<typeof userRepository>
+const mockedBlogRespository = blogRepository as jest.Mocked<typeof blogRepository>
+const mockedCommentRespository = commentRepository as jest.Mocked<typeof commentRepository>
+const mockedUserRepository = userRepository as jest.Mocked<typeof userRepository>
 
 describe('commentBlog', () => {
-    it('should create a comment', async() =>{
-        mockedBlogRepositry.findById.mockResolvedValue({
-            _id: '123',
+    beforeEach(() => {
+        jest.clearAllMocks()
+    })
+
+    it('should create a Comment', async () => {
+        mockedBlogRespository.findById.mockResolvedValue({
+            _id: '12345',
             author: '1234'
         } as BlogLean)
 
-        mockedUsertRepositry.findById.mockResolvedValue({
-            _id: '1234',
-            role: 'user'
+        mockedUserRepository.findById.mockResolvedValue({
+            _id: '1234'
         } as UserLean)
-
-        mockedCommentRepositry.create.mockResolvedValue({
-            _id: '12345',
-            blogId:'123',
-            userId:'1234',
-            comment:'test'
-        })
-
-        const result = await commentService.createComment({
-            blogId: '123',
+        
+        mockedCommentRespository.create.mockResolvedValue({
+            _id: '123',
             userId: '1234',
+            blogId: '12345',
             comment: 'test'
-        })
+        } as CommentLean)
+
+        const result = await commentService.createComment({blogId: '12345', userId: '1234', comment: 'test'})
+        
+        expect(mockedCommentRespository.create).toHaveBeenLastCalledWith({blogId: '12345', userId: '1234', comment: 'test'})
 
         expect(result).toEqual({
-            _id: '12345',
-            blogId:'123',
-            userId:'1234',
-            comment:'test'
+            _id: '123',
+            userId: '1234',
+            blogId: '12345',
+            comment: 'test'
         })
     })
 
+    it('should throw an Error when DB not available', async() => {
+        mockedBlogRespository.findById.mockRejectedValue(new Error('DB not found'))
 
-    it('should throw an Error when DB is not available', async() => {
-        mockedBlogRepositry.findById.mockResolvedValue({
-            _id: '123',
-            author: '1234'
-        } as BlogLean)
+        await expect(commentService.createComment({blogId: '12345', userId: '1234', comment: 'test'})).rejects.toThrow('DB not found')
 
-        mockedUsertRepositry.findById.mockResolvedValue({
-            _id: '1234',
-            role: 'user'
-        } as UserLean)
-
-        mockedCommentRepositry.create.mockRejectedValue(new Error('DB not found'))
-
-        await expect(commentService.createComment({
-            blogId: '123',
-            userId: '1234',
-            comment: 'test'
-        })).rejects.toThrow('DB not found')
+        expect(mockedCommentRespository.create).not.toHaveBeenCalled()
+        expect(mockedUserRepository.findById).not.toHaveBeenCalled()
     })
-
-    
-    it('should throw an Error when DB is not available', async() => {
-        mockedBlogRepositry.findById.mockResolvedValue({
-            _id: '123',
-            author: '1234'
-        } as BlogLean)
-
-        mockedUsertRepositry.findById.mockRejectedValue(new Error('DB not found'))
-
-        await expect(commentService.createComment({
-            blogId: '123',
-            userId: '1234',
-            comment: 'test'
-        })).rejects.toThrow('DB not found')
-    })
-    
-    it('should throw an Error when DB is not available', async() => {
-        mockedBlogRepositry.find.mockRejectedValue(new Error('DB not found'))
-
-        await expect(commentService.createComment({
-            blogId: '123',
-            userId: '1234',
-            comment: 'test'
-        })).rejects.toThrow('DB not found')
-    })
-
 
     it('should throw an Error when Blog not found', async() => {
-        mockedBlogRepositry.findById.mockResolvedValue(null)
+        mockedBlogRespository.findById.mockResolvedValue(null)
 
-        await expect(commentService.createComment({
-            blogId: '123',
-            userId: '1234',
-            comment: 'test'
-        })).rejects.toThrow(BlogNotFound)
+        await expect(commentService.createComment({blogId: '12345', userId: '1234', comment: 'test'})).rejects.toThrow(BlogNotFound)
+
+        expect(mockedCommentRespository.create).not.toHaveBeenCalled()
+
     })
-
-
+    
     it('should throw an Error when User not found', async() => {
-        mockedBlogRepositry.findById.mockResolvedValue({
-            _id: '123',
+        mockedBlogRespository.findById.mockResolvedValue({
+            _id: '12345',
             author: '1234'
         } as BlogLean)
 
-        mockedUsertRepositry.findById.mockResolvedValue(null)
+        mockedUserRepository.findById.mockResolvedValue(null)
 
-        await expect(commentService.createComment({
-            blogId: '123',
-            userId: '1234',
-            comment: 'test'
-        })).rejects.toThrow(UserNotFound)
+        await expect(commentService.createComment({blogId: '12345', userId: '1234', comment: 'test'})).rejects.toThrow(UserNotFound)
+
+        expect(mockedCommentRespository.create).not.toHaveBeenCalled()
     })
 
-
-    it('should throw an Error when Comment is empty', async() => {
-         mockedBlogRepositry.findById.mockResolvedValue({
-            _id: '123',
+    it('should thorw an Error when no comment-text fails', async() => {
+                mockedBlogRespository.findById.mockResolvedValue({
+            _id: '12345',
             author: '1234'
         } as BlogLean)
 
-        mockedUsertRepositry.findById.mockResolvedValue({
-            _id: '1234',
-            role: 'user'
+        mockedUserRepository.findById.mockResolvedValue({
+            _id: '1234'
         } as UserLean)
+        
+        await expect(commentService.createComment({blogId: '12345', userId: '1234', comment: ''})).rejects.toThrow(CommentNotFound)
 
-        mockedCommentRepositry.create.mockRejectedValue(new Error('Comment Field is empty'))
-
-        await expect(commentService.createComment({blogId: '123', userId: '1234', comment: ''})).rejects.toThrow('Comment Field is empty')
+        expect(mockedCommentRespository.create).not.toHaveBeenCalled()
     })
 
 
-    //XXS TEST:
+    it('thorws an Error when creation failes', async() => {
+         mockedBlogRespository.findById.mockResolvedValue({
+            _id: '12345',
+            author: '1234'
+        } as BlogLean)
+
+        mockedUserRepository.findById.mockResolvedValue({
+            _id: '1234'
+        } as UserLean)
+        
+        mockedCommentRespository.create.mockRejectedValue(new Error('creation failed'))
+
+        await expect(commentService.createComment({blogId: '12345', userId: '1234', comment: 'test'})).rejects.toThrow('creation failed')
+    })
 })

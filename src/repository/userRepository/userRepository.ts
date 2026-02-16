@@ -104,7 +104,7 @@ export const userRepository = {
 
         return leanUser
     },
-
+    
     deleteById: async (id: string): Promise<boolean> => {
         const result = await User.deleteOne({ _id: id }).exec();
         return result.deletedCount > 0;

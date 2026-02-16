@@ -6,9 +6,9 @@ const sendEmail = async (options: Record<string, string>) => {
   try {
     const mailOptions = {
       from: process.env.EMAIL_FROM || 'Cineflix Support <support@cineflix.com>',
-      to: options.email,
+      email: options.email,
       subject: options.subject,
-      text: options.message,
+      message: options.message,
       html: options.html 
     };
 

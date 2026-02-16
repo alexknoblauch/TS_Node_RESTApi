@@ -18,13 +18,14 @@ import { userRepository } from "@/repository/userRepository/userRepository";
 /**
  * Types
 */
-import { LoginCredentials, LoginResult, RefreshtokenInput, RefreshTokenResult, SafeUser, UserBase, UserCreateInput, UserDocument, UserRegister } from "@/models/user";
+import { LoginCredentials, LoginResult, PasswordForgot, RefreshtokenInput, RefreshTokenResult, SafeUser, UserBase, UserCreateInput, UserDocument, UserRegister } from "@/models/user";
 import { ensureDocument } from "@/utils/validation/ensureDocument";
 import InvalidCrednetials from "@/errors/service/common/InvalidCredentials";
 import sendEmail from "@/infra/mail/mailer.service";
 import TokenError from "@/errors/service/common/TokenError";
 import MailerError from "@/infra/mail/MailerError";
 import { refreshToken } from "@/controllers/v1/auth/refresh-token";
+import passwordForgot from "@/controllers/v1/auth/passwordForogt";
 
 
 const authService = {
@@ -43,12 +44,24 @@ const authService = {
         const accessToken = generateAccessToken(user._id.toString())
         const refreshToken = generateRefreshToken(user._id.toString())
 
-        logger.info('Refresh Token created for')
-
         await tokenRepository.create(refreshToken, user._id.toString())
 
         return {accessToken, refreshToken}
     },
+
+    async passwordForgot2 (credentials: PasswordForgot): Promise<string> {
+        const { email, baseURL } = credentials
+        const User = await userRepository.findDocumentByEmail(email)
+        ensureDocument(User, 'User')
+
+        const token = User.generatePasswordForgotToken()
+
+        const resetURL = `${baseURL}/${token}`
+
+
+
+        return token
+    } ,
 
     async refreshToken (refreshToken: string): Promise<RefreshTokenResult> {
         const tokenExists = await tokenRepository.findOneWithToken(refreshToken)
@@ -69,7 +82,6 @@ const authService = {
         const { email, password, role } = credentials;
 
         if(role === 'admin' /*&& !config.WHITELIST_ADMINS_EMAIL.includes(email)*/){
-            logger.warn(`Registration as admin failed: ${email}`)
             throw new Error('Email not allowed for admin registration');
         }
 
@@ -88,9 +100,7 @@ const authService = {
         if (refreshToken){
             await tokenRepository.delete(refreshToken)
         }
-        
-        logger.info('User logged out', { userId })
-    },
+   },
 
     async forgotpassword (credentials: Record<string, string>):Promise<void> {
         const { email, baseURL } = credentials     

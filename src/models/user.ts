@@ -81,6 +81,7 @@ export interface UserLean {
 
 export type UserDocument = HydratedDocument<UserBase & {        //HydratedDocument: inkludiert mongoose funtkionen save() toObject() ect
   createResetPasswordToken(): string;
+  generatePasswordForgotToken(): string
 }>;
 
 
@@ -108,9 +109,9 @@ export interface LoginInput {
 }
 
 export interface SafeUser {
-    _id: Types.ObjectId | string;
+    _id: string;
     userName: string;
-    email: string;
+    email: string;  
     role: 'admin' | 'user';
     firstName?: string;
     lastName?: string;
@@ -143,6 +144,11 @@ export interface UserCreateInput {
     email: string;
     password: string;
     role: 'user' | 'admin';
+}
+
+export interface PasswordForgot {
+    email: string,
+    baseURL: string
 }
 
 
@@ -235,6 +241,17 @@ UserSchema.methods.toJSON = function() {
     
     return user;
 };
+
+
+UserSchema.methods.generatePasswordForgotToken = function() {
+    const token = crypto.randomBytes(32).toString()
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+
+    this.passwordResetToken = hashedToken
+    this.passwordResetTokenExpires = Date.now() + 10 * 1000 * 60
+    return token
+} 
 
 
 UserSchema.pre('save', async function(this: UserDocument, next: any){       // this arbeitet auf instanz ebene 

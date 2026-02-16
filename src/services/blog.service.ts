@@ -28,11 +28,6 @@ const blogService = {
         ensureDocument(blog, 'Blog')
         
         if(blog.author !== userId && user.role !== 'admin'){
-            logger.warn('someone tried to delete blog without acceess',{
-                blog,
-                userId
-            })
-
             throw new InsufficientPermissionsError()
         }
 
@@ -45,10 +40,6 @@ const blogService = {
         const blogs = await blogRepository.find(query, {skip: options.skip, limit: options.limit})
 
         if(blogs.length === 0){
-            logger.info('No Blogs founnd',{
-                blogs,
-            })
-
             return []                           // Leeres array weil filte immer [] returnt!
         }
         return blogs
@@ -62,7 +53,6 @@ const blogService = {
         ensureDocument(data, 'Data')
         
         if(user.role === 'user' && data.status === 'draft') {
-            logger.warn('A User tried to access Draft Blog')
             throw new InsufficientPermissionsError()
         }
 
@@ -98,10 +88,6 @@ const blogService = {
         const { title, content, banner, status } = data
 
         if(blog.author !== userId && user?.role !== 'admin') {
-            logger.warn('User tried to update a Blog without haveing permission', {
-                userId,
-                blog
-            })
 
             throw new InsufficientPermissionsError()
         }

@@ -26,8 +26,6 @@ const commentService = {
             comment: cleanComment 
         })
         
-        logger.info('Comment successfully created')
-
         return createdComment
     }),
     
@@ -37,8 +35,6 @@ const commentService = {
         ensureDocument(blog, 'Blog')
 
         const allComments = await commentRepository.find({ blogId })
-
-        logger.info('Comments successfully retreaved')
 
         return allComments
     }),
@@ -52,7 +48,6 @@ const commentService = {
         ensureDocument(user, 'User')
 
         if(comment.userId.toString() !== userId && user.role !== 'admin' ) {
-            logger.error('User tried to delete a comment without permission')
             throw new InsufficientPermissionsError()
         }       
 
@@ -60,8 +55,6 @@ const commentService = {
         await blogRepository.update(comment.blogId, {                      // comment.blogId = Realtion!!
             $inc: {likesCount: -1}
         })
-
-        logger.info('Comment successfully deleted')
     })
 }
 

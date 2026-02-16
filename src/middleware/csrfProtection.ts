@@ -18,7 +18,7 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
     res.cookie('_csrfSecret', secret, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000
     });
   }
@@ -26,7 +26,7 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
 
   //backend to frontend  token erstellen
   const token = tokens.create(secret);
-  res.locals.csrfToken = token;
+  //res.locals.csrfToken = token;
   res.setHeader('X-CSRF-Token', token);
 
   
