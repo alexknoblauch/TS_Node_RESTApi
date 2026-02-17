@@ -12,6 +12,10 @@ const mockedBlogRepository = blogRepository as jest.Mocked<typeof blogRepository
 const mockedUserRepository = userRepository as jest.Mocked<typeof userRepository>
 
 describe('deleteBlog', () => {
+    beforeEach(() => {
+        jest.clearAllMocks()
+    })
+
     it('should delete a Blog', async() => {
         mockedBlogRepository.findById.mockResolvedValue({
             _id: '123',
@@ -81,8 +85,11 @@ describe('deleteBlog', () => {
     })
 
     it('should trow an error when DB is down', async() => {
-        mockedBlogRepository.findById.mockRejectedValue(new Error('DB not found'))
+        mockedUserRepository.findById.mockRejectedValue(new Error('DB not found'))
 
         await expect(blogService.deleteBlog('123', '1234')).rejects.toThrow('DB not found')
+        
+        expect(mockedBlogRepository.findById).not.toHaveBeenCalled()
+        expect(mockedBlogRepository.deleteById).not.toHaveBeenCalled()
     })
 })

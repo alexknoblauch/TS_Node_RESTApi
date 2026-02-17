@@ -12,6 +12,10 @@ const mockedBlogRepository = blogRepository as jest.Mocked<typeof blogRepository
 const mockedUserRepository = userRepository as jest.Mocked<typeof userRepository>
 
 describe('getBlogsByUser', () => {
+    beforeEach(() => {
+        jest.clearAllMocks()
+    })
+    
     it('should get all Blogs of a User', async() => {
         mockedUserRepository.findById.mockResolvedValue({
             _id: '123',

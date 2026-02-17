@@ -7,6 +7,8 @@ import xss from "xss";
 import { userRepository } from "@/repository/userRepository/userRepository";
 import { ensureDocument } from "@/utils/validation/ensureDocument";
 import InsufficientPermissionsError from "@/errors/service/common/InsufficientPermissionsError";
+import CommentNotFound from "@/errors/service/comment/CommentNotFound";
+import CommentNoText from "@/errors/service/comment/CommentNoText";
 
 const commentService = {
     createComment: (async function (credentials: CommentCreateDTO): Promise<CommentLean>{
@@ -17,6 +19,10 @@ const commentService = {
 
         const user = await userRepository.findById(userId)
         ensureDocument(user, 'User')
+
+        if(!comment || typeof comment !== 'string'){
+            throw new CommentNoText()
+        }
 
         const cleanComment = xss(comment)
 

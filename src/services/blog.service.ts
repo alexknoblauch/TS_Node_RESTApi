@@ -1,4 +1,8 @@
+import BlogBannerError from "@/errors/service/blog/BlogBannerError";
+import BlogNoContent from "@/errors/service/blog/BlogNoContent";
 import BlogNotFound from "@/errors/service/blog/BlogNotFound";
+import BlogNoTitle from "@/errors/service/blog/BlogNoTitle";
+import BlogStatusError from "@/errors/service/blog/BlogStautsError";
 import InsufficientPermissionsError from "@/errors/service/common/InsufficientPermissionsError";
 import logger from "@/lib/winston";
 import { BlogBase, BlogDocument, BlogLean, CreateBlogDTO, IBanner } from "@/models/blog";
@@ -12,6 +16,24 @@ import xss from "xss";
 
 const blogService = {
     createBlog: async function(credentials: CreateBlogDTO):Promise<BlogLean>  {
+
+        if(!credentials.content || typeof credentials.content !== 'string'){
+            throw new BlogNoContent()
+        }
+
+        if(!credentials.title || typeof credentials.title !== 'string'){
+            throw new BlogNoTitle()
+        }
+
+        if(!credentials.banner || 
+            typeof credentials.banner.url !== 'object' ||
+            typeof credentials.banner.url !== 'string' ||
+            typeof credentials.banner.height !== 'number' ||
+            typeof credentials.banner.width !== 'number'
+        ) {
+            throw new BlogBannerError()
+        }
+
         let credentialsObj = {... credentials}
         credentialsObj.content = xss(credentialsObj.content)
 

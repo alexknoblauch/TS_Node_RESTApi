@@ -10,6 +10,10 @@ const mockedUserRepository = userRepository as jest.Mocked<typeof userRepository
 const mockedBlogRepository = blogRepository as jest.Mocked<typeof blogRepository>
 
 describe('createBlog', () => {
+    beforeEach(() => {
+        jest.clearAllMocks()
+    })
+
     it('should create a Blog', async() => {
         mockedBlogRepository.create.mockResolvedValue({
             _id: '123',
@@ -37,5 +41,9 @@ describe('createBlog', () => {
 
 
         await expect(blogService.createBlog(data)).rejects.toThrow('DB not found')
+    })
+
+    it('should throw an Error when User not found', async() => {
+        
     })
 })
