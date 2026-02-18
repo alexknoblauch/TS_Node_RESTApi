@@ -13,24 +13,26 @@ import { ensureDocument } from '@/utils/validation/ensureDocument'
  * Models
  */
 import Blog from '@/models/blog'
-/**
- * Middleware
-*/
+
 /**
  * Types
  */
 import type { Request, Response } from 'express'
-import type { IBlog } from '@/models/blog'
+import { createBlogSchema } from '@/dto/blog/createBlog.schema'
+import blogService from '@/services/blog.service'
+import notFound from '@/errors/http/notFoundError'
 
 
-type BlogData = Pick<IBlog, 'title' | 'content' | 'banner' | 'status' >
 
 const createBlog = catchAsync(async function(req: Request, res: Response): Promise<void>{
-    const { title, content, banner, status } = req.body as BlogData
-    const userId = req.userId
+    const { title, content, banner, status } = createBlogSchema.parse(req.body)
+    const userId = req.userId?.toString()
+    if(!userId){
+        return notFound(req, 'userId not found')
+    }
 
     const cleanContent = xss(content)
-    const newEntry = await Blog.create({ title, content: cleanContent, banner, status, author: userId })
+    const newEntry = await blogService.createBlog({ title, content: cleanContent, banner, status, author: userId })
 
     
     ensureDocument(newEntry, 'New Blog')

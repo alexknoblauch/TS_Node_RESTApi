@@ -1,4 +1,5 @@
-import { BlogLean, CreateBlogDTO } from "@/models/blog"
+import { CreateBlogDTO } from "@/dto/blog/createBlog.schema"
+import { BlogLean } from "@/models/blog"
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty"
 import { userRepository } from "@/repository/userRepository/userRepository"
 import blogService from "@/services/blog.service"

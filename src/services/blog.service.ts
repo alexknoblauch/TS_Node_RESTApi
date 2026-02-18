@@ -1,38 +1,21 @@
+import { CreateBlogDTO } from "@/dto/blog/createBlog.schema";
+import { updateBlogDTO } from "@/dto/blog/updateBlog.schema";
 import BlogBannerError from "@/errors/service/blog/BlogBannerError";
 import BlogNoContent from "@/errors/service/blog/BlogNoContent";
 import BlogNotFound from "@/errors/service/blog/BlogNotFound";
 import BlogNoTitle from "@/errors/service/blog/BlogNoTitle";
-import BlogStatusError from "@/errors/service/blog/BlogStautsError";
 import InsufficientPermissionsError from "@/errors/service/common/InsufficientPermissionsError";
-import logger from "@/lib/winston";
-import { BlogBase, BlogDocument, BlogLean, CreateBlogDTO, IBanner } from "@/models/blog";
+import { BlogBase, BlogDocument, BlogLean, IBanner } from "@/models/blog";
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
 import { userRepository } from "@/repository/userRepository/userRepository";
 import { ensureDocument } from "@/utils/validation/ensureDocument";
-import { FilterQuery } from "mongoose";
+import { FilterQuery, UpdateQuery } from "mongoose";
 import xss from "xss";
 
 
 
 const blogService = {
     createBlog: async function(credentials: CreateBlogDTO):Promise<BlogLean>  {
-
-        if(!credentials.content || typeof credentials.content !== 'string'){
-            throw new BlogNoContent()
-        }
-
-        if(!credentials.title || typeof credentials.title !== 'string'){
-            throw new BlogNoTitle()
-        }
-
-        if(!credentials.banner || 
-            typeof credentials.banner.url !== 'object' ||
-            typeof credentials.banner.url !== 'string' ||
-            typeof credentials.banner.height !== 'number' ||
-            typeof credentials.banner.width !== 'number'
-        ) {
-            throw new BlogBannerError()
-        }
 
         let credentialsObj = {... credentials}
         credentialsObj.content = xss(credentialsObj.content)
@@ -100,7 +83,7 @@ const blogService = {
         return data
     },
 
-    updateBlog: async function(userId: string, blogId: string, data: { title?: string, content?: string, banner?: IBanner, status?: 'draft' | 'published' }): Promise<BlogDocument>{
+    updateBlog: async function(userId: string, blogId: string, data: UpdateQuery<updateBlogDTO>): Promise<BlogDocument>{
         const user = await userRepository.findById(userId)
         ensureDocument(user, 'User')
 

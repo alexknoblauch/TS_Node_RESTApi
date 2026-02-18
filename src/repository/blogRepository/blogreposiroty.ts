@@ -1,7 +1,9 @@
 /**
  * Models
  */
-import Blog, { BlogBase,  BlogDocument, BlogLean, CreateBlogDTO, IBlog } from '@/models/blog';
+import { CreateBlogDTO } from '@/dto/blog/createBlog.schema';
+import { updateBlogDTO } from '@/dto/blog/updateBlog.schema';
+import Blog, { BlogBase,  BlogDocument, BlogLean } from '@/models/blog';
 
 /**
  * Types
@@ -30,7 +32,7 @@ export const blogRepository = {
         return user as BlogDocument | null
     },
 
-    find: async(queryObj: FilterQuery<BlogBase>, options: {populate?: string, sort?: string, skip?: number, limit?: number}):Promise<BlogLean[] | NonNullable> => {
+    find: async(queryObj: FilterQuery<BlogBase>, options: {populate?: string, sort?: string, skip?: number, limit?: number}):Promise<BlogLean[]> => {
         let query = Blog.find(queryObj)
 
         if(options.populate){query = query.populate(options.populate)}
@@ -46,7 +48,7 @@ export const blogRepository = {
                 _id: blog._id.toString(),
                 author: blog.author.toString()
             }
-        }) 
+        })  
 
         return leanBlog
     },
@@ -84,7 +86,7 @@ export const blogRepository = {
         return blog
     },
 
-    update: async(id:string, updatedData: UpdateQuery<IBlog>):Promise<BlogLean | null> => {
+    update: async(id:string, updatedData: UpdateQuery<updateBlogDTO>):Promise<BlogLean | null> => {
         const newBlog = await Blog.findByIdAndUpdate(id, updatedData, { new: true }).lean().exec()
         if(!newBlog) return null
 

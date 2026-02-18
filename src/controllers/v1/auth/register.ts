@@ -10,10 +10,11 @@ import catchAsync from '../../../utils/async/catchAsync';
 import type {Request, Response} from 'express'
 import type { UserRegister } from '@/models/user'
 import authService from '@/services/auth.service'
+import { createUserSchema } from '@/dto/user/createUser';
 
 
 const register = catchAsync(async (req: Request, res: Response): Promise<void> => {
-    const credentials = req.body as UserRegister
+    const credentials = createUserSchema.parse(req.body)
 
     const {user, accessToken, refreshToken} = await authService.register(credentials)
                 

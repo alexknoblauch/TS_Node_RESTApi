@@ -1,14 +1,13 @@
 /**
  *  Node Modules
  */
-import mongoose, {Schema, model, Document} from 'mongoose'
+import {Schema, model} from 'mongoose'
 import crypto from 'crypto'
 
 /**
  *  Custom Modules
  */
 import bcrypt from 'bcrypt'
-import { Types } from 'mongoose';
 import { HydratedDocument } from 'mongoose';
 
 export interface IUser {

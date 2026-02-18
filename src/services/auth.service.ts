@@ -2,7 +2,6 @@
  * Custom Modules
  */
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "@/lib/jwt";
-import logger from "@/lib/winston";
 /**
  * Middleware
  */
@@ -24,8 +23,8 @@ import InvalidCrednetials from "@/errors/service/common/InvalidCredentials";
 import sendEmail from "@/infra/mail/mailer.service";
 import TokenError from "@/errors/service/common/TokenError";
 import MailerError from "@/infra/mail/MailerError";
-import { refreshToken } from "@/controllers/v1/auth/refresh-token";
-import passwordForgot from "@/controllers/v1/auth/passwordForogt";
+
+import { RegisterUserDTO } from "@/dto/user/userRegister";
 
 
 const authService = {
@@ -78,7 +77,7 @@ const authService = {
         return {accessToken}
     },
 
-    async register (credentials: UserRegister): Promise<{user: SafeUser; accessToken: string; refreshToken: string}> {
+    async register (credentials: RegisterUserDTO): Promise<{user: SafeUser; accessToken: string; refreshToken: string}> {
         const { email, password, role } = credentials;
 
         if(role === 'admin' /*&& !config.WHITELIST_ADMINS_EMAIL.includes(email)*/){

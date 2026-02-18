@@ -5,10 +5,10 @@
 import mongoose, { HydratedDocument, Schema, Types, model } from 'mongoose'
 import crypto from 'crypto'
 
+
 /**
  * Interfaces
  */
-export type BlogData = Pick<IBlog, 'title' | 'content' | 'banner' | 'status' >
 
 export type IBanner = {
     publicId: string; 
@@ -56,20 +56,6 @@ export interface BlogLean {
 }
 
 export type BlogDocument = HydratedDocument<IBlog>
-
-export interface CreateBlogDTO {
-    title: string;
-    content: string;
-    banner: IBanner;
-    author: string;
-}
-
-export interface UpdateBlogDTO {
-    title?: string;
-    content?: string;
-    banner?: IBanner;
-    status?: 'draft' | 'published';
-}
 
 /**
  * Schema

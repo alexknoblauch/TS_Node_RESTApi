@@ -1,4 +1,5 @@
 // repositories/userRepository.ts
+import { createUserDTO } from '@/dto/user/createUser';
 import User, { IUser, UserBase, UserDocument, UserLean } from '@/models/user';
 import { Query, UpdateQuery } from 'mongoose'
 
@@ -82,7 +83,7 @@ export const userRepository = {
         return leanUser
     },
 
-    create: async (userData: UserBase): Promise<UserLean> => {
+    create: async (userData: createUserDTO): Promise<UserLean> => {
         const user = await User.create(userData);
 
         const leanUser = {
