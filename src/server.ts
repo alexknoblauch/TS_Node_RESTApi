@@ -2,7 +2,7 @@
  *  Node Modules
 */
 import express, {Request, Response, Application, urlencoded, NextFunction} from 'express'
-import { redisClient } from './lib/redis'
+import { initRedis } from './lib/redis'
 import { Server } from 'http'
 
 /**
@@ -32,75 +32,74 @@ import { correlationIdMiddleware } from './middleware/correlationId'
 */
 import v1Router from './routes/v1/index'
 import initializeRateLimiter from './lib/express_rate_limit'
-import { serverClose } from './infra/server/serverClose'
-import AppError from './errors/service/ServiceAppError'
-
-
-/**
- *  Express App
- */
-export const app: Application = express()
-
-
-//Configure CORS options 
-const corsOptions: CorsOptions = {
-    origin: config.CORS_ORIGINS,
-}
-
-
-// Middleware
-app.use(correlationIdMiddleware)
-app.use(cors(corsOptions))
-app.use(compression({ threshold: 1024 }))
-app.use(helmet())
-
-app.use(express.json())                                 
-app.use(express.urlencoded({ extended: true }))         
-app.use(cookieParser())                                 
-app.use(csrfProtection)   
-
+import unhandledRejectionHandler from './infra/server/unhandledRejectionHandler'
+import uncaughtExceptionHandler from './infra/server/uncaughtExceptionHandler'
+import notFoundMiddleware from './errors/http/notFoundMiddleware'
+import handleShutDown from './infra/server/handleShutDown'
 
 
 // Process
-process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
-    logger.error('UNHANDLED REJECTION! Shutting down...', {     //Rejected Promise = inkonsisenz
-        reason: reason?.message || reason,
-        stack: reason?.stack,
-        promise
-    });
+process.on('unhandledRejection', (reason, promise) => {
+    if(server) unhandledRejectionHandler(server, reason, promise);
+})
     
-    serverClose(server, 'Process terminated due to unhandled rejection')    //Harter Exit
-});
-
-process.on('uncaughtException', (error: Error) => {             //Error ohne handler
-    logger.error('UNCAUGHT EXCEPTION! Shutting down...', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-    });
-    
-    serverClose(server, 'Process terminated due to uncaught exception')     //Harter Exit
+process.on('uncaughtException', (error) => {
+    if(server) uncaughtExceptionHandler(server, error)
 });
 
 
-// Server
+
+// Express App
+const createApp = function(): Application{
+    const app = express()
+    //Configure CORS options 
+    const corsOptions: CorsOptions = {
+        origin: config.CORS_ORIGINS,
+    }
+
+    // Middleware
+    app.use(correlationIdMiddleware)
+    app.use(cors(corsOptions))
+    app.use(compression({ threshold: 1024 }))
+    app.use(helmet())
+
+    app.use(express.json())                                 
+    app.use(express.urlencoded({ extended: true }))         
+    app.use(cookieParser())                                 
+    app.use(csrfProtection)  
+    
+
+    return app
+}
+
+
+// Server / Composition Root
 let server: Server; 
 
 const startServer = async() => {
     try {
         await connectToDatabase();
-        await redisClient.connect();
+        await initRedis();
         
+        const app = createApp()
+
         const limiter = initializeRateLimiter();
         app.use(limiter);
 
         app.use('/', v1Router);
+
+        app.all('*', notFoundMiddleware);
+        app.use(errorHandler);
         
         server = app.listen(config.PORT, () => {
             logger.info(`server lsitens at port ${config.PORT}`)
+
+            process.on('SIGINT', handleShutDown(server));
+            process.on('SIGTERM', handleShutDown(server));
         });
+
     } catch (err) {
-        logger.error('server not connected');
+        logger.error('server not connected', { err });              // { err } = MetaObject
         
         if (process.env.NODE_ENV === 'production') {
             process.exit(1)
@@ -110,31 +109,4 @@ const startServer = async() => {
 startServer();
 
 
-
-
-//ERROR HANDLING
-app.all('*', (req: Request, res: Response, next: NextFunction) => {
-    const error = new AppError(`API endpoint ${req.method} ${req.originalUrl} not found`, 404, 'ROUTE_NOT_FOUND');
-    next(error);
-});
-
-app.use(errorHandler);
-
-
-
-
-//EXIT PROCESS
-const handleShutDown = async function(){
-    try {
-        await disconnectDatabase();
-        
-        logger.info('server shut down');
-        process.exit(0);
-    } catch(err) {
-        logger.error('error during server shutdown');
-    }
-}
-
-process.on('SIGINT', handleShutDown);
-process.on('SIGTERM', handleShutDown);
 

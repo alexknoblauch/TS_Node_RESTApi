@@ -7,4 +7,4 @@ const registerUserSchema = z.object({
     role: z.enum(['user', 'admin'])
 })
 
-export type registerUserDTO = z.infer<typeof registerUserSchema>
+export type RegisterUserDTO = z.infer<typeof registerUserSchema>

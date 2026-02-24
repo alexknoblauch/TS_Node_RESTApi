@@ -19,7 +19,9 @@ export function httpError({
   action = 'REQUEST',
   reason = code
 }: HttpErrorOptions): never {
-  logger.info(message, {
+  const logLevel = `${statusCode}`.startsWith('4') ? 'fail' : 'error'
+  
+  logger.log(logLevel, message, {
     reason,
     action,
     ip: req.ip,

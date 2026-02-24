@@ -1,5 +1,5 @@
 import logger from "@/lib/winston";
-import { CommentCreateDTO, CommentLean, IComment } from "@/models/comment";
+import { CommentLean } from "@/models/comment";
 import { blogRepository } from "@/repository/blogRepository/blogreposiroty";
 import { commentRepository } from "@/repository/commentRepository/commentRepository";
 import xss from "xss";
@@ -9,6 +9,7 @@ import { ensureDocument } from "@/utils/validation/ensureDocument";
 import InsufficientPermissionsError from "@/errors/service/common/InsufficientPermissionsError";
 import CommentNotFound from "@/errors/service/comment/CommentNotFound";
 import CommentNoText from "@/errors/service/comment/CommentNoText";
+import { CommentCreateDTO } from "@/dto/comment/createComment.schema";
 
 const commentService = {
     createComment: (async function (credentials: CommentCreateDTO): Promise<CommentLean>{

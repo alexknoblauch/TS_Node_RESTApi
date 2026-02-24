@@ -17,6 +17,11 @@ export type IBanner = {
     height: number;
 }
 
+export type BaseBlog2 = HydratedDocument<IBlog> & {
+    fucntion1(): string
+    fucntion2(): Promise<string>
+}
+
 export interface IBlog {
     _id: Types.ObjectId;  
     title: string;

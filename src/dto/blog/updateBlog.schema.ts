@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { creareBannerSchema } from '../banner/createBanner'
+import { creareBannerSchema } from '../banner/createBanner.schema'
 
 export const updateBlogSchema = z.object({
   title: z.string().min(1, "Title cannot be empty").max(180, "Title too long").optional(),

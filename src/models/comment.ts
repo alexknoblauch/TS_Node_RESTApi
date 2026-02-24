@@ -31,16 +31,6 @@ export interface CommentLean {
 
 export type CommentDocument = HydratedDocument<IComment>;
 
-export interface CommentCreateDTO {
-    blogId: string;
-    userId: string;
-    comment: string;
-}
-
-export interface CommentUpdateDTO {
-    comment?: string;
-}
-
 export type CommentData = {
     comment: string
 }

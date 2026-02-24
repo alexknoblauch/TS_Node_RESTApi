@@ -18,7 +18,7 @@ Interfaces: BaseUser, LeanUser, DocumentUser + CRUD Interfaces.
 Statis Methods: Usermodel direkt anstueren.
 Middleware: Authenticate, Authorize, ErrorHandling, Validation, CorrelationId
 Logging: Winston mit Redis counter, correlationId, log level, file rotation.
-Errors: ServiceError und HTTPError - Layer trennen.
+Errors: ServiceError, HTTPError und InfrastructureError - Layer trennen.
 Error Handler: Prod und Dev unterscheiden - verschiden viel Information leaken. AppError und ServerError unterscheiden.
 
 

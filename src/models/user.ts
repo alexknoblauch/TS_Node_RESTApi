@@ -84,29 +84,6 @@ export type UserDocument = HydratedDocument<UserBase & {        //HydratedDocume
 }>;
 
 
-export interface UserRegister {
-    userName: string,
-    email: string,
-    password: string
-    role: 'user' | 'admin'
-}
-
-export interface LoginCredentials {
-    email: string, 
-    password: string
-}
-
-
-export interface LoginResult {
-    accessToken: string
-    refreshToken: string
-}
-
-export interface LoginInput {
-    email: string;
-    password: string;
-}
-
 export interface SafeUser {
     _id: string;
     userName: string;
@@ -124,6 +101,21 @@ export interface SafeUser {
     };
 }
 
+export interface LoginCredentials {
+    email: string, 
+    password: string
+}
+
+export interface LoginResult {
+    accessToken: string
+    refreshToken: string
+}
+
+export interface LoginInput {
+    email: string;
+    password: string;
+}
+
 export interface LogoutInput {
     userId: string;
     refreshToken: string;
@@ -136,13 +128,6 @@ export interface RefreshtokenInput {
 
 export interface RefreshTokenResult {
   accessToken: string;
-}
-
-export interface UserCreateInput {
-    userName: string;
-    email: string;
-    password: string;
-    role: 'user' | 'admin';
 }
 
 export interface PasswordForgot {

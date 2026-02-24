@@ -8,7 +8,6 @@ import catchAsync from '../../../utils/async/catchAsync';
  */ 
 
 import type {Request, Response} from 'express'
-import type { UserRegister } from '@/models/user'
 import authService from '@/services/auth.service'
 import { createUserSchema } from '@/dto/user/createUser';
 

@@ -37,7 +37,7 @@ export const connectToDatabase = async function():Promise<void>{
             options: clientOptiones
         })
     } catch(err){
-        logger.error("❌ Connection to DB failed:", err);
+        logger.error("Connection to DB failed:", err);
     }
 }
 
@@ -46,12 +46,12 @@ export const disconnectDatabase = async function(): Promise<void>{
     try{
         await mongoose.disconnect();
 
-        logger.info('successfully disconnected form Database', {
+        logger.info('successfully disconnected form Database' , {
             uri: process.env.MONGOOSE_URI,
             clientoptions: clientOptiones 
         });
     } catch (err){
         if(err instanceof Error)
-        console.error("❌ Disonnection to DB failed:", err);
+        console.error("Disonnection to DB failed:", err);
     }
 }

@@ -12,20 +12,21 @@ import { Request, Response } from "express"
 
 
 const commentBlog =  catchAsync(async(req: Request, res: Response) => {
-    const userId = req.userId                                   // params = string interference
-    const { blogId } = createCommentSchema.parse(req.params)                               // das auch string interference
-    const { comment } = createCommentSchema.parse(req.body)              // Wichtig Typisieren!
+    const userId = req.userId                
+    const { blogId } = req.params                 
+    const { comment } = req.body                 
     
     if(!userId) {
         return res.status(401).json({
             code: 'Unauthorized',
             message: 'User not authenticated'
         })
-    }    
-                             
+    }  
+    
+    
     const credentials = { userId, blogId, comment }
     const validatedCredentials = createCommentSchema.parse(credentials)
-    const createdComment = await commentService.createComment(credentials)
+    const createdComment = await commentService.createComment(validatedCredentials)
 
     res.status(201).json({
         blogId,                     

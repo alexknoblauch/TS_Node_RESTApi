@@ -17,7 +17,7 @@ import { userRepository } from "@/repository/userRepository/userRepository";
 /**
  * Types
 */
-import { LoginCredentials, LoginResult, PasswordForgot, RefreshtokenInput, RefreshTokenResult, SafeUser, UserBase, UserCreateInput, UserDocument, UserRegister } from "@/models/user";
+import { LoginCredentials, LoginResult, PasswordForgot, RefreshTokenResult, SafeUser, UserBase } from "@/models/user";
 import { ensureDocument } from "@/utils/validation/ensureDocument";
 import InvalidCrednetials from "@/errors/service/common/InvalidCredentials";
 import sendEmail from "@/infra/mail/mailer.service";

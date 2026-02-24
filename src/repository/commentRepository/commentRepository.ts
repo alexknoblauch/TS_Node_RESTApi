@@ -1,4 +1,5 @@
-import Comment, { CommentBase, CommentCreateDTO, CommentLean, IComment } from "@/models/comment";
+import { CommentCreateDTO } from "@/dto/comment/createComment.schema";
+import Comment, { CommentBase, CommentLean, IComment } from "@/models/comment";
 import { FilterQuery } from "mongoose";
 
 export const commentRepository = {
