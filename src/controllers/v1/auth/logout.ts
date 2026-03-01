@@ -21,9 +21,8 @@ import authService from "@/services/auth.service";
 
 const logout = catchAsync(async function(req: Request, res: Response): Promise<void>{
     const refreshToken = req.cookies.refreshToken
-    const userId = req.userId as string
 
-    await authService.logout(refreshToken, userId)
+    await authService.logout(refreshToken)
 
     res.clearCookie('refreshToken', {
         httpOnly: true,

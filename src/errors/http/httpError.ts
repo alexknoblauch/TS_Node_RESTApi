@@ -19,7 +19,9 @@ export function httpError({
   action = 'REQUEST',
   reason = code
 }: HttpErrorOptions): never {
-  const logLevel = `${statusCode}`.startsWith('4') ? 'fail' : 'error'
+
+  const logLevel = statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
+
   
   logger.log(logLevel, message, {
     reason,

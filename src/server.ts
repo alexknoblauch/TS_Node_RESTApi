@@ -52,12 +52,11 @@ process.on('uncaughtException', (error) => {
 // Express App
 const createApp = function(): Application{
     const app = express()
-    //Configure CORS options 
+
     const corsOptions: CorsOptions = {
         origin: config.CORS_ORIGINS,
     }
 
-    // Middleware
     app.use(correlationIdMiddleware)
     app.use(cors(corsOptions))
     app.use(compression({ threshold: 1024 }))
@@ -73,7 +72,7 @@ const createApp = function(): Application{
 }
 
 
-// Server / Composition Root
+// Server 
 let server: Server; 
 
 const startServer = async() => {
@@ -97,9 +96,8 @@ const startServer = async() => {
             process.on('SIGINT', handleShutDown(server));
             process.on('SIGTERM', handleShutDown(server));
         });
-
     } catch (err) {
-        logger.error('server not connected', { err });              // { err } = MetaObject
+        logger.error('Error while Server connection', { err });              // { err } = MetaObject
         
         if (process.env.NODE_ENV === 'production') {
             process.exit(1)

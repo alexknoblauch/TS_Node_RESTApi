@@ -80,7 +80,8 @@ export interface UserLean {
 
 export type UserDocument = HydratedDocument<UserBase & {        //HydratedDocument: inkludiert mongoose funtkionen save() toObject() ect
   createResetPasswordToken(): string;
-  generatePasswordForgotToken(): string
+  generatePasswordForgotToken(): string;
+  generatePasswordForgotToken2(): string
 }>;
 
 
@@ -133,6 +134,11 @@ export interface RefreshTokenResult {
 export interface PasswordForgot {
     email: string,
     baseURL: string
+}
+
+export interface RegisterResponse {
+    accessToken: string; 
+    refreshToken: string
 }
 
 

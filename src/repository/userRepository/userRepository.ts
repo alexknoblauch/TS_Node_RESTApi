@@ -29,7 +29,8 @@ export const userRepository = {
     },
 
     findDocumentByToken: async(token: string): Promise<UserDocument | null> => {
-        const user = await User.findOne({passwordResetToken: token, passwordResetTokenExpires: { $gt: new Date() }})
+        const user = await User.findOne({ passwordResetToken: token, passwordResetTokenExpires: { $gt: new Date() } })
+        //passwordResetTokenExpires  EXTEM WICHTIG sonst können alte token verwendet werden
         return user as UserDocument | null
     },
 
@@ -83,15 +84,9 @@ export const userRepository = {
         return leanUser
     },
 
-    create: async (userData: createUserDTO): Promise<UserLean> => {
+    create: async (userData: createUserDTO): Promise<UserDocument> => {
         const user = await User.create(userData);
-
-        const leanUser = {
-            ...user,
-            _id: user._id.toString()
-        }
-
-        return leanUser
+        return user as UserDocument
     },
 
     updateById: async (id: string, updateData: UpdateQuery<UserBase>): Promise<UserLean | null> => {

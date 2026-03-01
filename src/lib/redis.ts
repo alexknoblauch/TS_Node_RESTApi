@@ -23,4 +23,13 @@ redisClient.on('connect', () => {
   logger.info('Connected to Redis');
 });
 
-export { redisClient };
+
+export async function initRedis() {
+  try {
+    if (!redisClient.isOpen) {
+      await redisClient.connect();
+    }
+  } catch(err){
+    throw new InfrastructureError('RedisClient not initialized', 'Redis', err)
+  }
+}

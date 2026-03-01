@@ -17,7 +17,7 @@ import { userRepository } from "@/repository/userRepository/userRepository";
 /**
  * Types
 */
-import { LoginCredentials, LoginResult, PasswordForgot, RefreshTokenResult, SafeUser, UserBase } from "@/models/user";
+import user, { LoginCredentials, LoginResult, LogoutInput, PasswordForgot, RefreshTokenResult, RegisterResponse, SafeUser, UserBase, UserLean } from "@/models/user";
 import { ensureDocument } from "@/utils/validation/ensureDocument";
 import InvalidCrednetials from "@/errors/service/common/InvalidCredentials";
 import sendEmail from "@/infra/mail/mailer.service";
@@ -25,6 +25,10 @@ import TokenError from "@/errors/service/common/TokenError";
 import MailerError from "@/infra/mail/MailerError";
 
 import { RegisterUserDTO } from "@/dto/user/userRegister";
+import InsufficientPermissionsError from "@/errors/service/common/InsufficientPermissionsError";
+import ServiceAppError from "@/errors/service/ServiceAppError";
+import { createTestAccount } from "nodemailer";
+import UserNotFound from "@/errors/service/user/UserNotFound";
 
 
 const authService = {
@@ -77,7 +81,7 @@ const authService = {
         return {accessToken}
     },
 
-    async register (credentials: RegisterUserDTO): Promise<{user: SafeUser; accessToken: string; refreshToken: string}> {
+    async register (credentials: RegisterUserDTO): Promise<RegisterResponse> {
         const { email, password, role } = credentials;
 
         if(role === 'admin' /*&& !config.WHITELIST_ADMINS_EMAIL.includes(email)*/){
@@ -89,13 +93,16 @@ const authService = {
         const user = await userRepository.create(userData)
         const accessToken = generateAccessToken(user._id.toString())
         const refreshToken = generateRefreshToken(user._id.toString())
+        user.refreshToken = refreshToken
+
+        await userRepository.save(user)
 
         await tokenRepository.create(refreshToken, user._id.toString())
 
-        return {user, accessToken, refreshToken}
+        return {accessToken, refreshToken}
     },
 
-    async logout (refreshToken: string, userId: string):Promise<void> {
+    async logout (refreshToken: string):Promise<void> {
         if (refreshToken){
             await tokenRepository.delete(refreshToken)
         }
@@ -127,8 +134,9 @@ const authService = {
     
             throw new MailerError()
         } 
-    }
-}
+    },
+
+} 
 
 export default authService
 

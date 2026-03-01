@@ -1,16 +1,14 @@
-class InfrastructureError extends Error {
+class InfrastructureError extends AppError {
     public service: string     //z.b. 'Redis'
     public cause?: unknown     // catch(err) -> err
 
-    constructor(message: string, service: string, cause?: unknown) {
-        super(message);
+    constructor(message: string, service: string, context: Record<string, unknown> = {}, cause?: unknown) {
+        super(message, 'INFRASTRUCTURE_ERROR', true, {...context, service});
 
         this.message = `[${service}] ${message}`
-        this.name = 'InfrastructureError';
         this.service = service
         this.cause = cause; 
-        Error.captureStackTrace(this, this.constructor)
-        Object.setPrototypeOf(this, new.target.prototype)
+
     }
 
 }

@@ -15,7 +15,7 @@ import { createUserSchema } from '@/dto/user/createUser';
 const register = catchAsync(async (req: Request, res: Response): Promise<void> => {
     const credentials = createUserSchema.parse(req.body)
 
-    const {user, accessToken, refreshToken} = await authService.register(credentials)
+    const {accessToken, refreshToken} = await authService.register(credentials)
                 
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
@@ -25,11 +25,6 @@ const register = catchAsync(async (req: Request, res: Response): Promise<void> =
     })
     
     res.status(201).json({
-        user: {
-            username: user.userName,
-            email: user.email,
-            role: user.role
-        },
         accessToken
     })
 })
