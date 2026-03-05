@@ -1,4 +1,3 @@
-
 /**
  * Node Modules
  */
@@ -9,8 +8,8 @@ import logger from './winston';
  * Types
  */
 
-const redisClient = createClient({
-  url: 'redis://localhost:6379'
+export const redisClient = createClient({
+  url: 'redis://localhost:6379'           //Docker redis://redis:6379    AWS redis://default:abc123@redis-12345.us-east-1.cloud.redislabs.com:12345
 });
 
 
@@ -30,6 +29,6 @@ export async function initRedis() {
       await redisClient.connect();
     }
   } catch(err){
-    throw new InfrastructureError('RedisClient not initialized', 'Redis', err)
+    throw new InfrastructureError('RedisClient not initialized', 'Redis', {err})
   }
 }
