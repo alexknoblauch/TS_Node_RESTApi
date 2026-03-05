@@ -31,6 +31,7 @@ import sendEmail from '@/infra/mail/mailer.service'
 import passwordForgot from '@/controllers/v1/auth/passwordForogt'
 import passwordReset from '@/controllers/v1/auth/passwordReset'
 import passwordChange from '@/controllers/v1/auth/passwordChange'
+import { csrfProtection } from '@/middleware/csrfProtection'
 /**
  *  Models
  */
@@ -61,11 +62,12 @@ router.post('/login',
 
 router.post('/refresh-token',
     validateAuthRefreshToken(),
+    csrfProtection,
     validationErrorMiddelware, 
     refreshToken
 )
 
-router.post('/logout', authenticate, logout)
+router.post('/logout',csrfProtection, authenticate, logout)
 
 router.post('/forgot-password', passwordForgot)         //keine middelware; muss öffentliche route sein
 router.patch('/reset-password/:token', passwordReset)   //keine middelware; muss öffentliche route sein

@@ -3,12 +3,12 @@ import { Server } from 'http'
 
 export const serverClose = function(server: Server, message: string) {
     server.close(() => {
-        logger.error(message);
-        process.exit(1);            
+        logger.info(message);
+        process.exit(0);            
     });
 
     setTimeout(() => {
-        logger.error('Forcefully shutting down');
-        process.exit(1);
+        logger.info('Forcefully shutting down');
+        process.exit(0);
     }, 10000).unref();
 }

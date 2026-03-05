@@ -1,8 +1,8 @@
 import ServiceAppError from "../ServiceAppError";
 
 class RatelimitExceeded extends ServiceAppError {
-    constructor(){
-        super('Too many tries', 'RATELIMIT_EXCEEDED')
+    constructor(context: Record<string, any>){
+        super('Too many tries', 'RATELIMIT_EXCEEDED', context)
     }
 }
 

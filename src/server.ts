@@ -35,7 +35,11 @@ import initializeRateLimiter from './lib/express_rate_limit'
 import unhandledRejectionHandler from './infra/server/unhandledRejectionHandler'
 import uncaughtExceptionHandler from './infra/server/uncaughtExceptionHandler'
 import notFoundMiddleware from './errors/http/notFoundMiddleware'
-import handleShutDown from './infra/server/handleShutDown'
+
+/**
+ *  Server
+*/
+import gracefulShutdown from './infra/server/gracefulShutdown'
 
 
 // Process
@@ -65,9 +69,7 @@ const createApp = function(): Application{
     app.use(express.json())                                 
     app.use(express.urlencoded({ extended: true }))         
     app.use(cookieParser())                                 
-    app.use(csrfProtection)  
-    
-
+    //app.use(csrfProtection)  nur wenn SESSION ID   sonst route refresh-token logout csrf setzen
     return app
 }
 
@@ -93,10 +95,9 @@ const startServer = async() => {
         server = app.listen(config.PORT, () => {
             logger.info(`server lsitens at port ${config.PORT}`)
 
-            process.on('SIGINT', handleShutDown(server));
-            process.on('SIGTERM', handleShutDown(server));
-        });
-    } catch (err) {
+            process.on('SIGINT', () => gracefulShutdown(server));           // CB wichitg (wie bei React)
+            process.on('SIGTERM', () => gracefulShutdown(server));          // CB wichitg (wie bei React)        });
+    })} catch (err) {
         logger.error('Error while Server connection', { err });              // { err } = MetaObject
         
         if (process.env.NODE_ENV === 'production') {

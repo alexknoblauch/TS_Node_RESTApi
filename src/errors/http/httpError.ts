@@ -6,6 +6,7 @@ type HttpErrorOptions = {
   req: Request;
   message: string;
   statusCode: number;
+  context: Record<string, unknown>;
   code: string;
   action?: string;
   reason?: string;
@@ -15,6 +16,7 @@ export function httpError({
   req,
   message,
   statusCode,
+  context,
   code,
   action = 'REQUEST',
   reason = code
@@ -26,9 +28,10 @@ export function httpError({
   logger.log(logLevel, message, {
     reason,
     action,
+    context,
     ip: req.ip,
     userAgent: req.headers['user-agent']
   });
 
-  throw new HttpAppError(message, statusCode, code, action, reason);
+  throw new HttpAppError(message, statusCode, code, context, action, reason);
 }

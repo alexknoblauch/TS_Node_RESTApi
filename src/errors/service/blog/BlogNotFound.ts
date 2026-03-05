@@ -1,8 +1,8 @@
 import ServiceAppError from "../ServiceAppError";
 
 class BlogNotFound extends ServiceAppError {
-    constructor(){
-        super('Blog not found', 'BLOG_NOT_FOUND')
+    constructor(context: Record<string, any> = {}){
+        super('Blog not found', 'BLOG_NOT_FOUND', context)
     }
 }
 

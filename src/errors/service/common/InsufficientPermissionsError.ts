@@ -1,8 +1,8 @@
 import ServiceAppError from "../ServiceAppError";
 
 class InsufficientPermissionsError extends ServiceAppError {
-    constructor(){
-        super('Insufficient Permissions', 'INSUFFICIENT_PERMISSIONS')
+    constructor(context: Record<string, any>){
+        super('Insufficient Permissions', 'INSUFFICIENT_PERMISSIONS', context)
     }
 }
 

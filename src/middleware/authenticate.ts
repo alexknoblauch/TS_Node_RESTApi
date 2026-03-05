@@ -1,12 +1,12 @@
 /**
  * Custom Modules
  */
+import { authError } from "@/errors/http/authError";
 import { verifyAccessToken } from "@/lib/jwt";
 /**
  * Custom Modules
  */
 import catchAsync from "@/utils/async/catchAsync";
-import { authError } from "@/utils/Error files/authError";
 /**
  * Types
  */

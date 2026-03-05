@@ -4,10 +4,9 @@ class HttpAppError extends AppError {
   readonly action?: string
   readonly reason?: string
 
-  constructor(message: string, statusCode: number, code:string, action?: string, reason?: string) {
-    super(message, code, true);
+  constructor(message: string, statusCode: number, code:string, context: Record<string, unknown> = {}, action?: string, reason?: string) {
+    super(message, code, true, {...context, reason});
     
-    this.name = 'HTTPAppError'
     this.statusCode = statusCode;
     this.status = statusCode >= 500 ? 'error' : 'fail'
     this.action = action ?? 'REQUEST'

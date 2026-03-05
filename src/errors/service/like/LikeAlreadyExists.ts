@@ -1,8 +1,8 @@
 import ServiceAppError from "../ServiceAppError";
 
 class LikeAlreadyExists extends ServiceAppError {
-    constructor(){
-        super('Like already exists', 'LIKE_EXISTS')
+    constructor(context: Record<string, any>){
+        super('Like already exists', 'LIKE_EXISTS', context)
     }
 }
 

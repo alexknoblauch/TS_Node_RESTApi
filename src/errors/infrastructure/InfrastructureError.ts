@@ -3,12 +3,9 @@ class InfrastructureError extends AppError {
     public cause?: unknown     // catch(err) -> err
 
     constructor(message: string, service: string, context: Record<string, unknown> = {}, cause?: unknown) {
-        super(message, 'INFRASTRUCTURE_ERROR', true, {...context, service});
+        super(message, 'INFRASTRUCTURE_ERROR', true, {...context, service, cause});
 
-        this.message = `[${service}] ${message}`
         this.service = service
         this.cause = cause; 
-
     }
-
 }

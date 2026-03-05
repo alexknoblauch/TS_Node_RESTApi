@@ -1,8 +1,8 @@
 import ServiceAppError from "../ServiceAppError";
 
 class BlogBannerError extends ServiceAppError {
-    constructor() {
-        super('Banner nor correct', 'BANNER_ERROR')
+    constructor(context: Record<string, any> = {}) {
+        super('Banner nor correct', 'BANNER_ERROR', context)
     }
 }
 

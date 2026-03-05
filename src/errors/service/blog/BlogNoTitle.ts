@@ -1,8 +1,8 @@
 import ServiceAppError from "../ServiceAppError";
 
 class BlogNoTitle extends ServiceAppError {
-    constructor() {
-        super('No title for Blog', 'BLOG_TITLE_ERROR')
+    constructor(context: Record<string, any> = {}) {
+        super('No title for Blog', 'BLOG_TITLE_ERROR', context)
     }
 }
 export default BlogNoTitle

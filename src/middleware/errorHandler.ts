@@ -1,44 +1,77 @@
 import HttpAppError from "@/errors/http/HTTPAppError";
+import ServiceAppError from "@/errors/service/ServiceAppError";
 import logger from "@/lib/winston";
 import { Request, Response, NextFunction } from 'express'
 
 
-function isHtttpAppError(err: unknown): err is HttpAppError {      //APP 
+function isHttpAppError(err: unknown): err is HttpAppError {      //APP 
   return err instanceof HttpAppError;
+}
+function isServiceAppError(err: unknown): err is ServiceAppError {      //APP 
+  return err instanceof ServiceAppError;
 }
 
 
 export const errorHandler = (err: unknown, req: Request, res: Response, next: NextFunction) => {
-  if (process.env.NODE_ENV === 'production') {
-    if (isHtttpAppError(err) && err.isOperational) {
-      return res.status(err.statusCode).json({
-        status: err.status,
-        message: err.message,
-        errorCode: err.errorCode
-      });
-    }
+  const isDev = process.env.NODE_ENV === 'development';
 
-    logger.error('Non-operational error in production:', err);
+  logger.error('Error caught:', { 
+    error: err,
+    url: req.url,
+    method: req.method,
+    ip: req.ip 
+  });
+
+
+  if (isHttpAppError(err)) {
+    return res.status(err.statusCode).json({
+      message: err.message,
+      status: err.status,
+      code: err.code,
+      ...(isDev && {stack: err.stack})
+    });
+  }
+
+
+  if(isServiceAppError(err)) {
+    return res.status(400).json({
+      message: err.message,
+      code: err.code,
+      ...(isDev && {stack: err.stack})
+    });
+  }
+
+
+  if (err instanceof AppError) {
+    if (!err.isOperational) {
+      logger.error('Non-operational error detected');
+    }
 
     return res.status(500).json({
       message: 'Something went wrong',
-      errorCode: 'SERVER_ERROR'
+      code: 'SERVER_ERROR',
+      ...(isDev && { stack: err.stack })
     });
-    
-  } else if (process.env.NODE_ENV === 'development') {
-      if (isHtttpAppError(err)) {
-          return res.status(err.statusCode).json({
-          status: err.status,
-          message: err.message,
-          errorCode: err.errorCode,
-          stack: err.stack
-        });
-      } else {
-        return res.status(500).json({
-          status: 'error',
-          message: 'unknwn error',
-          stack: err instanceof Error ? err.stack : undefined         // wichtige TS definition 
-        })
-      }
   }
-};
+
+
+  if (err instanceof Error) {
+    return res.status(500).json({
+      message: 'Something went wrong',
+      code: 'SERVER_ERROR',
+      ...(isDev && { stack: err.stack })
+    });
+  }
+
+
+  return res.status(500).json({
+    message: 'Something went wrong',
+    errorCode: 'SERVER_ERROR'
+  })
+}
+
+
+if(isServiceAppError(err)){
+  const statusCode = method(err.code)
+  return res.status()
+}

@@ -1,8 +1,8 @@
 import ServiceAppError from "../ServiceAppError";
 
 class CommentNoText extends ServiceAppError {
-    constructor(){
-        super('No Text found', 'NO_TEXT')
+    constructor(context: Record<string, any>){
+        super('No Text found', 'NO_TEXT', context)
     }
 }
 

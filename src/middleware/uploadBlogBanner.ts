@@ -15,8 +15,8 @@ import catchAsync from "@/utils/async/catchAsync";
  */
 import type { Request, Response, NextFunction } from "express";
 import { ensureDocument } from "@/utils/validation/ensureDocument";
-import AppError from "@/errors/service errors/AppError";
-import { notFound } from "@/errors/http errors/notFoundError";
+import httpConflictError from "@/errors/http/httpConflictError";
+import notFound from "@/errors/http/notFoundError";
 
 /**
  * Constants
@@ -36,7 +36,7 @@ const uploadBlogBanner = (method: 'put' | 'post') => {
         }
 
         if(!req.file){
-            throw notFound(req, 'File not found')
+            throw notFound(req)
         }
 
         if(req.file.size > MAX_FILESIZE){
@@ -46,7 +46,7 @@ const uploadBlogBanner = (method: 'put' | 'post') => {
             userAgent: req.headers['user-agent'],
             action: 'UPLOAD_ATTEMPT'
             })
-            throw new AppError('File too big', 409, 'Conflict'); 
+            throw httpConflictError(req, 'file size conflict',)
         }
 
 
