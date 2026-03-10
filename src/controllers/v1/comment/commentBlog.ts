@@ -23,7 +23,6 @@ const commentBlog =  catchAsync(async(req: Request, res: Response) => {
         })
     }  
     
-    
     const credentials = { userId, blogId, comment }
     const validatedCredentials = createCommentSchema.parse(credentials)
     const createdComment = await commentService.createComment(validatedCredentials)

@@ -24,7 +24,7 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
   }
 
 
-  //backend to frontend  token erstellen
+  //backend to frontend  
   const token = tokens.create(secret);
   //res.locals.csrfToken = token;
   res.setHeader('X-CSRF-Token', token);

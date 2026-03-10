@@ -2,7 +2,7 @@ import HttpAppError from "@/errors/http/HTTPAppError";
 import ServiceAppError from "@/errors/service/ServiceAppError";
 import logger from "@/lib/winston"
 
-export function ensureDocument<T> (document: T | null | undefined, entityName: string): asserts document is T  {                         // so ist wert nie undefined   if(!user) check
+export function ensureDocument<T> (document: T | null | undefined, entityName: string): asserts document is NonNullable<T>  {                         // so ist wert nie undefined   if(!user) check
     if (document == null) {
         logger.info(`${entityName} not found`, {
             reason: `${entityName.toUpperCase()}._NOT_FOUND`,   

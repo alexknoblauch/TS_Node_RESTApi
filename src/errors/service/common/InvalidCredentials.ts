@@ -1,7 +1,7 @@
 import ServiceAppError from "../ServiceAppError";
 
 class InvalidCredentials extends ServiceAppError {
-    constructor(context: Record<string, any>){
+    constructor(context: Record<string, any> = {}){
         super('InvalidCredentials', 'INVALID_CREDENTIALS', context)
     }
 }

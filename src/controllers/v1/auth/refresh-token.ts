@@ -23,12 +23,13 @@ import catchAsync from "@/utils/async/catchAsync";
 import type { Request, Response } from 'express'
 import { Types } from 'mongoose'
 import authService from "@/services/auth.service";
+import config from "@/config";
 
 
 export const refreshToken = catchAsync(async (req: Request, res: Response) => {
-    const { refreshToken } = req.cookies
+    const { refreshTokenInput } = req.cookies
 
-    if (!refreshToken) {
+    if (!refreshTokenInput) {
         return res.status(400).json({
             success: false,
             code: 'MissingToken',
@@ -36,7 +37,14 @@ export const refreshToken = catchAsync(async (req: Request, res: Response) => {
         });
     }
 
-    const accessToken = await authService.refreshToken(refreshToken)
+    //refreshToken rotation
+    const {accessToken, refreshToken} = await authService.refreshToken(refreshTokenInput)
+
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: config.NODE_ENV === 'production',
+        sameSite: 'strict'
+    }) 
     
     res.status(200).json({
         message: 'refresh JWT success',

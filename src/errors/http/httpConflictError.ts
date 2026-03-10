@@ -1,6 +1,7 @@
 import { Request } from "express";
 import { httpError } from "./httpError";
 
+// => Arrow function (HOF)
 const httpConflictError = function(req: Request, message: string, context: Record<string, unknown> = {}) {
     return httpError({
         req,
@@ -8,8 +9,6 @@ const httpConflictError = function(req: Request, message: string, context: Recor
         context,
         statusCode: 409,
         code: 'HTTP_CONFLICT',
-        action: 'CONFLICT',
-        reason: 'CONFLICT'
     })
 }
 

@@ -46,29 +46,16 @@ const authService = {
  
         const accessToken = generateAccessToken(user._id.toString())
         const refreshToken = generateRefreshToken(user._id.toString())
+        user.refreshToken = refreshToken
+        user.save()
 
         await tokenRepository.create(refreshToken, user._id.toString())
 
         return {accessToken, refreshToken}
     },
 
-    async passwordForgot2 (credentials: PasswordForgot): Promise<string> {
-        const { email, baseURL } = credentials
-        const User = await userRepository.findDocumentByEmail(email)
-        ensureDocument(User, 'User')
-
-        const token = User.generatePasswordForgotToken()
-
-        const resetURL = `${baseURL}/${token}`
-
-
-
-        return token
-    } ,
-
     async refreshToken (refreshToken: string): Promise<RefreshTokenResult> {
         const tokenExists = await tokenRepository.findOneWithToken(refreshToken)
-        ensureDocument(tokenExists, 'Token')
 
         if (!tokenExists) throw new TokenError('Invalid token', 'INVALID_TOKEN'); 
         if (tokenExists.revoked) throw new TokenError('Revoked Token', 'REVOKED_TOKEN');
@@ -77,8 +64,9 @@ const authService = {
 
         const jwtPayload = verifyRefreshToken(refreshToken) as { userId: string }
         const accessToken = generateAccessToken(jwtPayload.userId.toString())
+        const newRefreshToken = generateRefreshToken(jwtPayload.userId.toString())
 
-        return {accessToken}
+        return {accessToken, refreshToken: newRefreshToken}
     },
 
     async register (credentials: RegisterUserDTO): Promise<RegisterResponse> {
@@ -96,7 +84,6 @@ const authService = {
         user.refreshToken = refreshToken
 
         await userRepository.save(user)
-
         await tokenRepository.create(refreshToken, user._id.toString())
 
         return {accessToken, refreshToken}

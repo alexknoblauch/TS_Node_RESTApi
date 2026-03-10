@@ -2,6 +2,7 @@ import HttpAppError from "@/errors/http/HTTPAppError";
 import ServiceAppError from "@/errors/service/ServiceAppError";
 import logger from "@/lib/winston";
 import { Request, Response, NextFunction } from 'express'
+import { ZodError } from "zod"
 
 
 function isHttpAppError(err: unknown): err is HttpAppError {      //APP 
@@ -22,7 +23,17 @@ export const errorHandler = (err: unknown, req: Request, res: Response, next: Ne
     ip: req.ip 
   });
 
+  
+  if (err instanceof ZodError) {
+    err = new HttpAppError(
+      "Validation failed",
+      400,
+      "VALIDATION_ERROR",
+      {err}
+    );
+  }
 
+  
   if (isHttpAppError(err)) {
     return res.status(err.statusCode).json({
       message: err.message,
@@ -42,19 +53,6 @@ export const errorHandler = (err: unknown, req: Request, res: Response, next: Ne
   }
 
 
-  if (err instanceof AppError) {
-    if (!err.isOperational) {
-      logger.error('Non-operational error detected');
-    }
-
-    return res.status(500).json({
-      message: 'Something went wrong',
-      code: 'SERVER_ERROR',
-      ...(isDev && { stack: err.stack })
-    });
-  }
-
-
   if (err instanceof Error) {
     return res.status(500).json({
       message: 'Something went wrong',
@@ -68,10 +66,4 @@ export const errorHandler = (err: unknown, req: Request, res: Response, next: Ne
     message: 'Something went wrong',
     errorCode: 'SERVER_ERROR'
   })
-}
-
-
-if(isServiceAppError(err)){
-  const statusCode = method(err.code)
-  return res.status()
 }

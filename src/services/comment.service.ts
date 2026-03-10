@@ -21,7 +21,8 @@ const commentService = {
         const user = await userRepository.findById(userId)
         ensureDocument(user, 'User')
 
-        if(!comment || typeof comment !== 'string'){
+        //if(!comment || typeof comment !== 'string'){
+        if (typeof comment !== 'string' || comment.trim() === '') {    
             throw new CommentNoText()
         }
 

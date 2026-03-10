@@ -6,6 +6,7 @@ class AppError extends Error {
     constructor(message: string, code: string, isOperational:boolean = true, context: Record<string, any> = {}){
         super(message)
 
+        this.name = this.constructor.name   
         this.code = code
         this.isOperational = isOperational
         this.context = context

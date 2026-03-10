@@ -2,7 +2,7 @@ import { ensureDocument } from "@/utils/validation/ensureDocument";
 import { httpError } from "./httpError";
 import { Request } from 'express'
 
-
+// => Arrow function (HOF)
 export const authError = (req: Request, message = 'Unauthorized', context: Record<string, unknown> = {}) =>
   httpError({
     req,
@@ -10,5 +10,4 @@ export const authError = (req: Request, message = 'Unauthorized', context: Recor
     context,
     statusCode: 401,
     code: 'UNAUTHORIZED',
-    action: 'AUTHENTICATION'
   });

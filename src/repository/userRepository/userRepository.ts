@@ -1,4 +1,5 @@
 // repositories/userRepository.ts
+import { refreshToken } from '@/controllers/v1/auth/refresh-token';
 import { createUserDTO } from '@/dto/user/createUser';
 import User, { IUser, UserBase, UserDocument, UserLean } from '@/models/user';
 import { Query, UpdateQuery } from 'mongoose'
@@ -38,38 +39,30 @@ export const userRepository = {
         return await user.save()
     },
 
-    findByEmailForLogin: async (email: string): Promise<UserLean | null> => {
-        const user = await User.findOne({ email }).select('+password').lean().exec();        // Alle Felder + email
-        
-        if(!user) return null
+    findByEmailForLogin: async (email: string): Promise<UserDocument> => {
+        const user =  await User.findOne({ email }).select('+password').exec();        // Alle Felder + email
+        return user as UserDocument 
+    },
 
-        const leanUser = {
-            ...user,
-            _id: user._id.toString()
-        }
+    find: async (filter: any, options?: { limit?: number, skip?: number, select?: string, sort?: any }): Promise<UserLean[]> => {
+        let query: Query<UserDocument[], UserDocument> = User.find(filter);  // query.select könnte types verändern. Query<> garantiert types und löst das problem
+
+        if (options?.select) query = query.select(options.select);
+        if (options?.sort) query = query.sort(options.sort);
+        if (options?.skip !== undefined) query = query.skip(options.skip);
+        if (options?.limit !== undefined) query = query.limit(options.limit);
+
+        const user = await query.lean<UserLean[]>().exec();
+
+        const leanUser = user.map(user => {
+            return {
+                    ...user,
+                    _id: user._id.toString()
+                }
+        })
 
         return leanUser
     },
-
-    find: async (filter: any, options?: {limit?: number, skip?: number, select?: string, sort?: any}): Promise<UserLean[]> => {
-            let query: Query<UserDocument[], UserDocument> = User.find(filter);  // query.select könnte types verändern. Query<> garantiert types und löst das problem
-
-            if (options?.select) query = query.select(options.select);
-            if (options?.sort) query = query.sort(options.sort);
-            if (options?.skip !== undefined) query = query.skip(options.skip);
-            if (options?.limit !== undefined) query = query.limit(options.limit);
-
-            const user = await query.lean<UserLean[]>().exec();
-
-            const leanUser = user.map(user => {
-                return {
-                        ...user,
-                        _id: user._id.toString()
-                    }
-            })
- 
-            return leanUser
-        },
 
     findById: async(id: string):Promise<UserLean | null> => {
         const user = await User.findById(id).lean().exec()

@@ -1,6 +1,7 @@
 import { httpError } from "./httpError";
 import { Request } from 'express'
 
+// => Arrow function (HOF)
 export const badRequest = (req: Request, message: string, code = 'BAD_REQUEST', context: Record<string, unknown> = {}) =>
   httpError({
     req,
@@ -8,5 +9,4 @@ export const badRequest = (req: Request, message: string, code = 'BAD_REQUEST', 
     context,
     statusCode: 400,
     code,
-    action: 'VALIDATION'
   });

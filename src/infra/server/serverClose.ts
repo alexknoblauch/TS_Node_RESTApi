@@ -9,6 +9,6 @@ export const serverClose = function(server: Server, message: string) {
 
     setTimeout(() => {
         logger.info('Forcefully shutting down');
-        process.exit(0);
+        process.exit(1);
     }, 10000).unref();
 }

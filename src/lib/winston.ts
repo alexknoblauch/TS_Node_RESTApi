@@ -2,7 +2,7 @@
  * Node Modules
  */
 import winston from 'winston'
-import DailyRotateFile from 'winston-daily-rotate-file'
+import DailyRotateFile from 'winston-daily-rotate-file'  // npm install winston winston-daily-rotate-file
 
 /**
  * Node Modules

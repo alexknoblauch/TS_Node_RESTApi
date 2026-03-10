@@ -9,6 +9,7 @@ import crypto from 'crypto'
  */
 import bcrypt from 'bcrypt'
 import { HydratedDocument } from 'mongoose';
+import { request } from 'express';
 
 export interface IUser {
     userName: string;
@@ -129,6 +130,7 @@ export interface RefreshtokenInput {
 
 export interface RefreshTokenResult {
   accessToken: string;
+  refreshToken: string;
 }
 
 export interface PasswordForgot {
@@ -251,25 +253,8 @@ UserSchema.pre('save', async function(this: UserDocument, next: any){       // t
     next()
 })
 
-UserSchema.methods.createResetPasswordToken = function(): string {
-    const resetToken = crypto.randomBytes(32).toString('hex')
-
-    this.passwordResetToken = crypto.createHash('sha256').update(resetToken)
-    this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000
-
-    return resetToken
-}
 
 export default model<IUser>('User', UserSchema)
 
 
 
-UserSchema.methods.createResetPasswordToken = function(){
-    const resetToken = crypto.randomBytes(32).toString('hex')
-    const encryptedToken = crypto.createHash('sha256').update(resetToken).digest('hex') // hash ist Obj digest macht string
-
-    this.passwordResetToken = encryptedToken
-    this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000
-
-    return resetToken
-}
