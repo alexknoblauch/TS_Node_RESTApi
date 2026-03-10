@@ -1,7 +1,7 @@
 /**
  *  Node Modules
 */
-import express, {Request, Response, Application, urlencoded, NextFunction} from 'express'
+import express, {Application} from 'express'
 import { initRedis } from './lib/redis'
 import { Server } from 'http'
 
@@ -17,14 +17,13 @@ import helmet from 'helmet'
  *  Custom Modules
 */
 import config from './config'
-import { connectToDatabase, disconnectDatabase } from './lib/mongoose'
+import { connectToDatabase } from './lib/mongoose'
 import logger from '@/lib/winston'
 
 /**
  *  Middelware
 */
 import { errorHandler } from './middleware/errorHandler'
-import { csrfProtection } from './middleware/csrfProtection'
 import { correlationIdMiddleware } from './middleware/correlationId'
 
 /**
@@ -97,7 +96,8 @@ const startServer = async() => {
 
             process.on('SIGINT', () => gracefulShutdown(server));           // CB wichitg (wie bei React)
             process.on('SIGTERM', () => gracefulShutdown(server));          // CB wichitg (wie bei React)        });
-    })} catch (err) {
+        })
+} catch (err) {
         logger.error('Error while Server connection', { err });              // { err } = MetaObject
         
         if (process.env.NODE_ENV === 'production') {

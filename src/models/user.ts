@@ -9,7 +9,6 @@ import crypto from 'crypto'
  */
 import bcrypt from 'bcrypt'
 import { HydratedDocument } from 'mongoose';
-import { request } from 'express';
 
 export interface IUser {
     userName: string;
@@ -86,62 +85,6 @@ export type UserDocument = HydratedDocument<UserBase & {        //HydratedDocume
 }>;
 
 
-export interface SafeUser {
-    _id: string;
-    userName: string;
-    email: string;  
-    role: 'admin' | 'user';
-    firstName?: string;
-    lastName?: string;
-    socialLinks?: {
-        website?: string;
-        youtube?: string;
-        facebook?: string;
-        linkedin?: string;
-        x?: string;
-        instagram?: string;
-    };
-}
-
-export interface LoginCredentials {
-    email: string, 
-    password: string
-}
-
-export interface LoginResult {
-    accessToken: string
-    refreshToken: string
-}
-
-export interface LoginInput {
-    email: string;
-    password: string;
-}
-
-export interface LogoutInput {
-    userId: string;
-    refreshToken: string;
-}
-
-export interface RefreshtokenInput {
-    refreshToken: string;
-    userId: string;
-}
-
-export interface RefreshTokenResult {
-  accessToken: string;
-  refreshToken: string;
-}
-
-export interface PasswordForgot {
-    email: string,
-    baseURL: string
-}
-
-export interface RegisterResponse {
-    accessToken: string; 
-    refreshToken: string
-}
 
 
 const UserSchema = new Schema<IUser>({

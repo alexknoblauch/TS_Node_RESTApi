@@ -31,10 +31,6 @@ export interface CommentLean {
 
 export type CommentDocument = HydratedDocument<IComment>;
 
-export type CommentData = {
-    comment: string
-}
-
 
 const commentSchema = new Schema<IComment>({
     blogId: {
